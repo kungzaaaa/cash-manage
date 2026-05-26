@@ -144,7 +144,8 @@
 
             <div class="header-actions">
                 <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden" role="button" aria-label="จัดการโปรไฟล์" title="จัดการโปรไฟล์">
+                <div id="user-profile-section" class="user-profile hidden" role="button" aria-label="จัดการโปรไฟล์"
+                    title="จัดการโปรไฟล์">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
                     <span id="user-name" class="user-name">ผู้ใช้</span>
                 </div>
@@ -567,7 +568,8 @@
                     <i data-lucide="alert-octagon" class="danger-icon"></i>
                     <h3>พื้นที่อันตราย (Danger Zone)</h3>
                 </div>
-                <p>การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร โดยไม่สามารถกู้คืนข้อมูลกลับมาได้อีก</p>
+                <p>การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร
+                    โดยไม่สามารถกู้คืนข้อมูลกลับมาได้อีก</p>
                 <button type="button" id="btn-delete-account" class="btn btn-danger-outline btn-full-width">
                     <i data-lucide="user-x"></i>
                     <span>ลบบัญชีผู้ใช้งานถาวร</span>
@@ -590,22 +592,33 @@
             </div>
 
             <form id="delete-confirm-form" autocomplete="off">
-                <p class="delete-warning-text">⚠️ <strong>คำเตือน:</strong> การกระทำนี้ไม่สามารถย้อนกลับได้ โปรดทำความเข้าใจว่าข้อมูลทั้งหมดของคุณจะถูกทำลายถาวร</p>
-                <p class="delete-instruction">กรุณาพิมพ์คำว่า <strong class="user-select-all">DELETE</strong> และพิมพ์ **อีเมลปัจจุบันของคุณ** ด้านล่างเพื่อยืนยัน</p>
+                <p class="delete-warning-text"><strong>คำเตือน:</strong> การกระทำนี้ไม่สามารถย้อนกลับได้
+                    โปรดทำความเข้าใจว่าข้อมูลทั้งหมดของคุณจะถูกทำลายถาวร</p>
+                <p class="delete-instruction">กรุณาพิมพ์คำว่า <strong class="user-select-all">DELETE</strong> และพิมพ์
+                    **อีเมลปัจจุบันของคุณ** ด้านล่างเพื่อยืนยัน</p>
 
                 <div class="form-grid">
                     <div class="form-group col-12">
                         <label for="delete-confirm-text">พิมพ์คำยืนยัน <span class="required">*</span></label>
-                        <input type="text" id="delete-confirm-text" placeholder="พิมพ์คำว่า DELETE ที่นี่" required>
+                        <div class="input-with-icon">
+                            <i data-lucide="shield-alert" class="input-icon-left"></i>
+                            <input type="text" id="delete-confirm-text" placeholder="พิมพ์คำว่า DELETE ที่นี่" required>
+                        </div>
                     </div>
 
                     <div class="form-group col-12">
-                        <label for="delete-confirm-email">ป้อนอีเมลของคุณอีกครั้ง <span class="required">*</span></label>
-                        <input type="email" id="delete-confirm-email" placeholder="ป้อนอีเมลเพื่อยืนยัน" required>
+                        <label for="delete-confirm-email">ป้อนอีเมลของคุณอีกครั้ง <span
+                                class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="mail" class="input-icon-left"></i>
+                            <input type="email" id="delete-confirm-email" placeholder="ป้อนอีเมลเพื่อยืนยัน" required>
+                        </div>
                     </div>
                 </div>
 
-                <div id="delete-error-message" class="error-message hidden" style="margin-top: 10px; margin-bottom: 10px; color: var(--color-danger); font-size: 13px; font-weight: 500;"></div>
+                <div id="delete-error-message" class="error-message hidden"
+                    style="margin-top: 10px; margin-bottom: 10px; color: var(--color-danger); font-size: 13px; font-weight: 500;">
+                </div>
 
                 <div class="modal-actions">
                     <button type="button" id="delete-confirm-cancel" class="btn btn-secondary btn-lg">
@@ -614,7 +627,7 @@
                     </button>
                     <button type="submit" id="btn-confirm-delete-account" class="btn btn-danger btn-lg" disabled>
                         <i data-lucide="trash-2"></i>
-                        <span id="btn-confirm-delete-text">กรุณารอยืนยัน... (7)</span>
+                        <span id="btn-confirm-delete-text">กรุณารอยืนยัน... (5)</span>
                     </button>
                 </div>
             </form>

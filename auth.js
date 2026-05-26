@@ -243,7 +243,7 @@ function openProfileModal() {
     // Set input values
     authElements.profileDisplayName.value = user.displayName || '';
     authElements.profileEmail.value = user.email || '';
-    
+
     // Set avatar preview
     if (user.photoURL) {
         authElements.profileAvatarPreview.src = user.photoURL;
@@ -260,7 +260,7 @@ function openProfileModal() {
     // Show modal
     authElements.profileModalOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden'; // Lock background scroll
-    
+
     // Refresh Lucide icons in modal
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -320,7 +320,7 @@ async function saveUserProfileData(e) {
 
     // Show app loading overlay
     authElements.loadingOverlay.classList.remove('hidden');
-    
+
     try {
         const updateData = { displayName: newDisplayName };
         if (selectedProfilePicBase64) {
@@ -359,26 +359,26 @@ async function saveUserProfileData(e) {
 function openDeleteConfirmModal() {
     // Hide profile modal first
     authElements.profileModalOverlay.classList.add('hidden');
-    
+
     // Clear confirm form inputs
     authElements.deleteConfirmText.value = '';
     authElements.deleteConfirmEmail.value = '';
     authElements.deleteErrorMessage.classList.add('hidden');
     authElements.deleteErrorMessage.textContent = '';
-    
+
     // Lock the delete confirmation button initially
     authElements.btnConfirmDelete.disabled = true;
-    
+
     // Show confirmation modal
     authElements.deleteConfirmModalOverlay.classList.remove('hidden');
-    
+
     // Security Countdown setup
-    let countdown = 7;
+    let countdown = 5;
     authElements.btnConfirmDeleteText.textContent = `กรุณารอยืนยัน... (${countdown})`;
-    
+
     // Clear any existing intervals
     if (deleteCountdownInterval) clearInterval(deleteCountdownInterval);
-    
+
     deleteCountdownInterval = setInterval(() => {
         countdown--;
         if (countdown > 0) {
@@ -386,7 +386,7 @@ function openDeleteConfirmModal() {
         } else {
             clearInterval(deleteCountdownInterval);
             deleteCountdownInterval = null;
-            authElements.btnConfirmDeleteText.textContent = '🔥 ยืนยันการลบบัญชีอย่างถาวร';
+            authElements.btnConfirmDeleteText.textContent = 'ยืนยันการลบบัญชี';
             // Trigger check to see if text inputs are already valid and unlock button
             validateDeleteInputs();
         }
@@ -411,17 +411,17 @@ function validateDeleteInputs() {
         authElements.btnConfirmDelete.disabled = true;
         return;
     }
-    
+
     const confirmWord = authElements.deleteConfirmText.value.trim();
     const confirmEmail = authElements.deleteConfirmEmail.value.trim();
     const currentUser = auth.currentUser;
-    
+
     if (!currentUser) return;
-    
+
     // Requirements: typed "DELETE" exactly, and email matches current user email
     const isTextValid = confirmWord === 'DELETE';
     const isEmailValid = confirmEmail.toLowerCase() === currentUser.email.toLowerCase();
-    
+
     if (isTextValid && isEmailValid) {
         authElements.btnConfirmDelete.disabled = false;
     } else {
@@ -434,7 +434,7 @@ async function executeDeleteAccount(e) {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return;
-    
+
     // Additional final confirmation check
     const confirmWord = authElements.deleteConfirmText.value.trim();
     const confirmEmail = authElements.deleteConfirmEmail.value.trim();
@@ -443,10 +443,10 @@ async function executeDeleteAccount(e) {
         authElements.deleteErrorMessage.classList.remove('hidden');
         return;
     }
-    
+
     authElements.deleteErrorMessage.classList.add('hidden');
     authElements.loadingOverlay.classList.remove('hidden');
-    
+
     try {
         // 1. Scrub/Delete user's financial transactions in Firestore
         const txDocRefs = await db.collection('users').doc(user.uid).collection('transactions').get();
@@ -457,20 +457,20 @@ async function executeDeleteAccount(e) {
             });
             await batch.commit();
         }
-        
+
         // 2. Delete user's profile database document in Firestore
         await db.collection('users').doc(user.uid).delete();
-        
+
         // 3. Delete user account in Firebase Authentication
         await user.delete();
-        
+
         // Success: Auth state listener will handle UI redirect to login automatically
         authElements.deleteConfirmModalOverlay.classList.add('hidden');
         document.body.style.overflow = '';
         if (typeof showToast === 'function') showToast('ลบบัญชีผู้ใช้และล้างข้อมูลธุรกรรมสำเร็จแล้ว', 'success');
     } catch (error) {
         console.error('Error deleting account:', error);
-        
+
         // Handle security sensitive operation recent login requirement
         if (error.code === 'auth/requires-recent-login') {
             authElements.deleteErrorMessage.innerHTML = `
@@ -554,35 +554,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     // Profile & Account Settings Events
     // -------------------------------------------------------------
-    
+
     // Open profile settings when clicking header avatar/name
     authElements.userProfileSection.addEventListener('click', openProfileModal);
-    
+
     // Close profile settings
     authElements.btnProfileClose.addEventListener('click', closeProfileModal);
     authElements.btnProfileCancel.addEventListener('click', closeProfileModal);
-    
+
     // Profile pic edit button click simulations
     authElements.profileAvatarPreview.addEventListener('click', () => authElements.profilePicInput.click());
     document.getElementById('btn-upload-avatar').addEventListener('click', () => authElements.profilePicInput.click());
-    
+
     // Profile pic input changes
     authElements.profilePicInput.addEventListener('change', handleProfilePicSelection);
-    
+
     // Submit profile updates form
     authElements.profileForm.addEventListener('submit', saveUserProfileData);
-    
+
     // Open Delete Account confirm modal
     authElements.btnDeleteAccount.addEventListener('click', openDeleteConfirmModal);
-    
+
     // Close Delete Confirmation Modal
     authElements.deleteConfirmClose.addEventListener('click', closeDeleteConfirmModal);
     authElements.deleteConfirmCancel.addEventListener('click', closeDeleteConfirmModal);
-    
+
     // Real-time input validation for DELETE confirm form
     authElements.deleteConfirmText.addEventListener('input', validateDeleteInputs);
     authElements.deleteConfirmEmail.addEventListener('input', validateDeleteInputs);
-    
+
     // Execute Delete Account form submission
     authElements.deleteConfirmForm.addEventListener('submit', executeDeleteAccount);
 });
