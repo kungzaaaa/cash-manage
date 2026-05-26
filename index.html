@@ -144,9 +144,10 @@
 
             <div class="header-actions">
                 <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden">
+                <div id="user-profile-section" class="user-profile hidden" style="cursor: pointer;" title="แก้ไขโปรไฟล์">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
                     <span id="user-name" class="user-name">ผู้ใช้</span>
+                    <i data-lucide="edit-3" class="edit-profile-icon" style="width: 14px; height: 14px; margin-left: 5px; opacity: 0.6;"></i>
                 </div>
 
                 <!-- Theme Toggle Button -->
@@ -497,6 +498,55 @@
                         <span>ยกเลิก</span>
                     </button>
                     <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-lucide="save"></i>
+                        <span>บันทึกการแก้ไข</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <div class="icon-wrapper bg-primary-light">
+                        <i data-lucide="user" class="text-primary"></i>
+                    </div>
+                    <h2>แก้ไขโปรไฟล์</h2>
+                </div>
+                <button id="edit-profile-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="edit-profile-form" autocomplete="off">
+                <div class="form-grid">
+                    <div class="form-group col-12">
+                        <label for="edit-profile-name">ชื่อผู้ใช้งาน <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="user" class="input-icon-left"></i>
+                            <input type="text" id="edit-profile-name" placeholder="ชื่อที่ต้องการแสดง" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-12">
+                        <label for="edit-profile-avatar">URL รูปโปรไฟล์ (ไม่บังคับ)</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="image" class="input-icon-left"></i>
+                            <input type="url" id="edit-profile-avatar" placeholder="https://example.com/avatar.jpg">
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 5px;">ปล่อยว่างไว้เพื่อใช้รูปเดิม หรือรูปจาก Google</small>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="edit-profile-cancel" class="btn btn-secondary btn-lg">
+                        <i data-lucide="x"></i>
+                        <span>ยกเลิก</span>
+                    </button>
+                    <button type="submit" id="edit-profile-save" class="btn btn-primary btn-lg">
                         <i data-lucide="save"></i>
                         <span>บันทึกการแก้ไข</span>
                     </button>
