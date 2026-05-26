@@ -520,36 +520,40 @@
             </div>
 
             <form id="profile-form" autocomplete="off">
-                <div class="profile-avatar-container">
-                    <div class="profile-avatar-wrapper">
-                        <img id="profile-avatar-preview" src="" alt="Avatar Preview" class="profile-avatar-preview">
-                        <div class="avatar-upload-overlay" id="btn-upload-avatar">
-                            <i data-lucide="camera"></i>
+                <div class="profile-layout-horizontal">
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar-wrapper">
+                            <img id="profile-avatar-preview" src="" alt="Avatar Preview" class="profile-avatar-preview">
+                            <div class="avatar-upload-overlay" id="btn-upload-avatar">
+                                <i data-lucide="camera"></i>
+                            </div>
                         </div>
-                    </div>
-                    <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
-                    <p class="avatar-help-text">คลิกที่รูปเพื่ออัปโหลดรูปภาพ (ระบบบีบอัดและย่อขนาดภาพให้อัตโนมัติ)</p>
-                    <button type="button" id="btn-remove-avatar-pic" class="btn btn-secondary btn-sm" style="margin-top: 8px; font-size: 11px; padding: 6px 12px; border-radius: 20px;">
-                        <i data-lucide="rotate-ccw" style="width: 12px; height: 12px; margin-right: 4px;"></i>
-                        <span>กลับไปใช้รูปภาพเริ่มต้น</span>
-                    </button>
-                    <p id="profile-pic-error" class="error-message hidden"></p>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group col-12">
-                        <label for="profile-display-name">ชื่อ - นามสกุล <span class="required">*</span></label>
-                        <div class="input-with-icon">
-                            <i data-lucide="user" class="input-icon-left"></i>
-                            <input type="text" id="profile-display-name" placeholder="ชื่อของคุณ" required>
-                        </div>
+                        <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
+                        <p class="avatar-help-text" style="line-height: 1.2; margin-bottom: 4px;">คลิกที่รูปเพื่อเปลี่ยน</p>
+                        <button type="button" id="btn-remove-avatar-pic" class="btn btn-secondary btn-sm" style="margin-top: 4px; font-size: 11px; padding: 6px 12px; border-radius: 20px;">
+                            <i data-lucide="rotate-ccw" style="width: 12px; height: 12px; margin-right: 4px;"></i>
+                            <span>ใช้รูปเริ่มต้น</span>
+                        </button>
+                        <p id="profile-pic-error" class="error-message hidden"></p>
                     </div>
 
-                    <div class="form-group col-12">
-                        <label for="profile-email">อีเมลผู้ใช้งาน</label>
-                        <div class="input-with-icon">
-                            <i data-lucide="mail" class="input-icon-left"></i>
-                            <input type="email" id="profile-email" disabled>
+                    <div class="profile-inputs-container">
+                        <div class="form-grid">
+                            <div class="form-group col-12">
+                                <label for="profile-display-name">ชื่อ - นามสกุล <span class="required">*</span></label>
+                                <div class="input-with-icon">
+                                    <i data-lucide="user" class="input-icon-left"></i>
+                                    <input type="text" id="profile-display-name" placeholder="ชื่อของคุณ" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-12">
+                                <label for="profile-email">อีเมลผู้ใช้งาน</label>
+                                <div class="input-with-icon">
+                                    <i data-lucide="mail" class="input-icon-left"></i>
+                                    <input type="email" id="profile-email" disabled>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

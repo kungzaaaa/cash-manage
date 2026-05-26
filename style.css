@@ -1529,6 +1529,26 @@ body {
     margin-bottom: 24px;
 }
 
+/* Profile Horizontal Layout */
+.profile-layout-horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.profile-inputs-container {
+    flex: 1;
+    width: 100%;
+}
+
+.profile-layout-horizontal .profile-avatar-container {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    width: 130px;
+}
+
 .profile-avatar-wrapper {
     position: relative;
     width: 100px;
@@ -1718,5 +1738,11 @@ body {
 
     .user-name {
         display: none;
+    }
+
+    .profile-layout-horizontal {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
     }
 }
