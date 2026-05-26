@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash & Bank Flow Tracker | เครื่องมือบันทึกรายรับ-รายจ่าย</title>
+
+    <!-- Google Fonts: Kanit (Thai) & Inter (English/Numbers) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kanit:wght@200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- Lucide Icons for clean stroke icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Background Elements for Glassmorphism visual depth -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <!-- Loading Overlay (shown while Firebase checks auth state) -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>กำลังตรวจสอบสถานะผู้ใช้...</p>
+    </div>
+
+    <!-- Auth Login / Register Screen -->
+    <div id="auth-screen" class="auth-screen hidden">
+        <div class="auth-card glass-card">
+            <!-- Logo -->
+            <div class="auth-logo">
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="wallet" class="logo-icon"></i>
+                </div>
+                <h1>Cash & Bank Flow</h1>
+                <p>เข้าสู่ระบบเพื่อบันทึกรายรับ-รายจ่ายของคุณ</p>
+            </div>
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button id="auth-tab-login" class="auth-tab active">เข้าสู่ระบบ</button>
+                <button id="auth-tab-register" class="auth-tab">สมัครบัญชีใหม่</button>
+            </div>
+
+            <!-- Google Login -->
+            <button id="btn-google-login" class="btn-google">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                        fill="#4285F4" />
+                    <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853" />
+                    <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05" />
+                    <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335" />
+                </svg>
+                <span>เข้าสู่ระบบด้วย Google</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="auth-divider"><span>หรือใช้อีเมล</span></div>
+
+            <!-- Login Form -->
+            <div id="login-form-container">
+                <form id="login-form" class="auth-form" autocomplete="off">
+                    <div class="auth-input-group">
+                        <i data-lucide="mail" class="auth-input-icon"></i>
+                        <input type="email" id="login-email" placeholder="อีเมล" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <i data-lucide="lock" class="auth-input-icon"></i>
+                        <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i data-lucide="log-in"></i>
+                        <span>เข้าสู่ระบบ</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form-container" class="hidden">
+                <form id="register-form" class="auth-form" autocomplete="off">
+                    <div class="auth-input-group">
+                        <i data-lucide="user" class="auth-input-icon"></i>
+                        <input type="text" id="register-name" placeholder="ชื่อที่แสดง">
+                    </div>
+                    <div class="auth-input-group">
+                        <i data-lucide="mail" class="auth-input-icon"></i>
+                        <input type="email" id="register-email" placeholder="อีเมล" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <i data-lucide="lock" class="auth-input-icon"></i>
+                        <input type="password" id="register-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <i data-lucide="shield-check" class="auth-input-icon"></i>
+                        <input type="password" id="register-password-confirm" placeholder="ยืนยันรหัสผ่าน" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i data-lucide="user-plus"></i>
+                        <span>สมัครบัญชีใหม่</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Auth Error -->
+            <div id="auth-error" class="auth-error hidden"></div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="wallet" class="logo-icon"></i>
+                </div>
+                <div>
+                    <h1>Cash & Bank Flow</h1>
+                    <p>ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- User Profile -->
+                <div id="user-profile-section" class="user-profile hidden">
+                    <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
+                    <span id="user-name" class="user-name">ผู้ใช้</span>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i data-lucide="sun" class="sun-icon"></i>
+                    <i data-lucide="moon" class="moon-icon"></i>
+                </button>
+
+                <!-- Quick Reset / Demo Data buttons -->
+                <button id="btn-load-mock" class="btn btn-secondary btn-sm">
+                    <i data-lucide="sparkles"></i>
+                    <span>ข้อมูลทดลอง</span>
+                </button>
+                <button id="btn-clear-all" class="btn btn-danger-outline btn-sm">
+                    <i data-lucide="trash-2"></i>
+                    <span>ล้างข้อมูล</span>
+                </button>
+                <button id="btn-logout" class="btn btn-danger-outline btn-sm">
+                    <i data-lucide="log-out"></i>
+                    <span>ออกจากระบบ</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+
+            <!-- LEFT COLUMN: Dashboard Metrics & Quick Form -->
+            <section class="left-column">
+
+                <!-- Balance Overview Cards -->
+                <div class="metrics-container">
+                    <!-- Total Balance Card -->
+                    <div class="card card-total-balance glass-card">
+                        <div class="card-header">
+                            <span>ยอดเงินคงเหลือทั้งหมด</span>
+                            <div class="badge badge-accent">รวมทุกบัญชี</div>
+                        </div>
+                        <div class="balance-value">
+                            <span class="currency">฿</span>
+                            <span id="total-balance">0.00</span>
+                        </div>
+                        <div class="card-footer">
+                            <div class="sub-metric">
+                                <i data-lucide="trending-up" class="text-success"></i>
+                                <div>
+                                    <span class="label">รายรับรวม</span>
+                                    <span id="total-income" class="value text-success">+฿0.00</span>
+                                </div>
+                            </div>
+                            <div class="sub-metric">
+                                <i data-lucide="trending-down" class="text-danger"></i>
+                                <div>
+                                    <span class="label">รายจ่ายรวม</span>
+                                    <span id="total-expense" class="value text-danger">-฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cash & Bank Separated Cards -->
+                    <div class="account-cards-grid">
+                        <!-- Cash Account Card -->
+                        <div class="card card-account glass-card" id="card-cash">
+                            <div class="account-info">
+                                <div class="icon-avatar bg-cash">
+                                    <i data-lucide="banknote" class="text-cash"></i>
+                                </div>
+                                <div>
+                                    <span class="label">เงินสดคงเหลือ</span>
+                                    <div class="account-balance">
+                                        <span class="currency">฿</span>
+                                        <span id="cash-balance">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-mini-flow">
+                                <span class="text-success" id="cash-income">+฿0.00</span>
+                                <span class="separator">|</span>
+                                <span class="text-danger" id="cash-expense">-฿0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account Card -->
+                        <div class="card card-account glass-card" id="card-bank">
+                            <div class="account-info">
+                                <div class="icon-avatar bg-bank">
+                                    <i data-lucide="landmark" class="text-bank"></i>
+                                </div>
+                                <div>
+                                    <span class="label">เงินในธนาคารคงเหลือ</span>
+                                    <div class="account-balance">
+                                        <span class="currency">฿</span>
+                                        <span id="bank-balance">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-mini-flow">
+                                <span class="text-success" id="bank-income">+฿0.00</span>
+                                <span class="separator">|</span>
+                                <span class="text-danger" id="bank-expense">-฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Entry Form -->
+                <div class="card glass-card form-card">
+                    <div class="card-title">
+                        <i data-lucide="plus-circle" class="title-icon text-primary"></i>
+                        <h2>บันทึกรายการใหม่</h2>
+                    </div>
+
+                    <form id="transaction-form" autocomplete="off">
+                        <!-- Form Tabs for Income / Expense Selection -->
+                        <div class="type-selector-tabs">
+                            <input type="radio" id="type-income" name="tx-type" value="income" checked>
+                            <label for="type-income" class="tab-label label-income">
+                                <i data-lucide="arrow-down-left"></i>
+                                <span>รายรับ (Income)</span>
+                            </label>
+
+                            <input type="radio" id="type-expense" name="tx-type" value="expense">
+                            <label for="type-expense" class="tab-label label-expense">
+                                <i data-lucide="arrow-up-right"></i>
+                                <span>รายจ่าย (Expense)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-grid">
+                            <!-- Input Amount -->
+                            <div class="form-group col-12">
+                                <label for="tx-amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
+                                <div class="input-with-icon amount-input-wrapper">
+                                    <span class="input-prefix">฿</span>
+                                    <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- Input Account/Wallet (Cash vs Bank) -->
+                            <div class="form-group col-6">
+                                <label for="tx-method">ช่องทางการเงิน <span class="required">*</span></label>
+                                <select id="tx-method" required>
+                                    <option value="cash">💵 เงินสด (Cash)</option>
+                                    <option value="bank" selected>🏦 บัญชีธนาคาร (Bank)</option>
+                                </select>
+                            </div>
+
+                            <!-- Input Category -->
+                            <div class="form-group col-6">
+                                <label for="tx-category">หมวดหมู่ <span class="required">*</span></label>
+                                <select id="tx-category" required>
+                                    <!-- Options will be dynamically populated in JavaScript to match Income/Expense context -->
+                                </select>
+                            </div>
+
+                            <!-- Input Date -->
+                            <div class="form-group col-12">
+                                <label for="tx-date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                                <div class="input-with-icon">
+                                    <i data-lucide="calendar" class="input-icon-left"></i>
+                                    <input type="datetime-local" id="tx-date" required>
+                                </div>
+                            </div>
+
+                            <!-- Input Description -->
+                            <div class="form-group col-12">
+                                <label for="tx-description">บันทึกเพิ่มเติม</label>
+                                <div class="input-with-icon">
+                                    <i data-lucide="file-text" class="input-icon-left"></i>
+                                    <input type="text" id="tx-description"
+                                        placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-tx">
+                            <i data-lucide="check-circle-2"></i>
+                            <span>บันทึกรายการ</span>
+                        </button>
+                    </form>
+                </div>
+
+            </section>
+
+            <!-- RIGHT COLUMN: Charts, Budgeting & Historical Ledger -->
+            <section class="right-column">
+
+                <!-- Visual Charts Section -->
+                <div class="card glass-card chart-card">
+                    <div class="card-title-row">
+                        <div class="card-title">
+                            <i data-lucide="pie-chart" class="title-icon text-warning"></i>
+                            <h2>วิเคราะห์สัดส่วนและการเงิน</h2>
+                        </div>
+                        <div class="chart-tab-buttons">
+                            <button class="chart-tab active" data-chart="flow">กระแสเงินสด</button>
+                            <button class="chart-tab" data-chart="category">แยกตามหมวดหมู่</button>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <!-- Balance / Cash-Bank Flow Chart Canvas -->
+                        <div class="chart-container active" id="chart-flow-container">
+                            <canvas id="flowChart"></canvas>
+                        </div>
+                        <!-- Category Distribution Chart Canvas -->
+                        <div class="chart-container" id="chart-category-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Ledger (History) -->
+                <div class="card glass-card ledger-card">
+                    <div class="ledger-header">
+                        <div class="card-title">
+                            <i data-lucide="history" class="title-icon text-success"></i>
+                            <h2>ประวัติรายการเดินบัญชี</h2>
+                        </div>
+                        <button id="btn-export-csv" class="btn btn-secondary-outline btn-sm">
+                            <i data-lucide="download"></i>
+                            <span>ส่งออก CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- Ledger Search & Filters -->
+                    <div class="ledger-filters">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="ledger-search" placeholder="ค้นหาบันทึก หรือจำนวนเงิน...">
+                        </div>
+
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+                            <button class="filter-btn" data-filter="income">รายรับ</button>
+                            <button class="filter-btn" data-filter="expense">รายจ่าย</button>
+                            <button class="filter-btn" data-filter="cash">เงินสด</button>
+                            <button class="filter-btn" data-filter="bank">ธนาคาร</button>
+                        </div>
+                    </div>
+
+                    <!-- History Items Container -->
+                    <div class="ledger-list-wrapper">
+                        <ul id="ledger-list" class="ledger-list">
+                            <!-- Items dynamically populated by JS -->
+                        </ul>
+                        <!-- Empty State UI -->
+                        <div id="ledger-empty-state" class="empty-state hidden">
+                            <div class="empty-icon-wrapper">
+                                <i data-lucide="folder-open"></i>
+                            </div>
+                            <h3>ไม่พบรายการธุรกรรม</h3>
+                            <p>ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่ หรือกดโหลดข้อมูลจำลองเพื่อดูการแสดงผล</p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <footer class="app-footer-bar">
+            <p>© 2026 Cash & Bank Flow Tracker.
+                พัฒนาขึ้นด้วยเทคโนโลยีระดับพรีเมียมและคำนึงถึงความเป็นส่วนตัวของข้อมูลผู้ใช้งาน 100%</p>
+        </footer>
+    </div>
+
+    <!-- Notification system -->
+    <div id="notification-toast" class="toast hidden">
+        <i data-lucide="info" class="toast-icon"></i>
+        <span class="toast-message">บันทึกสำเร็จ</span>
+    </div>
+
+    <!-- Edit Modal Overlay -->
+    <div id="edit-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="pencil" class="title-icon text-warning"></i>
+                    <h2>แก้ไขรายการธุรกรรม</h2>
+                </div>
+                <button id="edit-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="edit-transaction-form" autocomplete="off">
+                <input type="hidden" id="edit-tx-id">
+
+                <!-- Type selector tabs -->
+                <div class="type-selector-tabs">
+                    <input type="radio" id="edit-type-income" name="edit-tx-type" value="income">
+                    <label for="edit-type-income" class="tab-label label-income">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span>รายรับ (Income)</span>
+                    </label>
+                    <input type="radio" id="edit-type-expense" name="edit-tx-type" value="expense">
+                    <label for="edit-type-expense" class="tab-label label-expense">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span>รายจ่าย (Expense)</span>
+                    </label>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group col-12">
+                        <label for="edit-tx-amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
+                        <div class="input-with-icon amount-input-wrapper">
+                            <span class="input-prefix">฿</span>
+                            <input type="number" id="edit-tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="edit-tx-method">ช่องทางการเงิน <span class="required">*</span></label>
+                        <select id="edit-tx-method" required>
+                            <option value="cash">💵 เงินสด (Cash)</option>
+                            <option value="bank">🏦 บัญชีธนาคาร (Bank)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="edit-tx-category">หมวดหมู่ <span class="required">*</span></label>
+                        <select id="edit-tx-category" required></select>
+                    </div>
+
+                    <div class="form-group col-12">
+                        <label for="edit-tx-date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="calendar" class="input-icon-left"></i>
+                            <input type="datetime-local" id="edit-tx-date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-12">
+                        <label for="edit-tx-description">บันทึกเพิ่มเติม</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="file-text" class="input-icon-left"></i>
+                            <input type="text" id="edit-tx-description"
+                                placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="edit-modal-cancel" class="btn btn-secondary btn-lg">
+                        <i data-lucide="x"></i>
+                        <span>ยกเลิก</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-lucide="save"></i>
+                        <span>บันทึกการแก้ไข</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Config & Auth -->
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+
+    <!-- Custom Javascript -->
+    <script src="app.js"></script>
+</body>
+
+</html>
