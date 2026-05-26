@@ -144,10 +144,9 @@
 
             <div class="header-actions">
                 <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden" style="cursor: pointer;" title="แก้ไขโปรไฟล์">
+                <div id="user-profile-section" class="user-profile hidden">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
                     <span id="user-name" class="user-name">ผู้ใช้</span>
-                    <i data-lucide="edit-3" class="edit-profile-icon" style="width: 14px; height: 14px; margin-left: 5px; opacity: 0.6;"></i>
                 </div>
 
                 <!-- Theme Toggle Button -->
@@ -506,50 +505,73 @@
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div id="edit-profile-modal" class="modal-overlay hidden">
-        <div class="modal-content">
+    <!-- Profile Modal Overlay -->
+    <div id="profile-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
             <div class="modal-header">
-                <div class="modal-title">
-                    <div class="icon-wrapper bg-primary-light">
-                        <i data-lucide="user" class="text-primary"></i>
-                    </div>
-                    <h2>แก้ไขโปรไฟล์</h2>
+                <div class="card-title">
+                    <i data-lucide="user-cog" class="title-icon text-primary"></i>
+                    <h2>จัดการโปรไฟล์</h2>
                 </div>
-                <button id="edit-profile-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                <button id="profile-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
                     <i data-lucide="x"></i>
                 </button>
             </div>
 
-            <form id="edit-profile-form" autocomplete="off">
-                <div class="form-grid">
-                    <div class="form-group col-12">
-                        <label for="edit-profile-name">ชื่อผู้ใช้งาน <span class="required">*</span></label>
+            <form id="profile-form" autocomplete="off">
+                <div class="profile-avatar-upload-container">
+                    <div class="profile-avatar-preview" id="profile-avatar-preview">
+                        <!-- Shows icon or image -->
+                        <i data-lucide="user" class="default-avatar-icon"></i>
+                    </div>
+                    <label for="profile-avatar-input" class="btn btn-sm btn-secondary btn-upload-avatar">
+                        <i data-lucide="camera"></i> เปลี่ยนรูปภาพ
+                    </label>
+                    <input type="file" id="profile-avatar-input" accept="image/*" class="hidden">
+                    <p class="text-xs text-muted mt-2">ภาพจะถูกย่อขนาดอัตโนมัติเพื่อประหยัดพื้นที่</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="profile-firstname">ชื่อ</label>
                         <div class="input-with-icon">
                             <i data-lucide="user" class="input-icon-left"></i>
-                            <input type="text" id="edit-profile-name" placeholder="ชื่อที่ต้องการแสดง" required>
+                            <input type="text" id="profile-firstname" placeholder="ชื่อจริง">
                         </div>
                     </div>
-
-                    <div class="form-group col-12">
-                        <label for="edit-profile-avatar">URL รูปโปรไฟล์ (ไม่บังคับ)</label>
+                    <div class="form-group col-6">
+                        <label for="profile-lastname">นามสกุล</label>
                         <div class="input-with-icon">
-                            <i data-lucide="image" class="input-icon-left"></i>
-                            <input type="url" id="edit-profile-avatar" placeholder="https://example.com/avatar.jpg">
+                            <i data-lucide="user" class="input-icon-left"></i>
+                            <input type="text" id="profile-lastname" placeholder="นามสกุล">
                         </div>
-                        <small style="color: var(--text-muted); display: block; margin-top: 5px;">ปล่อยว่างไว้เพื่อใช้รูปเดิม หรือรูปจาก Google</small>
                     </div>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" id="edit-profile-cancel" class="btn btn-secondary btn-lg">
-                        <i data-lucide="x"></i>
-                        <span>ยกเลิก</span>
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="profile-dob">วัน/เดือน/ปีเกิด</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="calendar" class="input-icon-left"></i>
+                            <input type="date" id="profile-dob">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions mt-4" style="justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+                    <button type="button" id="btn-delete-account" class="btn btn-danger">
+                        <i data-lucide="trash-2"></i>
+                        <span>ลบบัญชี</span>
                     </button>
-                    <button type="submit" id="edit-profile-save" class="btn btn-primary btn-lg">
-                        <i data-lucide="save"></i>
-                        <span>บันทึกการแก้ไข</span>
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" id="profile-modal-cancel" class="btn btn-secondary">
+                            <span>ยกเลิก</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save"></i>
+                            <span>บันทึก</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

@@ -143,16 +143,7 @@ const elements = {
     editTxMethod: document.getElementById('edit-tx-method'),
     editTxCategory: document.getElementById('edit-tx-category'),
     editTxDate: document.getElementById('edit-tx-date'),
-    editTxDescription: document.getElementById('edit-tx-description'),
-
-    // Edit Profile Modal
-    userProfileSection: document.getElementById('user-profile-section'),
-    editProfileModal: document.getElementById('edit-profile-modal'),
-    editProfileClose: document.getElementById('edit-profile-close'),
-    editProfileCancel: document.getElementById('edit-profile-cancel'),
-    editProfileForm: document.getElementById('edit-profile-form'),
-    editProfileName: document.getElementById('edit-profile-name'),
-    editProfileAvatar: document.getElementById('edit-profile-avatar')
+    editTxDescription: document.getElementById('edit-tx-description')
 };
 
 // -------------------------------------------------------------
@@ -831,52 +822,8 @@ function setupEventListeners() {
             showToast('ไม่สามารถแก้ไขข้อมูลได้', 'danger');
         }
     });
-
-    // 12. Edit Profile Modal
-    elements.userProfileSection.addEventListener('click', openEditProfileModal);
-    elements.editProfileClose.addEventListener('click', closeEditProfileModal);
-    elements.editProfileCancel.addEventListener('click', closeEditProfileModal);
-    elements.editProfileModal.addEventListener('click', (e) => {
-        if (e.target === elements.editProfileModal) closeEditProfileModal();
-    });
-
-    elements.editProfileForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        const newName = elements.editProfileName.value.trim();
-        const newAvatar = elements.editProfileAvatar.value.trim();
-        
-        if (!newName) {
-            showToast('กรุณากรอกชื่อผู้ใช้งาน', 'danger');
-            return;
-        }
-
-        try {
-            await user.updateProfile({
-                displayName: newName,
-                photoURL: newAvatar || null
-            });
-            
-            // Update UI directly
-            document.getElementById('user-name').textContent = newName;
-            if (newAvatar) {
-                document.getElementById('user-avatar').src = newAvatar;
-            } else {
-                // Generate UI Avatar if empty
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName)}&background=random`;
-            }
-            
-            closeEditProfileModal();
-            showToast('อัปเดตโปรไฟล์เรียบร้อยแล้ว!', 'success');
-        } catch (error) {
-            console.error(error);
-            showToast('เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์', 'danger');
-        }
-    });
 }
+
 // -------------------------------------------------------------
 // Transaction Mutators
 // -------------------------------------------------------------
@@ -931,35 +878,6 @@ function closeEditModal() {
     elements.editModalOverlay.classList.add('hidden');
     document.body.style.overflow = ''; // restore scroll
     elements.editForm.reset();
-}
-
-// -------------------------------------------------------------
-// Edit Profile Modal logic
-// -------------------------------------------------------------
-function openEditProfileModal() {
-    const user = auth.currentUser;
-    if (!user) return;
-    
-    // Fill current info
-    elements.editProfileName.value = user.displayName || '';
-    
-    // If the photoURL is from ui-avatars (which we generated), leave input empty for better UX
-    // or populate if it's a real custom URL or Google URL.
-    if (user.photoURL && !user.photoURL.includes('ui-avatars.com')) {
-        elements.editProfileAvatar.value = user.photoURL;
-    } else {
-        elements.editProfileAvatar.value = '';
-    }
-    
-    elements.editProfileModal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    lucide.createIcons();
-}
-
-function closeEditProfileModal() {
-    elements.editProfileModal.classList.add('hidden');
-    document.body.style.overflow = '';
-    elements.editProfileForm.reset();
 }
 
 // -------------------------------------------------------------

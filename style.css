@@ -1471,6 +1471,54 @@ body {
     white-space: nowrap;
 }
 
+.user-profile:hover {
+    background: hsla(var(--hue-primary), 20%, 50%, 0.15);
+    cursor: pointer;
+}
+
+/* Profile Modal Styles */
+.profile-avatar-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.profile-avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: hsla(var(--hue-primary), 20%, 50%, 0.1);
+    border: 2px dashed var(--border-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.profile-avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--text-muted);
+}
+
+.btn-upload-avatar {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Keyframes and Animations */
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 hsla(var(--hue-primary), 85%, 63%, 0.4); }
