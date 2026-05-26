@@ -284,9 +284,9 @@ function handleProfilePicSelection(e) {
         return;
     }
 
-    // Validate size (800KB = 819,200 bytes)
-    if (file.size > 800 * 1024) {
-        authElements.profilePicError.textContent = 'ขนาดรูปภาพต้องไม่เกิน 800KB (กรุณาเลือกรูปภาพอื่น)';
+    // Validate size (350KB = 358,400 bytes)
+    if (file.size > 350 * 1024) {
+        authElements.profilePicError.textContent = 'ขนาดรูปภาพต้องไม่เกิน 350KB (กรุณาเลือกรูปภาพอื่น)';
         authElements.profilePicError.classList.remove('hidden');
         return;
     }
