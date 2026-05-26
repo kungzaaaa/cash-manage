@@ -6,21 +6,21 @@
 // Category Configurations with emojis and Lucide icon keys
 const CATEGORIES = {
     income: [
-        { id: 'salary', label: 'เงินเดือน / ค่าจ้าง', icon: 'briefcase', color: 'hsl(150, 80%, 42%)' },
-        { id: 'business', label: 'รายได้ธุรกิจ', icon: 'store', color: 'hsl(205, 90%, 50%)' },
-        { id: 'investment', label: 'การลงทุน / ปันผล', icon: 'trending-up', color: 'hsl(280, 80%, 60%)' },
-        { id: 'gift', label: 'ของขวัญ / โบนัส', icon: 'gift', color: 'hsl(40, 95%, 50%)' },
-        { id: 'others-income', label: 'รายรับอื่น ๆ', icon: 'plus-circle', color: 'hsl(190, 80%, 45%)' }
+        { id: 'salary', labelKey: 'cat.salary', icon: 'briefcase', color: 'hsl(150, 80%, 42%)' },
+        { id: 'business', labelKey: 'cat.business', icon: 'store', color: 'hsl(205, 90%, 50%)' },
+        { id: 'investment', labelKey: 'cat.investment', icon: 'trending-up', color: 'hsl(280, 80%, 60%)' },
+        { id: 'gift', labelKey: 'cat.gift', icon: 'gift', color: 'hsl(40, 95%, 50%)' },
+        { id: 'others-income', labelKey: 'cat.others_income', icon: 'plus-circle', color: 'hsl(190, 80%, 45%)' }
     ],
     expense: [
-        { id: 'food', label: 'อาหาร & เครื่องดื่ม', icon: 'utensils', color: 'hsl(0, 80%, 60%)' },
-        { id: 'shopping', label: 'ช้อปปิ้ง', icon: 'shopping-cart', color: 'hsl(330, 80%, 55%)' },
-        { id: 'travel', label: 'เดินทาง & พาหนะ', icon: 'car', color: 'hsl(205, 90%, 50%)' },
-        { id: 'bills', label: 'บิล & ค่าใช้จ่ายคงที่', icon: 'receipt', color: 'hsl(28, 90%, 55%)' },
-        { id: 'housing', label: 'ที่อยู่อาศัย', icon: 'home', color: 'hsl(260, 70%, 60%)' },
-        { id: 'health', label: 'สุขภาพ & รักษาพยาบาล', icon: 'heart', color: 'hsl(350, 85%, 55%)' },
-        { id: 'entertainment', label: 'ท่องเที่ยว & บันเทิง', icon: 'film', color: 'hsl(170, 75%, 40%)' },
-        { id: 'others-expense', label: 'รายจ่ายอื่น ๆ', icon: 'minus-circle', color: 'hsl(0, 0%, 55%)' }
+        { id: 'food', labelKey: 'cat.food', icon: 'utensils', color: 'hsl(0, 80%, 60%)' },
+        { id: 'shopping', labelKey: 'cat.shopping', icon: 'shopping-cart', color: 'hsl(330, 80%, 55%)' },
+        { id: 'travel', labelKey: 'cat.travel', icon: 'car', color: 'hsl(205, 90%, 50%)' },
+        { id: 'bills', labelKey: 'cat.bills', icon: 'receipt', color: 'hsl(28, 90%, 55%)' },
+        { id: 'housing', labelKey: 'cat.housing', icon: 'home', color: 'hsl(260, 70%, 60%)' },
+        { id: 'health', labelKey: 'cat.health', icon: 'heart', color: 'hsl(350, 85%, 55%)' },
+        { id: 'entertainment', labelKey: 'cat.entertainment', icon: 'film', color: 'hsl(170, 75%, 40%)' },
+        { id: 'others-expense', labelKey: 'cat.others_expense', icon: 'minus-circle', color: 'hsl(0, 0%, 55%)' }
     ]
 };
 
@@ -33,7 +33,7 @@ const MOCK_TRANSACTIONS = [
         method: 'bank',
         category: 'salary',
         date: '2026-05-25T09:00',
-        description: 'เงินเดือนประจำเดือน พฤษภาคม'
+        description: t('mock.salary')
     },
     {
         id: 'mock-2',
@@ -42,7 +42,7 @@ const MOCK_TRANSACTIONS = [
         method: 'bank',
         category: 'bills',
         date: '2026-05-25T11:30',
-        description: 'ค่าบริการอินเทอร์เน็ตและไฟฟ้ารอบเดือน'
+        description: t('mock.bills')
     },
     {
         id: 'mock-3',
@@ -51,7 +51,7 @@ const MOCK_TRANSACTIONS = [
         method: 'cash',
         category: 'gift',
         date: '2026-05-25T18:00',
-        description: 'รางวัลจากคุณแม่'
+        description: t('mock.gift')
     },
     {
         id: 'mock-4',
@@ -60,7 +60,7 @@ const MOCK_TRANSACTIONS = [
         method: 'cash',
         category: 'food',
         date: '2026-05-26T08:15',
-        description: 'มื้อเช้าและกาแฟสตาร์บัคส์'
+        description: t('mock.food')
     },
     {
         id: 'mock-5',
@@ -69,7 +69,7 @@ const MOCK_TRANSACTIONS = [
         method: 'bank',
         category: 'shopping',
         date: '2026-05-26T14:40',
-        description: 'ซื้อรองเท้าผ้าใบสีขาวคู่ใหม่'
+        description: t('mock.shopping')
     }
 ];
 
@@ -197,7 +197,7 @@ async function initAppForUser(user) {
         renderDashboard();
     }, (error) => {
         console.error("Error fetching transactions: ", error);
-        showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'danger');
+        showToast(t('toast.load_error'), 'danger');
     });
 }
 
@@ -254,7 +254,7 @@ function populateCategorySelect(selectEl, isIncome) {
         const option = document.createElement('option');
         option.value = cat.id;
         const iconSymbol = EMOJI_MAP[cat.id] || (isIncome ? '📥' : '💸');
-        option.textContent = `${iconSymbol} ${cat.label}`;
+        option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
         selectEl.appendChild(option);
     });
 
@@ -336,6 +336,11 @@ function renderDashboard() {
 
     // 4. Update Charts
     updateCharts();
+
+    // 5. Re-apply translations for dynamically rendered content
+    if (typeof applyTranslations === 'function') {
+        applyTranslations();
+    }
 }
 
 // Format numbers nicely: 12500 -> 12,500.00
@@ -370,7 +375,7 @@ function renderLedgerList() {
             const amountStr = tx.amount.toString();
             const descStr = (tx.description || '').toLowerCase();
             const categoryObj = getCategoryObj(tx.type, tx.category);
-            const categoryLabel = categoryObj ? categoryObj.label.toLowerCase() : '';
+            const categoryLabel = categoryObj ? t(categoryObj.labelKey).toLowerCase() : '';
             
             return amountStr.includes(searchVal) || descStr.includes(searchVal) || categoryLabel.includes(searchVal);
         }
@@ -392,14 +397,14 @@ function renderLedgerList() {
         const categoryObj = getCategoryObj(tx.type, tx.category);
         const iconName = categoryObj ? categoryObj.icon : 'help-circle';
         const colorVal = categoryObj ? categoryObj.color : 'var(--text-muted)';
-        const categoryLabel = categoryObj ? categoryObj.label : 'หมวดหมู่ทั่วไป';
+        const categoryLabel = categoryObj ? t(categoryObj.labelKey) : t('ledger.category_default');
         
         const sign = tx.type === 'income' ? '+' : '-';
         const amountClass = tx.type === 'income' ? 'text-success' : 'text-danger';
         
         // Clean beautiful relative dates
         const dateObj = new Date(tx.date);
-        const formattedDate = dateObj.toLocaleDateString('th-TH', {
+        const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -413,14 +418,14 @@ function renderLedgerList() {
             <div class="ledger-item-left">
                 <div class="item-icon-wrapper" style="background-color: ${colorVal}18; border: 1px solid ${colorVal}30;">
                     <i data-lucide="${iconName}" style="color: ${colorVal}"></i>
-                    <div class="method-indicator bg-${tx.method}" title="${tx.method === 'cash' ? 'เงินสด' : 'บัญชีธนาคาร'}">
+                    <div class="method-indicator bg-${tx.method}" title="${tx.method === 'cash' ? t('ledger.method_cash_title') : t('ledger.method_bank_title')}">
                         <i data-lucide="${methodBadgeIcon}"></i>
                     </div>
                 </div>
                 <div class="item-title-desc">
                     <div class="item-title-row">
                         <span class="item-title">${categoryLabel}</span>
-                        <span class="method-text-badge bg-${tx.method} text-${tx.method}">${tx.method === 'cash' ? 'เงินสด' : 'ธนาคาร'}</span>
+                        <span class="method-text-badge bg-${tx.method} text-${tx.method}">${tx.method === 'cash' ? t('ledger.method_cash') : t('ledger.method_bank')}</span>
                     </div>
                     ${tx.description ? `<span class="item-desc">${tx.description}</span>` : ''}
                     <span class="item-date">${formattedDate}</span>
@@ -431,10 +436,10 @@ function renderLedgerList() {
                     <span class="item-amount ${amountClass}">${sign}฿${formatCurrency(tx.amount)}</span>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-action-sm btn-edit" title="แก้ไขรายการ" data-id="${tx.id}">
+                    <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
                         <i data-lucide="pencil"></i>
                     </button>
-                    <button class="btn-action-sm btn-delete" title="ลบรายการนี้" data-id="${tx.id}">
+                    <button class="btn-action-sm btn-delete" title="${t('ledger.delete_title')}" data-id="${tx.id}">
                         <i data-lucide="trash-2"></i>
                     </button>
                 </div>
@@ -497,7 +502,7 @@ function updateCharts() {
     flowChartInstance = new Chart(flowCtx, {
         type: 'doughnut',
         data: {
-            labels: ['เงินสด (Cash)', 'เงินในธนาคาร (Bank)'],
+            labels: [t('chart.cash_label'), t('chart.bank_label')],
             datasets: [{
                 data: [Math.max(0, totalCash), Math.max(0, totalBank)],
                 backgroundColor: [
@@ -535,7 +540,7 @@ function updateCharts() {
     // Populate categories initially
     CATEGORIES.expense.forEach(c => {
         expenseData[c.id] = {
-            label: c.label,
+            label: t(c.labelKey),
             amount: 0,
             color: c.color
         };
@@ -551,7 +556,7 @@ function updateCharts() {
             } else {
                 // Unknown Category fallback
                 if (!expenseData['others-expense']) {
-                    expenseData['others-expense'] = { label: 'อื่น ๆ', amount: 0, color: '#777' };
+                    expenseData['others-expense'] = { label: t('chart.others'), amount: 0, color: '#777' };
                 }
                 expenseData['others-expense'].amount += amount;
             }
@@ -582,7 +587,7 @@ function updateCharts() {
         categoryChartInstance = new Chart(categoryCtx, {
             type: 'pie',
             data: {
-                labels: ['ยังไม่มีข้อมูลค่าใช้จ่าย'],
+                labels: [t('chart.no_expense_data')],
                 datasets: [{
                     data: [1],
                     backgroundColor: [isDark ? '#2a2b36' : '#e2e8f0'],
@@ -651,10 +656,10 @@ function setupEventListeners() {
     // 2. Quick Demo / Reset
     elements.btnLoadMock.addEventListener('click', async () => {
         if (!txRef) {
-            showToast('กรุณาเข้าสู่ระบบก่อน', 'danger');
+            showToast(t('toast.login_required'), 'danger');
             return;
         }
-        if (confirm('คำเตือน: คุณต้องการโหลดข้อมูลทดลองใช่หรือไม่?\n\nระบบจะเพิ่มข้อมูลตัวอย่างเข้าไปในรายการปัจจุบัน')) {
+        if (confirm(t('confirm.load_mock'))) {
             try {
                 const batch = db.batch();
                 MOCK_TRANSACTIONS.forEach(tx => {
@@ -664,17 +669,17 @@ function setupEventListeners() {
                     batch.set(docRef, newTx);
                 });
                 await batch.commit();
-                showToast('โหลดข้อมูลทดลองเสร็จสิ้น', 'success');
+                showToast(t('toast.mock_loaded'), 'success');
             } catch (error) {
                 console.error(error);
-                showToast('ไม่สามารถโหลดข้อมูลตัวอย่างได้', 'danger');
+                showToast(t('toast.mock_error'), 'danger');
             }
         }
     });
 
     elements.btnClearAll.addEventListener('click', async () => {
         if (!txRef) return;
-        if (confirm('คุณต้องการลบข้อมูลประวัติการทำรายการทั้งหมดใช่หรือไม่? ข้อมูลจะไม่สามารถกู้คืนได้')) {
+        if (confirm(t('confirm.clear_all'))) {
             try {
                 const snapshot = await txRef.get();
                 const batch = db.batch();
@@ -682,10 +687,10 @@ function setupEventListeners() {
                     batch.delete(doc.ref);
                 });
                 await batch.commit();
-                showToast('ล้างข้อมูลบัญชีเรียบร้อย', 'danger');
+                showToast(t('toast.clear_success'), 'danger');
             } catch (error) {
                 console.error(error);
-                showToast('ไม่สามารถลบข้อมูลได้', 'danger');
+                showToast(t('toast.clear_error'), 'danger');
             }
         }
     });
@@ -699,7 +704,7 @@ function setupEventListeners() {
         e.preventDefault();
         
         if (!txRef) {
-            showToast('กรุณาเข้าสู่ระบบก่อน', 'danger');
+            showToast(t('toast.login_required'), 'danger');
             return;
         }
 
@@ -711,12 +716,12 @@ function setupEventListeners() {
         const description = elements.txDescription.value.trim();
 
         if (isNaN(amount) || amount <= 0) {
-            showToast('กรุณากรอกจำนวนเงินให้ถูกต้อง', 'danger');
+            showToast(t('toast.amount_invalid'), 'danger');
             return;
         }
 
         if (!date) {
-            showToast('กรุณาเลือกวันเวลาทำรายการ', 'danger');
+            showToast(t('toast.date_required'), 'danger');
             return;
         }
 
@@ -729,10 +734,10 @@ function setupEventListeners() {
             elements.txAmount.value = '';
             elements.txDescription.value = '';
             initFormDateTime(); // reset back to current date/time
-            showToast('เพิ่มรายการธุรกรรมเรียบร้อย!', 'success');
+            showToast(t('toast.tx_added'), 'success');
         } catch (error) {
             console.error(error);
-            showToast('ไม่สามารถบันทึกข้อมูลได้', 'danger');
+            showToast(t('toast.tx_save_error'), 'danger');
         }
     });
 
@@ -803,11 +808,11 @@ function setupEventListeners() {
         const description = elements.editTxDescription.value.trim();
 
         if (isNaN(amount) || amount <= 0) {
-            showToast('กรุณากรอกจำนวนเงินให้ถูกต้อง', 'danger');
+            showToast(t('toast.amount_invalid'), 'danger');
             return;
         }
         if (!date) {
-            showToast('กรุณาเลือกวันเวลาทำรายการ', 'danger');
+            showToast(t('toast.date_required'), 'danger');
             return;
         }
 
@@ -816,10 +821,10 @@ function setupEventListeners() {
         try {
             await txRef.doc(id).set(updatedTx);
             closeEditModal();
-            showToast('แก้ไขรายการธุรกรรมเรียบร้อยแล้ว!', 'success');
+            showToast(t('toast.tx_edited'), 'success');
         } catch (error) {
             console.error(error);
-            showToast('ไม่สามารถแก้ไขข้อมูลได้', 'danger');
+            showToast(t('toast.tx_edit_error'), 'danger');
         }
     });
 }
@@ -828,13 +833,13 @@ function setupEventListeners() {
 // Transaction Mutators
 // -------------------------------------------------------------
 function deleteTransaction(id) {
-    if (confirm('คุณแน่ใจว่าต้องการลบรายการนี้ใช่ไหม?')) {
+    if (confirm(t('confirm.delete_tx'))) {
         if (!txRef) return;
         txRef.doc(id).delete().then(() => {
-            showToast('ลบรายการธุรกรรมเรียบร้อยแล้ว', 'success');
+            showToast(t('toast.tx_deleted'), 'success');
         }).catch(error => {
             console.error(error);
-            showToast('ไม่สามารถลบข้อมูลได้', 'danger');
+            showToast(t('toast.tx_delete_error'), 'danger');
         });
     }
 }
@@ -917,22 +922,22 @@ function showToast(message, type = 'success') {
 // -------------------------------------------------------------
 function exportToCSV() {
     if (state.transactions.length === 0) {
-        showToast('ไม่มีรายการธุรกรรมสำหรับส่งออกข้อมูล', 'danger');
+        showToast(t('toast.csv_no_data'), 'danger');
         return;
     }
 
     // Set CSV Header columns
     let csvContent = '\uFEFF'; // Excel UTF-8 BOM to prevent Thai char corruption
-    csvContent += 'วันเวลา,ประเภท,จำนวนเงิน,ช่องทาง,หมวดหมู่,คำอธิบายเพิ่มเติม\r\n';
+    csvContent += `${t('csv.date')},${t('csv.type')},${t('csv.amount')},${t('csv.method')},${t('csv.category')},${t('csv.description')}\r\n`;
 
     state.transactions.forEach(tx => {
-        const typeLabel = tx.type === 'income' ? 'รายรับ' : 'รายจ่าย';
-        const methodLabel = tx.method === 'cash' ? 'เงินสด' : 'ธนาคาร';
+        const typeLabel = tx.type === 'income' ? t('csv.income') : t('csv.expense');
+        const methodLabel = tx.method === 'cash' ? t('csv.cash') : t('csv.bank');
         const catObj = getCategoryObj(tx.type, tx.category);
-        const catLabel = catObj ? catObj.label : tx.category;
+        const catLabel = catObj ? t(catObj.labelKey) : tx.category;
         const description = (tx.description || '').replace(/"/g, '""'); // escape quotes
 
-        const formattedDate = new Date(tx.date).toLocaleString('th-TH');
+        const formattedDate = new Date(tx.date).toLocaleString(getDateLocale());
         
         csvContent += `"${formattedDate}","${typeLabel}",${tx.amount},"${methodLabel}","${catLabel}","${description}"\r\n`;
     });
@@ -950,5 +955,5 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     
-    showToast('ดาวน์โหลดไฟล์ CSV เรียบร้อยแล้ว', 'success');
+    showToast(t('toast.csv_success'), 'success');
 }

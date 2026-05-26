@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash & Bank Flow Tracker | เครื่องมือบันทึกรายรับ-รายจ่าย</title>
-
+    <link rel="icon" type="image/png" href="เปลี่ยนไอคอน Tap Web ตรงนี้">
     <!-- Google Fonts: Kanit (Thai) & Inter (English/Numbers) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,20 +37,25 @@
     <!-- Loading Overlay (shown while Firebase checks auth state) -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner"></div>
-        <p>กำลังตรวจสอบสถานะผู้ใช้...</p>
+        <p data-i18n="loading.checking">กำลังตรวจสอบสถานะผู้ใช้...</p>
     </div>
 
     <!-- Auth Login / Register Screen -->
     <div id="auth-screen" class="auth-screen hidden">
         <div class="auth-card auth-card-horizontal glass-card">
+            <!-- Language Toggle on Auth Screen -->
+            <button id="auth-lang-toggle" class="btn-icon auth-lang-btn" aria-label="Switch Language" title="EN / ไทย">
+                <span id="auth-lang-flag">EN</span>
+            </button>
+
             <!-- Left Branding Column -->
             <div class="auth-left">
                 <div class="auth-logo-large">
                     <div class="logo-icon-wrapper-large">
                         <i data-lucide="wallet" class="logo-icon-large"></i>
                     </div>
-                    <h1>Cash & Bank Flow</h1>
-                    <p>จัดการการเงินของคุณอย่างมืออาชีพ<br>บันทึกและติดตามทุกรายรับ-รายจ่าย</p>
+                    <h1 data-i18n="auth.brand_title">Cash & Bank Flow</h1>
+                    <p data-i18n-html="auth.brand_desc">จัดการการเงินของคุณอย่างมืออาชีพ<br>บันทึกและติดตามทุกรายรับ-รายจ่าย</p>
                 </div>
             </div>
 
@@ -58,8 +63,8 @@
             <div class="auth-right">
                 <!-- Auth Tabs -->
                 <div class="auth-tabs">
-                    <button id="auth-tab-login" class="auth-tab active">เข้าสู่ระบบ</button>
-                    <button id="auth-tab-register" class="auth-tab">สมัครบัญชีใหม่</button>
+                    <button id="auth-tab-login" class="auth-tab active" data-i18n="auth.tab_login">เข้าสู่ระบบ</button>
+                    <button id="auth-tab-register" class="auth-tab" data-i18n="auth.tab_register">สมัครบัญชีใหม่</button>
                 </div>
 
                 <!-- Google Login -->
@@ -78,26 +83,26 @@
                             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                             fill="#EA4335" />
                     </svg>
-                    <span>เข้าสู่ระบบด้วย Google</span>
+                    <span data-i18n="auth.google_login">เข้าสู่ระบบด้วย Google</span>
                 </button>
 
                 <!-- Divider -->
-                <div class="auth-divider"><span>หรือใช้อีเมล</span></div>
+                <div class="auth-divider"><span data-i18n="auth.divider">หรือใช้อีเมล</span></div>
 
                 <!-- Login Form -->
                 <div id="login-form-container">
                     <form id="login-form" class="auth-form" autocomplete="off">
                         <div class="auth-input-group">
                             <i data-lucide="mail" class="auth-input-icon"></i>
-                            <input type="email" id="login-email" placeholder="อีเมล" required>
+                            <input type="email" id="login-email" placeholder="อีเมล" data-i18n-placeholder="auth.email_placeholder" required>
                         </div>
                         <div class="auth-input-group">
                             <i data-lucide="lock" class="auth-input-icon"></i>
-                            <input type="password" id="login-password" placeholder="รหัสผ่าน" required>
+                            <input type="password" id="login-password" placeholder="รหัสผ่าน" data-i18n-placeholder="auth.password_placeholder" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">
                             <i data-lucide="log-in"></i>
-                            <span>เข้าสู่ระบบ</span>
+                            <span data-i18n="auth.login_btn">เข้าสู่ระบบ</span>
                         </button>
                     </form>
                 </div>
@@ -107,23 +112,24 @@
                     <form id="register-form" class="auth-form" autocomplete="off">
                         <div class="auth-input-group">
                             <i data-lucide="user" class="auth-input-icon"></i>
-                            <input type="text" id="register-name" placeholder="ชื่อที่แสดง">
+                            <input type="text" id="register-name" placeholder="ชื่อที่แสดง" data-i18n-placeholder="auth.register_name_placeholder">
                         </div>
                         <div class="auth-input-group">
                             <i data-lucide="mail" class="auth-input-icon"></i>
-                            <input type="email" id="register-email" placeholder="อีเมล" required>
+                            <input type="email" id="register-email" placeholder="อีเมล" data-i18n-placeholder="auth.register_email_placeholder" required>
                         </div>
                         <div class="auth-input-group">
                             <i data-lucide="lock" class="auth-input-icon"></i>
-                            <input type="password" id="register-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" required>
+                            <input type="password" id="register-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)"
+                                data-i18n-placeholder="auth.register_password_placeholder" required>
                         </div>
                         <div class="auth-input-group">
                             <i data-lucide="shield-check" class="auth-input-icon"></i>
-                            <input type="password" id="register-password-confirm" placeholder="ยืนยันรหัสผ่าน" required>
+                            <input type="password" id="register-password-confirm" placeholder="ยืนยันรหัสผ่าน" data-i18n-placeholder="auth.register_confirm_placeholder" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block btn-lg">
                             <i data-lucide="user-plus"></i>
-                            <span>สมัครบัญชีใหม่</span>
+                            <span data-i18n="auth.register_btn">สมัครบัญชีใหม่</span>
                         </button>
                     </form>
                 </div>
@@ -143,17 +149,23 @@
                 </div>
                 <div>
                     <h1>Cash & Bank Flow</h1>
-                    <p>ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี</p>
+                    <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี</p>
                 </div>
             </div>
 
             <div class="header-actions">
                 <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden" role="button" aria-label="จัดการโปรไฟล์"
+                <div id="user-profile-section" class="user-profile hidden" role="button" data-i18n-aria="header.profile_label"
+                    data-i18n-title="header.profile_label" aria-label="จัดการโปรไฟล์"
                     title="จัดการโปรไฟล์">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
                     <span id="user-name" class="user-name">ผู้ใช้</span>
                 </div>
+
+                <!-- Language Toggle Button -->
+                <button id="lang-toggle" class="btn-icon" aria-label="Switch Language" title="EN / ไทย">
+                    <span id="lang-flag">EN</span>
+                </button>
 
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
@@ -164,15 +176,15 @@
                 <!-- Quick Reset / Demo Data buttons -->
                 <button id="btn-load-mock" class="btn btn-secondary btn-sm">
                     <i data-lucide="sparkles"></i>
-                    <span>ข้อมูลทดลอง</span>
+                    <span data-i18n="header.mock_data">ข้อมูลทดลอง</span>
                 </button>
                 <button id="btn-clear-all" class="btn btn-danger-outline btn-sm">
                     <i data-lucide="trash-2"></i>
-                    <span>ล้างข้อมูล</span>
+                    <span data-i18n="header.clear_all">ล้างข้อมูล</span>
                 </button>
                 <button id="btn-logout" class="btn btn-danger-outline btn-sm">
                     <i data-lucide="log-out"></i>
-                    <span>ออกจากระบบ</span>
+                    <span data-i18n="header.logout">ออกจากระบบ</span>
                 </button>
             </div>
         </header>
@@ -188,8 +200,8 @@
                     <!-- Total Balance Card -->
                     <div class="card card-total-balance glass-card">
                         <div class="card-header">
-                            <span>ยอดเงินคงเหลือทั้งหมด</span>
-                            <div class="badge badge-accent">รวมทุกบัญชี</div>
+                            <span data-i18n="dashboard.total_balance">ยอดเงินคงเหลือทั้งหมด</span>
+                            <div class="badge badge-accent" data-i18n="dashboard.all_accounts">รวมทุกบัญชี</div>
                         </div>
                         <div class="balance-value">
                             <span class="currency">฿</span>
@@ -199,14 +211,14 @@
                             <div class="sub-metric">
                                 <i data-lucide="trending-up" class="text-success"></i>
                                 <div>
-                                    <span class="label">รายรับรวม</span>
+                                    <span class="label" data-i18n="dashboard.total_income">รายรับรวม</span>
                                     <span id="total-income" class="value text-success">+฿0.00</span>
                                 </div>
                             </div>
                             <div class="sub-metric">
                                 <i data-lucide="trending-down" class="text-danger"></i>
                                 <div>
-                                    <span class="label">รายจ่ายรวม</span>
+                                    <span class="label" data-i18n="dashboard.total_expense">รายจ่ายรวม</span>
                                     <span id="total-expense" class="value text-danger">-฿0.00</span>
                                 </div>
                             </div>
@@ -222,7 +234,7 @@
                                     <i data-lucide="banknote" class="text-cash"></i>
                                 </div>
                                 <div>
-                                    <span class="label">เงินสดคงเหลือ</span>
+                                    <span class="label" data-i18n="dashboard.cash_balance">เงินสดคงเหลือ</span>
                                     <div class="account-balance">
                                         <span class="currency">฿</span>
                                         <span id="cash-balance">0.00</span>
@@ -243,7 +255,7 @@
                                     <i data-lucide="landmark" class="text-bank"></i>
                                 </div>
                                 <div>
-                                    <span class="label">เงินในธนาคารคงเหลือ</span>
+                                    <span class="label" data-i18n="dashboard.bank_balance">เงินในธนาคารคงเหลือ</span>
                                     <div class="account-balance">
                                         <span class="currency">฿</span>
                                         <span id="bank-balance">0.00</span>
@@ -263,7 +275,7 @@
                 <div class="card glass-card form-card">
                     <div class="card-title">
                         <i data-lucide="plus-circle" class="title-icon text-primary"></i>
-                        <h2>บันทึกรายการใหม่</h2>
+                        <h2 data-i18n="form.title">บันทึกรายการใหม่</h2>
                     </div>
 
                     <form id="transaction-form" autocomplete="off">
@@ -272,20 +284,20 @@
                             <input type="radio" id="type-income" name="tx-type" value="income" checked>
                             <label for="type-income" class="tab-label label-income">
                                 <i data-lucide="arrow-down-left"></i>
-                                <span>รายรับ (Income)</span>
+                                <span data-i18n="form.income">รายรับ (Income)</span>
                             </label>
 
                             <input type="radio" id="type-expense" name="tx-type" value="expense">
                             <label for="type-expense" class="tab-label label-expense">
                                 <i data-lucide="arrow-up-right"></i>
-                                <span>รายจ่าย (Expense)</span>
+                                <span data-i18n="form.expense">รายจ่าย (Expense)</span>
                             </label>
                         </div>
 
                         <div class="form-grid">
                             <!-- Input Amount -->
                             <div class="form-group col-12">
-                                <label for="tx-amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
+                                <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
                                 <div class="input-with-icon amount-input-wrapper">
                                     <span class="input-prefix">฿</span>
                                     <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01"
@@ -295,16 +307,16 @@
 
                             <!-- Input Account/Wallet (Cash vs Bank) -->
                             <div class="form-group col-6">
-                                <label for="tx-method">ช่องทางการเงิน <span class="required">*</span></label>
+                                <label for="tx-method" data-i18n="form.method">ช่องทางการเงิน <span class="required">*</span></label>
                                 <select id="tx-method" required>
-                                    <option value="cash">💵 เงินสด (Cash)</option>
-                                    <option value="bank" selected>🏦 บัญชีธนาคาร (Bank)</option>
+                                    <option value="cash" data-i18n="form.method_cash">💵 เงินสด (Cash)</option>
+                                    <option value="bank" selected data-i18n="form.method_bank">🏦 บัญชีธนาคาร (Bank)</option>
                                 </select>
                             </div>
 
                             <!-- Input Category -->
                             <div class="form-group col-6">
-                                <label for="tx-category">หมวดหมู่ <span class="required">*</span></label>
+                                <label for="tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
                                 <select id="tx-category" required>
                                     <!-- Options will be dynamically populated in JavaScript to match Income/Expense context -->
                                 </select>
@@ -312,7 +324,7 @@
 
                             <!-- Input Date -->
                             <div class="form-group col-12">
-                                <label for="tx-date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                                <label for="tx-date" data-i18n="form.date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
                                 <div class="input-with-icon">
                                     <i data-lucide="calendar" class="input-icon-left"></i>
                                     <input type="datetime-local" id="tx-date" required>
@@ -321,18 +333,18 @@
 
                             <!-- Input Description -->
                             <div class="form-group col-12">
-                                <label for="tx-description">บันทึกเพิ่มเติม</label>
+                                <label for="tx-description" data-i18n="form.description">บันทึกเพิ่มเติม</label>
                                 <div class="input-with-icon">
                                     <i data-lucide="file-text" class="input-icon-left"></i>
                                     <input type="text" id="tx-description"
-                                        placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม...">
+                                        placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม..." data-i18n-placeholder="form.description_placeholder">
                                 </div>
                             </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-tx">
                             <i data-lucide="check-circle-2"></i>
-                            <span>บันทึกรายการ</span>
+                            <span data-i18n="form.submit">บันทึกรายการ</span>
                         </button>
                     </form>
                 </div>
@@ -347,11 +359,11 @@
                     <div class="card-title-row">
                         <div class="card-title">
                             <i data-lucide="pie-chart" class="title-icon text-warning"></i>
-                            <h2>วิเคราะห์สัดส่วนและการเงิน</h2>
+                            <h2 data-i18n="chart.title">วิเคราะห์สัดส่วนและการเงิน</h2>
                         </div>
                         <div class="chart-tab-buttons">
-                            <button class="chart-tab active" data-chart="flow">กระแสเงินสด</button>
-                            <button class="chart-tab" data-chart="category">แยกตามหมวดหมู่</button>
+                            <button class="chart-tab active" data-chart="flow" data-i18n="chart.tab_flow">กระแสเงินสด</button>
+                            <button class="chart-tab" data-chart="category" data-i18n="chart.tab_category">แยกตามหมวดหมู่</button>
                         </div>
                     </div>
 
@@ -372,11 +384,11 @@
                     <div class="ledger-header">
                         <div class="card-title">
                             <i data-lucide="history" class="title-icon text-success"></i>
-                            <h2>ประวัติรายการเดินบัญชี</h2>
+                            <h2 data-i18n="ledger.title">ประวัติรายการเดินบัญชี</h2>
                         </div>
                         <button id="btn-export-csv" class="btn btn-secondary-outline btn-sm">
                             <i data-lucide="download"></i>
-                            <span>ส่งออก CSV</span>
+                            <span data-i18n="ledger.export_csv">ส่งออก CSV</span>
                         </button>
                     </div>
 
@@ -384,15 +396,15 @@
                     <div class="ledger-filters">
                         <div class="search-box">
                             <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" id="ledger-search" placeholder="ค้นหาบันทึก หรือจำนวนเงิน...">
+                            <input type="text" id="ledger-search" placeholder="ค้นหาบันทึก หรือจำนวนเงิน..." data-i18n-placeholder="ledger.search_placeholder">
                         </div>
 
                         <div class="filter-buttons">
-                            <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
-                            <button class="filter-btn" data-filter="income">รายรับ</button>
-                            <button class="filter-btn" data-filter="expense">รายจ่าย</button>
-                            <button class="filter-btn" data-filter="cash">เงินสด</button>
-                            <button class="filter-btn" data-filter="bank">ธนาคาร</button>
+                            <button class="filter-btn active" data-filter="all" data-i18n="ledger.filter_all">ทั้งหมด</button>
+                            <button class="filter-btn" data-filter="income" data-i18n="ledger.filter_income">รายรับ</button>
+                            <button class="filter-btn" data-filter="expense" data-i18n="ledger.filter_expense">รายจ่าย</button>
+                            <button class="filter-btn" data-filter="cash" data-i18n="ledger.filter_cash">เงินสด</button>
+                            <button class="filter-btn" data-filter="bank" data-i18n="ledger.filter_bank">ธนาคาร</button>
                         </div>
                     </div>
 
@@ -406,8 +418,8 @@
                             <div class="empty-icon-wrapper">
                                 <i data-lucide="folder-open"></i>
                             </div>
-                            <h3>ไม่พบรายการธุรกรรม</h3>
-                            <p>ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่ หรือกดโหลดข้อมูลจำลองเพื่อดูการแสดงผล</p>
+                            <h3 data-i18n="ledger.empty_title">ไม่พบรายการธุรกรรม</h3>
+                            <p data-i18n="ledger.empty_desc">ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่ หรือกดโหลดข้อมูลจำลองเพื่อดูการแสดงผล</p>
                         </div>
                     </div>
                 </div>
@@ -416,7 +428,7 @@
         </main>
 
         <footer class="app-footer-bar">
-            <p>© 2026 Cash & Bank Flow Tracker.
+            <p data-i18n="footer.text">© 2026 Cash & Bank Flow Tracker.
                 พัฒนาขึ้นด้วยเทคโนโลยีระดับพรีเมียมและคำนึงถึงความเป็นส่วนตัวของข้อมูลผู้ใช้งาน 100%</p>
         </footer>
     </div>
@@ -433,7 +445,7 @@
             <div class="modal-header">
                 <div class="card-title">
                     <i data-lucide="pencil" class="title-icon text-warning"></i>
-                    <h2>แก้ไขรายการธุรกรรม</h2>
+                    <h2 data-i18n="edit.title">แก้ไขรายการธุรกรรม</h2>
                 </div>
                 <button id="edit-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
                     <i data-lucide="x"></i>
@@ -448,18 +460,18 @@
                     <input type="radio" id="edit-type-income" name="edit-tx-type" value="income">
                     <label for="edit-type-income" class="tab-label label-income">
                         <i data-lucide="arrow-down-left"></i>
-                        <span>รายรับ (Income)</span>
+                        <span data-i18n="form.income">รายรับ (Income)</span>
                     </label>
                     <input type="radio" id="edit-type-expense" name="edit-tx-type" value="expense">
                     <label for="edit-type-expense" class="tab-label label-expense">
                         <i data-lucide="arrow-up-right"></i>
-                        <span>รายจ่าย (Expense)</span>
+                        <span data-i18n="form.expense">รายจ่าย (Expense)</span>
                     </label>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group col-12">
-                        <label for="edit-tx-amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
+                        <label for="edit-tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
                         <div class="input-with-icon amount-input-wrapper">
                             <span class="input-prefix">฿</span>
                             <input type="number" id="edit-tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
@@ -467,20 +479,20 @@
                     </div>
 
                     <div class="form-group col-6">
-                        <label for="edit-tx-method">ช่องทางการเงิน <span class="required">*</span></label>
+                        <label for="edit-tx-method" data-i18n="form.method">ช่องทางการเงิน <span class="required">*</span></label>
                         <select id="edit-tx-method" required>
-                            <option value="cash">💵 เงินสด (Cash)</option>
-                            <option value="bank">🏦 บัญชีธนาคาร (Bank)</option>
+                            <option value="cash" data-i18n="form.method_cash">💵 เงินสด (Cash)</option>
+                            <option value="bank" data-i18n="form.method_bank">🏦 บัญชีธนาคาร (Bank)</option>
                         </select>
                     </div>
 
                     <div class="form-group col-6">
-                        <label for="edit-tx-category">หมวดหมู่ <span class="required">*</span></label>
+                        <label for="edit-tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
                         <select id="edit-tx-category" required></select>
                     </div>
 
                     <div class="form-group col-12">
-                        <label for="edit-tx-date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                        <label for="edit-tx-date" data-i18n="form.date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="calendar" class="input-icon-left"></i>
                             <input type="datetime-local" id="edit-tx-date" required>
@@ -488,11 +500,11 @@
                     </div>
 
                     <div class="form-group col-12">
-                        <label for="edit-tx-description">บันทึกเพิ่มเติม</label>
+                        <label for="edit-tx-description" data-i18n="form.description">บันทึกเพิ่มเติม</label>
                         <div class="input-with-icon">
                             <i data-lucide="file-text" class="input-icon-left"></i>
                             <input type="text" id="edit-tx-description"
-                                placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม...">
+                                placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม..." data-i18n-placeholder="form.description_placeholder">
                         </div>
                     </div>
                 </div>
@@ -500,11 +512,11 @@
                 <div class="modal-actions">
                     <button type="button" id="edit-modal-cancel" class="btn btn-secondary btn-lg">
                         <i data-lucide="x"></i>
-                        <span>ยกเลิก</span>
+                        <span data-i18n="edit.cancel">ยกเลิก</span>
                     </button>
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i data-lucide="save"></i>
-                        <span>บันทึกการแก้ไข</span>
+                        <span data-i18n="edit.save">บันทึกการแก้ไข</span>
                     </button>
                 </div>
             </form>
@@ -517,7 +529,7 @@
             <div class="modal-header">
                 <div class="card-title">
                     <i data-lucide="user" class="title-icon text-primary"></i>
-                    <h2>จัดการโปรไฟล์และบัญชี</h2>
+                    <h2 data-i18n="profile.title">จัดการโปรไฟล์และบัญชี</h2>
                 </div>
                 <button id="profile-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
                     <i data-lucide="x"></i>
@@ -533,25 +545,26 @@
                         </div>
                     </div>
                     <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
-                    <p class="avatar-help-text">คลิกที่รูปเพื่ออัปโหลดรูปภาพ (ระบบบีบอัดและย่อขนาดภาพให้อัตโนมัติ)</p>
-                    <button type="button" id="btn-remove-avatar-pic" class="btn btn-secondary btn-sm" style="margin-top: 8px; font-size: 11px; padding: 6px 12px; border-radius: 20px;">
+                    <p class="avatar-help-text" data-i18n="profile.avatar_help">คลิกที่รูปเพื่ออัปโหลดรูปภาพ (ระบบบีบอัดและย่อขนาดภาพให้อัตโนมัติ)</p>
+                    <button type="button" id="btn-remove-avatar-pic" class="btn btn-secondary btn-sm"
+                        style="margin-top: 8px; font-size: 11px; padding: 6px 12px; border-radius: 20px;">
                         <i data-lucide="rotate-ccw" style="width: 12px; height: 12px; margin-right: 4px;"></i>
-                        <span>กลับไปใช้รูปภาพเริ่มต้น</span>
+                        <span data-i18n="profile.reset_avatar">กลับไปใช้รูปภาพเริ่มต้น</span>
                     </button>
                     <p id="profile-pic-error" class="error-message hidden"></p>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group col-12">
-                        <label for="profile-display-name">ชื่อ - นามสกุล <span class="required">*</span></label>
+                        <label for="profile-display-name" data-i18n="profile.name_label">ชื่อ - นามสกุล <span class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="user" class="input-icon-left"></i>
-                            <input type="text" id="profile-display-name" placeholder="ชื่อของคุณ" required>
+                            <input type="text" id="profile-display-name" placeholder="ชื่อของคุณ" data-i18n-placeholder="profile.name_placeholder" required>
                         </div>
                     </div>
 
                     <div class="form-group col-12">
-                        <label for="profile-email">อีเมลผู้ใช้งาน</label>
+                        <label for="profile-email" data-i18n="profile.email_label">อีเมลผู้ใช้งาน</label>
                         <div class="input-with-icon">
                             <i data-lucide="mail" class="input-icon-left"></i>
                             <input type="email" id="profile-email" disabled>
@@ -562,11 +575,11 @@
                 <div class="modal-actions">
                     <button type="button" id="profile-modal-cancel" class="btn btn-secondary btn-lg">
                         <i data-lucide="x"></i>
-                        <span>ยกเลิก</span>
+                        <span data-i18n="profile.cancel">ยกเลิก</span>
                     </button>
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i data-lucide="save"></i>
-                        <span>บันทึกโปรไฟล์</span>
+                        <span data-i18n="profile.save">บันทึกโปรไฟล์</span>
                     </button>
                 </div>
             </form>
@@ -575,13 +588,13 @@
             <div class="danger-zone">
                 <div class="danger-zone-header">
                     <i data-lucide="alert-octagon" class="danger-icon"></i>
-                    <h3>คำเตือน</h3>
+                    <h3 data-i18n="danger.title">คำเตือน</h3>
                 </div>
-                <p>การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร
+                <p data-i18n="danger.description">การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร
                     โดยไม่สามารถกู้คืนข้อมูลกลับมาได้อีก</p>
                 <button type="button" id="btn-delete-account" class="btn btn-danger-outline btn-full-width">
                     <i data-lucide="user-x"></i>
-                    <span>ลบบัญชีผู้ใช้งานถาวร</span>
+                    <span data-i18n="danger.delete_btn">ลบบัญชีผู้ใช้งานถาวร</span>
                 </button>
             </div>
         </div>
@@ -593,7 +606,7 @@
             <div class="modal-header">
                 <div class="card-title text-danger">
                     <i data-lucide="alert-triangle" class="title-icon text-danger"></i>
-                    <h2>ยืนยันการลบบัญชีผู้ใช้</h2>
+                    <h2 data-i18n="delete.title">ยืนยันการลบบัญชีผู้ใช้</h2>
                 </div>
                 <button id="delete-confirm-close" class="btn-icon btn-modal-close" aria-label="ปิด">
                     <i data-lucide="x"></i>
@@ -601,26 +614,26 @@
             </div>
 
             <form id="delete-confirm-form" autocomplete="off">
-                <p class="delete-warning-text"><strong>คำเตือน:</strong> การกระทำนี้ไม่สามารถย้อนกลับได้
+                <p class="delete-warning-text" data-i18n-html="delete.warning"><strong>คำเตือน:</strong> การกระทำนี้ไม่สามารถย้อนกลับได้
                     โปรดทำความเข้าใจว่าข้อมูลทั้งหมดจะถูกลบถาวร</p>
-                <p class="delete-instruction">กรุณาพิมพ์คำว่า <strong class="user-select-all">DELETE</strong> และพิมพ์
+                <p class="delete-instruction" data-i18n-html="delete.instruction">กรุณาพิมพ์คำว่า <strong class="user-select-all">DELETE</strong> และพิมพ์
                     **อีเมลปัจจุบันของคุณ** ด้านล่างเพื่อยืนยัน</p>
 
                 <div class="form-grid">
                     <div class="form-group col-12">
-                        <label for="delete-confirm-text">พิมพ์คำยืนยัน <span class="required">*</span></label>
+                        <label for="delete-confirm-text" data-i18n="delete.confirm_label">พิมพ์คำยืนยัน <span class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="shield-alert" class="input-icon-left"></i>
-                            <input type="text" id="delete-confirm-text" placeholder="พิมพ์คำว่า DELETE ที่นี่" required>
+                            <input type="text" id="delete-confirm-text" placeholder="พิมพ์คำว่า DELETE ที่นี่" data-i18n-placeholder="delete.confirm_placeholder" required>
                         </div>
                     </div>
 
                     <div class="form-group col-12">
-                        <label for="delete-confirm-email">ป้อนอีเมลของคุณอีกครั้ง <span
+                        <label for="delete-confirm-email" data-i18n="delete.email_label">ป้อนอีเมลของคุณอีกครั้ง <span
                                 class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="mail" class="input-icon-left"></i>
-                            <input type="email" id="delete-confirm-email" placeholder="ป้อนอีเมลเพื่อยืนยัน" required>
+                            <input type="email" id="delete-confirm-email" placeholder="ป้อนอีเมลเพื่อยืนยัน" data-i18n-placeholder="delete.email_placeholder" required>
                         </div>
                     </div>
                 </div>
@@ -632,7 +645,7 @@
                 <div class="modal-actions">
                     <button type="button" id="delete-confirm-cancel" class="btn btn-secondary btn-lg">
                         <i data-lucide="x"></i>
-                        <span>ยกเลิก</span>
+                        <span data-i18n="delete.cancel">ยกเลิก</span>
                     </button>
                     <button type="submit" id="btn-confirm-delete-account" class="btn btn-danger btn-lg" disabled>
                         <i data-lucide="trash-2"></i>
@@ -643,18 +656,15 @@
         </div>
     </div>
 
+    <!-- i18n Language System -->
+    <script src="lang.js"></script>
+
     <!-- Firebase Config & Auth -->
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 
     <!-- Custom Javascript -->
     <script src="app.js"></script>
-
-    <!-- Vercel Speed Insights -->
-    <script type="module">
-        import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@1.0.12/dist/index.mjs';
-        injectSpeedInsights();
-    </script>
 </body>
 
 </html>

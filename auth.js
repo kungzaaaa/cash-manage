@@ -157,21 +157,21 @@ function hideAuthError() {
     authElements.authError.classList.add('hidden');
 }
 
-// Map Firebase error codes to Thai messages
-function getThaiErrorMessage(code) {
+// Map Firebase error codes to translated messages
+function getAuthErrorMessage(code) {
     const map = {
-        'auth/email-already-in-use': 'อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่น',
-        'auth/invalid-email': 'รูปแบบอีเมลไม่ถูกต้อง',
-        'auth/user-not-found': 'ไม่พบบัญชีผู้ใช้นี้ กรุณาสมัครสมาชิกก่อน',
-        'auth/wrong-password': 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง',
-        'auth/invalid-credential': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
-        'auth/weak-password': 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
-        'auth/popup-closed-by-user': 'การเข้าสู่ระบบถูกยกเลิก',
-        'auth/network-request-failed': 'ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้ กรุณาลองใหม่',
-        'auth/too-many-requests': 'มีการเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่',
-        'auth/cancelled-popup-request': 'กรุณาลองกดเข้าสู่ระบบอีกครั้ง'
+        'auth/email-already-in-use': t('auth.error.email_in_use'),
+        'auth/invalid-email': t('auth.error.invalid_email'),
+        'auth/user-not-found': t('auth.error.user_not_found'),
+        'auth/wrong-password': t('auth.error.wrong_password'),
+        'auth/invalid-credential': t('auth.error.invalid_credential'),
+        'auth/weak-password': t('auth.error.weak_password'),
+        'auth/popup-closed-by-user': t('auth.error.popup_closed'),
+        'auth/network-request-failed': t('auth.error.network'),
+        'auth/too-many-requests': t('auth.error.too_many'),
+        'auth/cancelled-popup-request': t('auth.error.cancelled_popup')
     };
-    return map[code] || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+    return map[code] || t('auth.error.generic');
 }
 
 // ---------------------------------------------------------------
@@ -183,7 +183,7 @@ async function loginWithGoogle() {
         await auth.signInWithPopup(googleProvider);
     } catch (error) {
         console.error('Google login error:', error);
-        showAuthError(getThaiErrorMessage(error.code));
+        showAuthError(getAuthErrorMessage(error.code));
     }
 }
 
@@ -196,7 +196,7 @@ async function loginWithEmail(email, password) {
         await auth.signInWithEmailAndPassword(email, password);
     } catch (error) {
         console.error('Email login error:', error);
-        showAuthError(getThaiErrorMessage(error.code));
+        showAuthError(getAuthErrorMessage(error.code));
     }
 }
 
@@ -213,7 +213,7 @@ async function registerWithEmail(email, password, displayName) {
         }
     } catch (error) {
         console.error('Register error:', error);
-        showAuthError(getThaiErrorMessage(error.code));
+        showAuthError(getAuthErrorMessage(error.code));
     }
 }
 
@@ -258,7 +258,7 @@ let deleteCountdownInterval = null;
 function openProfileModal() {
     const user = auth.currentUser;
     if (!user) {
-        if (typeof showToast === 'function') showToast('กรุณาเข้าสู่ระบบก่อน', 'danger');
+        if (typeof showToast === 'function') showToast(t('toast.login_required'), 'danger');
         return;
     }
 
@@ -299,7 +299,7 @@ function compressAndResizeImage(file, maxWidth = 200, maxHeight = 200, quality =
     return new Promise((resolve, reject) => {
         // Validate if it is an image
         if (!file.type.startsWith('image/')) {
-            reject(new Error('กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง'));
+            reject(new Error(t('toast.image_select_error')));
             return;
         }
 
@@ -336,10 +336,10 @@ function compressAndResizeImage(file, maxWidth = 200, maxHeight = 200, quality =
                 const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
                 resolve(compressedBase64);
             };
-            img.onerror = () => reject(new Error('เกิดข้อผิดพลาดในการโหลดรูปภาพ'));
+            img.onerror = () => reject(new Error(t('toast.image_load_error')));
             img.src = e.target.result;
         };
-        reader.onerror = () => reject(new Error('เกิดข้อผิดพลาดในการอ่านไฟล์'));
+        reader.onerror = () => reject(new Error(t('toast.image_read_error')));
         reader.readAsDataURL(file);
     });
 }
@@ -362,7 +362,7 @@ async function handleProfilePicSelection(e) {
         authElements.profilePicError.classList.add('hidden');
     } catch (error) {
         console.error('Error compressing image:', error);
-        authElements.profilePicError.textContent = error.message || 'เกิดข้อผิดพลาดในการประมวลผลรูปภาพ';
+        authElements.profilePicError.textContent = error.message || t('toast.image_process_error');
         authElements.profilePicError.classList.remove('hidden');
     }
 }
@@ -388,7 +388,7 @@ function handleRemoveAvatarPic() {
     }
     
     authElements.profilePicError.classList.add('hidden');
-    if (typeof showToast === 'function') showToast('สลับกลับไปใช้รูปภาพเริ่มต้นเรียบร้อย (กรุณากดบันทึกเพื่อบันทึกการเปลี่ยนแปลง)', 'info');
+    if (typeof showToast === 'function') showToast(t('toast.avatar_reset'), 'info');
 }
 
 // Save Profile Updates to Firebase and Firestore
@@ -399,7 +399,7 @@ async function saveUserProfileData(e) {
 
     const newDisplayName = authElements.profileDisplayName.value.trim();
     if (!newDisplayName) {
-        if (typeof showToast === 'function') showToast('กรุณากรอกชื่อ-นามสกุล', 'danger');
+        if (typeof showToast === 'function') showToast(t('toast.name_required'), 'danger');
         return;
     }
 
@@ -442,11 +442,11 @@ async function saveUserProfileData(e) {
             authElements.userAvatar.style.display = 'block';
         }
 
-        if (typeof showToast === 'function') showToast('อัปเดตข้อมูลโปรไฟล์เรียบร้อยแล้ว', 'success');
+        if (typeof showToast === 'function') showToast(t('toast.profile_updated'), 'success');
         closeProfileModal();
     } catch (error) {
         console.error('Error updating profile:', error);
-        if (typeof showToast === 'function') showToast('ไม่สามารถอัปเดตโปรไฟล์ได้ กรุณาลองใหม่', 'danger');
+        if (typeof showToast === 'function') showToast(t('toast.profile_error'), 'danger');
     } finally {
         authElements.loadingOverlay.classList.add('hidden');
     }
@@ -471,7 +471,7 @@ function openDeleteConfirmModal() {
 
     // Security Countdown setup
     let countdown = 5;
-    authElements.btnConfirmDeleteText.textContent = `กรุณารอยืนยัน... (${countdown})`;
+    authElements.btnConfirmDeleteText.textContent = `${t('delete.waiting')} (${countdown})`;
 
     // Clear any existing intervals
     if (deleteCountdownInterval) clearInterval(deleteCountdownInterval);
@@ -479,11 +479,11 @@ function openDeleteConfirmModal() {
     deleteCountdownInterval = setInterval(() => {
         countdown--;
         if (countdown > 0) {
-            authElements.btnConfirmDeleteText.textContent = `กรุณารอยืนยัน... (${countdown})`;
+            authElements.btnConfirmDeleteText.textContent = `${t('delete.waiting')} (${countdown})`;
         } else {
             clearInterval(deleteCountdownInterval);
             deleteCountdownInterval = null;
-            authElements.btnConfirmDeleteText.textContent = 'ยืนยันการลบบัญชี';
+            authElements.btnConfirmDeleteText.textContent = t('delete.confirm_btn');
             // Trigger check to see if text inputs are already valid and unlock button
             validateDeleteInputs();
         }
@@ -536,7 +536,7 @@ async function executeDeleteAccount(e) {
     const confirmWord = authElements.deleteConfirmText.value.trim();
     const confirmEmail = authElements.deleteConfirmEmail.value.trim();
     if (confirmWord !== 'DELETE' || confirmEmail.toLowerCase() !== user.email.toLowerCase()) {
-        authElements.deleteErrorMessage.textContent = 'ข้อมูลยืนยันไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+        authElements.deleteErrorMessage.textContent = t('delete.error.invalid');
         authElements.deleteErrorMessage.classList.remove('hidden');
         return;
     }
@@ -564,21 +564,16 @@ async function executeDeleteAccount(e) {
         // Success: Auth state listener will handle UI redirect to login automatically
         authElements.deleteConfirmModalOverlay.classList.add('hidden');
         document.body.style.overflow = '';
-        if (typeof showToast === 'function') showToast('ลบบัญชีผู้ใช้และล้างข้อมูลธุรกรรมสำเร็จแล้ว', 'success');
+        if (typeof showToast === 'function') showToast(t('toast.account_deleted'), 'success');
     } catch (error) {
         console.error('Error deleting account:', error);
 
         // Handle security sensitive operation recent login requirement
         if (error.code === 'auth/requires-recent-login') {
-            authElements.deleteErrorMessage.innerHTML = `
-                <div style="line-height: 1.5; padding: 6px;">
-                    <strong>⚠️ เกิดข้อผิดพลาดด้านความปลอดภัยสูงสุด:</strong><br>
-                    เพื่อความปลอดภัยในการป้องกันบัญชีและข้อมูลของคุณ กรุณา <strong>"ออกจากระบบ"</strong> แล้วทำการ <strong>"เข้าสู่ระบบใหม่อีกครั้ง"</strong> จากนั้นจึงจะสามารถเข้ามาดำเนินการลบบัญชีนี้ได้ตามปกติครับ
-                </div>
-            `;
+            authElements.deleteErrorMessage.innerHTML = t('delete.error.relogin');
             authElements.deleteErrorMessage.classList.remove('hidden');
         } else {
-            authElements.deleteErrorMessage.textContent = 'ไม่สามารถลบบัญชีได้เนื่องจากข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง';
+            authElements.deleteErrorMessage.textContent = t('delete.error.generic');
             authElements.deleteErrorMessage.classList.remove('hidden');
         }
     } finally {
@@ -616,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = authElements.loginEmail.value.trim();
         const password = authElements.loginPassword.value;
         if (!email || !password) {
-            showAuthError('กรุณากรอกอีเมลและรหัสผ่าน');
+            showAuthError(t('auth.error.fill_email_password'));
             return;
         }
         loginWithEmail(email, password);
@@ -631,15 +626,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmPassword = authElements.registerPasswordConfirm.value;
 
         if (!email || !password) {
-            showAuthError('กรุณากรอกอีเมลและรหัสผ่าน');
+            showAuthError(t('auth.error.fill_email_password'));
             return;
         }
         if (password !== confirmPassword) {
-            showAuthError('รหัสผ่านไม่ตรงกัน กรุณากรอกใหม่');
+            showAuthError(t('auth.error.password_mismatch'));
             return;
         }
         if (password.length < 6) {
-            showAuthError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+            showAuthError(t('auth.error.password_too_short'));
             return;
         }
         registerWithEmail(email, password, name);
