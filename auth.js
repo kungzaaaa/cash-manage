@@ -54,6 +54,7 @@ const authElements = {
     profilePicError: document.getElementById('profile-pic-error'),
     btnProfileCancel: document.getElementById('profile-modal-cancel'),
     btnProfileClose: document.getElementById('profile-modal-close'),
+    btnRemoveAvatarPic: document.getElementById('btn-remove-avatar-pic'),
     btnDeleteAccount: document.getElementById('btn-delete-account'),
 
     // Delete Confirmation Modal
@@ -327,6 +328,30 @@ function handleProfilePicSelection(e) {
     reader.readAsDataURL(file);
 }
 
+// Reset/Remove avatar back to original Google account photo or default avatar
+function handleRemoveAvatarPic() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Search for google provider photo URL
+    const googleProfile = user.providerData.find(p => p.providerId === 'google.com');
+    const googlePhotoURL = googleProfile ? googleProfile.photoURL : '';
+
+    // Mark for removal
+    selectedProfilePicBase64 = 'REMOVE';
+
+    // Show preview immediately
+    if (googlePhotoURL) {
+        authElements.profileAvatarPreview.src = googlePhotoURL;
+    } else {
+        const displayName = authElements.profileDisplayName.value.trim() || user.displayName || user.email || 'User';
+        authElements.profileAvatarPreview.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
+    }
+    
+    authElements.profilePicError.classList.add('hidden');
+    if (typeof showToast === 'function') showToast('สลับกลับไปใช้รูปภาพเริ่มต้นเรียบร้อย (กรุณากดบันทึกเพื่อบันทึกการเปลี่ยนแปลง)', 'info');
+}
+
 // Save Profile Updates to Firebase and Firestore
 async function saveUserProfileData(e) {
     e.preventDefault();
@@ -346,16 +371,20 @@ async function saveUserProfileData(e) {
         // 1. Update Firebase Auth Profile (ONLY update displayName, skip base64 photoURL as it exceeds 2KB limit!)
         await user.updateProfile({ displayName: newDisplayName });
 
-        // 2. Fetch current Firestore doc to make sure we keep any existing fields
+        // 2. Fetch current Firestore doc or fallback to provider Google photo URL
         const userDocRef = db.collection('users').doc(user.uid);
-        const doc = await userDocRef.get();
-        let currentPhotoURL = user.photoURL || '';
+        const googleProfile = user.providerData.find(p => p.providerId === 'google.com');
+        const googlePhotoURL = googleProfile ? googleProfile.photoURL : '';
         
-        if (doc.exists) {
-            currentPhotoURL = doc.data().photoURL || currentPhotoURL;
+        let finalPhotoURL = '';
+        if (selectedProfilePicBase64 === 'REMOVE') {
+            finalPhotoURL = googlePhotoURL || '';
+        } else if (selectedProfilePicBase64) {
+            finalPhotoURL = selectedProfilePicBase64;
+        } else {
+            const doc = await userDocRef.get();
+            finalPhotoURL = doc.exists && doc.data().photoURL ? doc.data().photoURL : (user.photoURL || '');
         }
-
-        const finalPhotoURL = selectedProfilePicBase64 || currentPhotoURL;
 
         // 3. Update Cloud Firestore Document (Firestore supports up to 1MB which is perfect for Base64!)
         await userDocRef.set({
@@ -597,6 +626,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Profile pic input changes
     authElements.profilePicInput.addEventListener('change', handleProfilePicSelection);
+
+    // Reset profile avatar to default
+    authElements.btnRemoveAvatarPic.addEventListener('click', handleRemoveAvatarPic);
 
     // Submit profile updates form
     authElements.profileForm.addEventListener('submit', saveUserProfileData);
