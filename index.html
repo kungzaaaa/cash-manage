@@ -144,7 +144,7 @@
 
             <div class="header-actions">
                 <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden">
+                <div id="user-profile-section" class="user-profile hidden" role="button" aria-label="จัดการโปรไฟล์" title="จัดการโปรไฟล์">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
                     <span id="user-name" class="user-name">ผู้ใช้</span>
                 </div>
@@ -510,8 +510,8 @@
         <div class="modal-card glass-card">
             <div class="modal-header">
                 <div class="card-title">
-                    <i data-lucide="user-cog" class="title-icon text-primary"></i>
-                    <h2>จัดการโปรไฟล์</h2>
+                    <i data-lucide="user" class="title-icon text-primary"></i>
+                    <h2>จัดการโปรไฟล์และบัญชี</h2>
                 </div>
                 <button id="profile-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
                     <i data-lucide="x"></i>
@@ -519,59 +519,103 @@
             </div>
 
             <form id="profile-form" autocomplete="off">
-                <div class="profile-avatar-upload-container">
-                    <div class="profile-avatar-preview" id="profile-avatar-preview">
-                        <!-- Shows icon or image -->
-                        <i data-lucide="user" class="default-avatar-icon"></i>
-                    </div>
-                    <label for="profile-avatar-input" class="btn btn-sm btn-secondary btn-upload-avatar">
-                        <i data-lucide="camera"></i> เปลี่ยนรูปภาพ
-                    </label>
-                    <input type="file" id="profile-avatar-input" accept="image/*" class="hidden">
-                    <p class="text-xs text-muted mt-2">ภาพจะถูกย่อขนาดอัตโนมัติเพื่อประหยัดพื้นที่</p>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="profile-firstname">ชื่อ</label>
-                        <div class="input-with-icon">
-                            <i data-lucide="user" class="input-icon-left"></i>
-                            <input type="text" id="profile-firstname" placeholder="ชื่อจริง">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar-wrapper">
+                        <img id="profile-avatar-preview" src="" alt="Avatar Preview" class="profile-avatar-preview">
+                        <div class="avatar-upload-overlay" id="btn-upload-avatar">
+                            <i data-lucide="camera"></i>
                         </div>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="profile-lastname">นามสกุล</label>
-                        <div class="input-with-icon">
-                            <i data-lucide="user" class="input-icon-left"></i>
-                            <input type="text" id="profile-lastname" placeholder="นามสกุล">
-                        </div>
-                    </div>
+                    <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
+                    <p class="avatar-help-text">คลิกที่รูปเพื่ออัปโหลดไฟล์รูปภาพ (ขนาดไม่เกิน 800KB)</p>
+                    <p id="profile-pic-error" class="error-message hidden"></p>
                 </div>
 
-                <div class="form-row">
+                <div class="form-grid">
                     <div class="form-group col-12">
-                        <label for="profile-dob">วัน/เดือน/ปีเกิด</label>
+                        <label for="profile-display-name">ชื่อ - นามสกุล <span class="required">*</span></label>
                         <div class="input-with-icon">
-                            <i data-lucide="calendar" class="input-icon-left"></i>
-                            <input type="date" id="profile-dob">
+                            <i data-lucide="user" class="input-icon-left"></i>
+                            <input type="text" id="profile-display-name" placeholder="ชื่อของคุณ" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-12">
+                        <label for="profile-email">อีเมลผู้ใช้งาน</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="mail" class="input-icon-left"></i>
+                            <input type="email" id="profile-email" disabled>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-actions mt-4" style="justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
-                    <button type="button" id="btn-delete-account" class="btn btn-danger">
-                        <i data-lucide="trash-2"></i>
-                        <span>ลบบัญชี</span>
+                <div class="modal-actions">
+                    <button type="button" id="profile-modal-cancel" class="btn btn-secondary btn-lg">
+                        <i data-lucide="x"></i>
+                        <span>ยกเลิก</span>
                     </button>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="button" id="profile-modal-cancel" class="btn btn-secondary">
-                            <span>ยกเลิก</span>
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save"></i>
-                            <span>บันทึก</span>
-                        </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-lucide="save"></i>
+                        <span>บันทึกโปรไฟล์</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <div class="danger-zone-header">
+                    <i data-lucide="alert-octagon" class="danger-icon"></i>
+                    <h3>พื้นที่อันตราย (Danger Zone)</h3>
+                </div>
+                <p>การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร โดยไม่สามารถกู้คืนข้อมูลกลับมาได้อีก</p>
+                <button type="button" id="btn-delete-account" class="btn btn-danger-outline btn-full-width">
+                    <i data-lucide="user-x"></i>
+                    <span>ลบบัญชีผู้ใช้งานถาวร</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="delete-confirm-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card glass-card border-danger-focus">
+            <div class="modal-header">
+                <div class="card-title text-danger">
+                    <i data-lucide="alert-triangle" class="title-icon text-danger"></i>
+                    <h2>ยืนยันการลบบัญชีผู้ใช้</h2>
+                </div>
+                <button id="delete-confirm-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="delete-confirm-form" autocomplete="off">
+                <p class="delete-warning-text">⚠️ <strong>คำเตือน:</strong> การกระทำนี้ไม่สามารถย้อนกลับได้ โปรดทำความเข้าใจว่าข้อมูลทั้งหมดของคุณจะถูกทำลายถาวร</p>
+                <p class="delete-instruction">กรุณาพิมพ์คำว่า <strong class="user-select-all">DELETE</strong> และพิมพ์ **อีเมลปัจจุบันของคุณ** ด้านล่างเพื่อยืนยัน</p>
+
+                <div class="form-grid">
+                    <div class="form-group col-12">
+                        <label for="delete-confirm-text">พิมพ์คำยืนยัน <span class="required">*</span></label>
+                        <input type="text" id="delete-confirm-text" placeholder="พิมพ์คำว่า DELETE ที่นี่" required>
                     </div>
+
+                    <div class="form-group col-12">
+                        <label for="delete-confirm-email">ป้อนอีเมลของคุณอีกครั้ง <span class="required">*</span></label>
+                        <input type="email" id="delete-confirm-email" placeholder="ป้อนอีเมลเพื่อยืนยัน" required>
+                    </div>
+                </div>
+
+                <div id="delete-error-message" class="error-message hidden" style="margin-top: 10px; margin-bottom: 10px; color: var(--color-danger); font-size: 13px; font-weight: 500;"></div>
+
+                <div class="modal-actions">
+                    <button type="button" id="delete-confirm-cancel" class="btn btn-secondary btn-lg">
+                        <i data-lucide="x"></i>
+                        <span>ยกเลิก</span>
+                    </button>
+                    <button type="submit" id="btn-confirm-delete-account" class="btn btn-danger btn-lg" disabled>
+                        <i data-lucide="trash-2"></i>
+                        <span id="btn-confirm-delete-text">กรุณารอยืนยัน... (7)</span>
+                    </button>
                 </div>
             </form>
         </div>

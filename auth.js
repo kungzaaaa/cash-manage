@@ -44,17 +44,28 @@ const authElements = {
     userName: document.getElementById('user-name'),
     btnLogout: document.getElementById('btn-logout'),
 
-    // Profile Modal
+    // Profile Settings Modal
     profileModalOverlay: document.getElementById('profile-modal-overlay'),
-    profileModalClose: document.getElementById('profile-modal-close'),
-    profileModalCancel: document.getElementById('profile-modal-cancel'),
     profileForm: document.getElementById('profile-form'),
-    profileFirstname: document.getElementById('profile-firstname'),
-    profileLastname: document.getElementById('profile-lastname'),
-    profileDob: document.getElementById('profile-dob'),
-    profileAvatarInput: document.getElementById('profile-avatar-input'),
+    profileDisplayName: document.getElementById('profile-display-name'),
+    profileEmail: document.getElementById('profile-email'),
+    profilePicInput: document.getElementById('profile-pic-input'),
     profileAvatarPreview: document.getElementById('profile-avatar-preview'),
-    btnDeleteAccount: document.getElementById('btn-delete-account')
+    profilePicError: document.getElementById('profile-pic-error'),
+    btnProfileCancel: document.getElementById('profile-modal-cancel'),
+    btnProfileClose: document.getElementById('profile-modal-close'),
+    btnDeleteAccount: document.getElementById('btn-delete-account'),
+
+    // Delete Confirmation Modal
+    deleteConfirmModalOverlay: document.getElementById('delete-confirm-modal-overlay'),
+    deleteConfirmClose: document.getElementById('delete-confirm-close'),
+    deleteConfirmCancel: document.getElementById('delete-confirm-cancel'),
+    deleteConfirmForm: document.getElementById('delete-confirm-form'),
+    deleteConfirmText: document.getElementById('delete-confirm-text'),
+    deleteConfirmEmail: document.getElementById('delete-confirm-email'),
+    deleteErrorMessage: document.getElementById('delete-error-message'),
+    btnConfirmDelete: document.getElementById('btn-confirm-delete-account'),
+    btnConfirmDeleteText: document.getElementById('btn-confirm-delete-text')
 };
 
 // ---------------------------------------------------------------
@@ -216,123 +227,265 @@ async function saveUserProfile(user) {
 }
 
 // ---------------------------------------------------------------
-// Profile Management (Edit & Avatar)
+// Profile Management & Account Deletion Logic
 // ---------------------------------------------------------------
-let profileAvatarBase64 = null;
+let selectedProfilePicBase64 = null;
+let deleteCountdownInterval = null;
 
-async function loadUserProfile(user) {
-    if (!user) return null;
-    try {
-        const doc = await db.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-            return doc.data();
-        }
-    } catch (error) {
-        console.error('Error loading profile:', error);
+// Open Profile & Account Settings Modal
+function openProfileModal() {
+    const user = auth.currentUser;
+    if (!user) {
+        if (typeof showToast === 'function') showToast('กรุณาเข้าสู่ระบบก่อน', 'danger');
+        return;
     }
-    return null;
+
+    // Set input values
+    authElements.profileDisplayName.value = user.displayName || '';
+    authElements.profileEmail.value = user.email || '';
+    
+    // Set avatar preview
+    if (user.photoURL) {
+        authElements.profileAvatarPreview.src = user.photoURL;
+    } else {
+        authElements.profileAvatarPreview.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email || 'User')}`;
+    }
+
+    // Reset temporary variables and error message
+    selectedProfilePicBase64 = null;
+    authElements.profilePicError.classList.add('hidden');
+    authElements.profilePicError.textContent = '';
+    authElements.profilePicInput.value = '';
+
+    // Show modal
+    authElements.profileModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Lock background scroll
+    
+    // Refresh Lucide icons in modal
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-async function updateUserProfile(user, data) {
-    if (!user) return;
-    try {
-        const updateData = {
-            firstname: data.firstname || '',
-            lastname: data.lastname || '',
-            dob: data.dob || '',
-        };
-        // Update displayName for Auth if firstname is provided
-        if (data.firstname) {
-            const displayName = data.lastname ? `${data.firstname} ${data.lastname}` : data.firstname;
-            await user.updateProfile({ displayName: displayName });
-            updateData.displayName = displayName;
-        }
-        if (data.photoBase64) {
-            updateData.photoURL = data.photoBase64;
-            await user.updateProfile({ photoURL: data.photoBase64 });
-        }
-        
-        await db.collection('users').doc(user.uid).set(updateData, { merge: true });
-        
-        // Refresh UI
-        showApp(user);
-        return true;
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        throw error;
-    }
+// Close Profile Modal
+function closeProfileModal() {
+    authElements.profileModalOverlay.classList.add('hidden');
+    document.body.style.overflow = ''; // Unlock background scroll
+    authElements.profileForm.reset();
 }
 
-// Utility to resize image and convert to Base64 (max width 300px)
-function resizeImageToBase64(file, callback) {
+// Handle local image file loading & size validation
+function handleProfilePicSelection(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate if it is an image
+    if (!file.type.startsWith('image/')) {
+        authElements.profilePicError.textContent = 'กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง';
+        authElements.profilePicError.classList.remove('hidden');
+        return;
+    }
+
+    // Validate size (800KB = 819,200 bytes)
+    if (file.size > 800 * 1024) {
+        authElements.profilePicError.textContent = 'ขนาดรูปภาพต้องไม่เกิน 800KB (กรุณาเลือกรูปภาพอื่น)';
+        authElements.profilePicError.classList.remove('hidden');
+        return;
+    }
+
+    // Read and convert to Base64
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 300;
-            const MAX_HEIGHT = 300;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-            } else {
-                if (height > MAX_HEIGHT) {
-                    width *= MAX_HEIGHT / height;
-                    height = MAX_HEIGHT;
-                }
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // Compress to webp for smaller size, quality 0.7
-            const dataUrl = canvas.toDataURL('image/webp', 0.7);
-            callback(dataUrl);
-        };
-        img.src = e.target.result;
+    reader.onload = (event) => {
+        selectedProfilePicBase64 = event.target.result;
+        authElements.profileAvatarPreview.src = selectedProfilePicBase64;
+        authElements.profilePicError.classList.add('hidden');
+        authElements.profilePicError.textContent = '';
+    };
+    reader.onerror = () => {
+        authElements.profilePicError.textContent = 'เกิดข้อผิดพลาดในการอ่านไฟล์รูปภาพ';
+        authElements.profilePicError.classList.remove('hidden');
     };
     reader.readAsDataURL(file);
 }
 
-// ---------------------------------------------------------------
-// Delete Account
-// ---------------------------------------------------------------
-async function deleteUserAccount(user) {
+// Save Profile Updates to Firebase and Firestore
+async function saveUserProfileData(e) {
+    e.preventDefault();
+    const user = auth.currentUser;
     if (!user) return;
+
+    const newDisplayName = authElements.profileDisplayName.value.trim();
+    if (!newDisplayName) {
+        if (typeof showToast === 'function') showToast('กรุณากรอกชื่อ-นามสกุล', 'danger');
+        return;
+    }
+
+    // Show app loading overlay
+    authElements.loadingOverlay.classList.remove('hidden');
+    
     try {
-        const uid = user.uid;
+        const updateData = { displayName: newDisplayName };
+        if (selectedProfilePicBase64) {
+            updateData.photoURL = selectedProfilePicBase64;
+        }
+
+        // 1. Update Firebase Auth Profile
+        await user.updateProfile(updateData);
+
+        // 2. Update Firestore User Document
+        const userDocRef = db.collection('users').doc(user.uid);
+        await userDocRef.set({
+            displayName: newDisplayName,
+            photoURL: selectedProfilePicBase64 || user.photoURL || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        // 3. Update Current Session UI Header
+        authElements.userName.textContent = newDisplayName;
+        if (updateData.photoURL) {
+            authElements.userAvatar.src = updateData.photoURL;
+            authElements.userAvatar.style.display = 'block';
+        }
+
+        if (typeof showToast === 'function') showToast('อัปเดตข้อมูลโปรไฟล์เรียบร้อยแล้ว', 'success');
+        closeProfileModal();
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        if (typeof showToast === 'function') showToast('ไม่สามารถอัปเดตโปรไฟล์ได้ กรุณาลองใหม่', 'danger');
+    } finally {
+        authElements.loadingOverlay.classList.add('hidden');
+    }
+}
+
+// Open Delete Account Confirmation Modal with Security Countdown
+function openDeleteConfirmModal() {
+    // Hide profile modal first
+    authElements.profileModalOverlay.classList.add('hidden');
+    
+    // Clear confirm form inputs
+    authElements.deleteConfirmText.value = '';
+    authElements.deleteConfirmEmail.value = '';
+    authElements.deleteErrorMessage.classList.add('hidden');
+    authElements.deleteErrorMessage.textContent = '';
+    
+    // Lock the delete confirmation button initially
+    authElements.btnConfirmDelete.disabled = true;
+    
+    // Show confirmation modal
+    authElements.deleteConfirmModalOverlay.classList.remove('hidden');
+    
+    // Security Countdown setup
+    let countdown = 7;
+    authElements.btnConfirmDeleteText.textContent = `กรุณารอยืนยัน... (${countdown})`;
+    
+    // Clear any existing intervals
+    if (deleteCountdownInterval) clearInterval(deleteCountdownInterval);
+    
+    deleteCountdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            authElements.btnConfirmDeleteText.textContent = `กรุณารอยืนยัน... (${countdown})`;
+        } else {
+            clearInterval(deleteCountdownInterval);
+            deleteCountdownInterval = null;
+            authElements.btnConfirmDeleteText.textContent = '🔥 ยืนยันการลบบัญชีอย่างถาวร';
+            // Trigger check to see if text inputs are already valid and unlock button
+            validateDeleteInputs();
+        }
+    }, 1000);
+}
+
+// Close Delete Confirmation Modal
+function closeDeleteConfirmModal() {
+    if (deleteCountdownInterval) {
+        clearInterval(deleteCountdownInterval);
+        deleteCountdownInterval = null;
+    }
+    authElements.deleteConfirmModalOverlay.classList.add('hidden');
+    // Restore profile settings modal
+    authElements.profileModalOverlay.classList.remove('hidden');
+}
+
+// Real-time Validation for Delete inputs
+function validateDeleteInputs() {
+    // If the countdown is still running, do not unlock
+    if (deleteCountdownInterval !== null) {
+        authElements.btnConfirmDelete.disabled = true;
+        return;
+    }
+    
+    const confirmWord = authElements.deleteConfirmText.value.trim();
+    const confirmEmail = authElements.deleteConfirmEmail.value.trim();
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) return;
+    
+    // Requirements: typed "DELETE" exactly, and email matches current user email
+    const isTextValid = confirmWord === 'DELETE';
+    const isEmailValid = confirmEmail.toLowerCase() === currentUser.email.toLowerCase();
+    
+    if (isTextValid && isEmailValid) {
+        authElements.btnConfirmDelete.disabled = false;
+    } else {
+        authElements.btnConfirmDelete.disabled = true;
+    }
+}
+
+// Execute complete Account Deletion and data scrubbing
+async function executeDeleteAccount(e) {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    // Additional final confirmation check
+    const confirmWord = authElements.deleteConfirmText.value.trim();
+    const confirmEmail = authElements.deleteConfirmEmail.value.trim();
+    if (confirmWord !== 'DELETE' || confirmEmail.toLowerCase() !== user.email.toLowerCase()) {
+        authElements.deleteErrorMessage.textContent = 'ข้อมูลยืนยันไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+        authElements.deleteErrorMessage.classList.remove('hidden');
+        return;
+    }
+    
+    authElements.deleteErrorMessage.classList.add('hidden');
+    authElements.loadingOverlay.classList.remove('hidden');
+    
+    try {
+        // 1. Scrub/Delete user's financial transactions in Firestore
+        const txDocRefs = await db.collection('users').doc(user.uid).collection('transactions').get();
+        if (!txDocRefs.empty) {
+            const batch = db.batch();
+            txDocRefs.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+        }
         
-        // 1. Delete all transactions
-        const txSnapshot = await db.collection('users').doc(uid).collection('transactions').get();
-        const batch = db.batch();
-        txSnapshot.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        await batch.commit();
-
-        // 2. Delete user profile document
-        await db.collection('users').doc(uid).delete();
-
-        // 3. Delete Auth account
+        // 2. Delete user's profile database document in Firestore
+        await db.collection('users').doc(user.uid).delete();
+        
+        // 3. Delete user account in Firebase Authentication
         await user.delete();
         
-        // User is signed out automatically by onAuthStateChanged
-        return true;
+        // Success: Auth state listener will handle UI redirect to login automatically
+        authElements.deleteConfirmModalOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        if (typeof showToast === 'function') showToast('ลบบัญชีผู้ใช้และล้างข้อมูลธุรกรรมสำเร็จแล้ว', 'success');
     } catch (error) {
         console.error('Error deleting account:', error);
-        // Requires recent login
+        
+        // Handle security sensitive operation recent login requirement
         if (error.code === 'auth/requires-recent-login') {
-            alert('เพื่อความปลอดภัย กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่อีกครั้งก่อนทำการลบบัญชี');
+            authElements.deleteErrorMessage.innerHTML = `
+                <div style="line-height: 1.5; padding: 6px;">
+                    <strong>⚠️ เกิดข้อผิดพลาดด้านความปลอดภัยสูงสุด:</strong><br>
+                    เพื่อความปลอดภัยในการป้องกันบัญชีและข้อมูลของคุณ กรุณา <strong>"ออกจากระบบ"</strong> แล้วทำการ <strong>"เข้าสู่ระบบใหม่อีกครั้ง"</strong> จากนั้นจึงจะสามารถเข้ามาดำเนินการลบบัญชีนี้ได้ตามปกติครับ
+                </div>
+            `;
+            authElements.deleteErrorMessage.classList.remove('hidden');
         } else {
-            alert('เกิดข้อผิดพลาดในการลบบัญชี: ' + error.message);
+            authElements.deleteErrorMessage.textContent = 'ไม่สามารถลบบัญชีได้เนื่องจากข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง';
+            authElements.deleteErrorMessage.classList.remove('hidden');
         }
-        throw error;
+    } finally {
+        authElements.loadingOverlay.classList.add('hidden');
     }
 }
 
@@ -399,134 +552,37 @@ document.addEventListener('DOMContentLoaded', () => {
     authElements.btnLogout.addEventListener('click', logout);
 
     // -------------------------------------------------------------
-    // Profile UI Event Listeners
+    // Profile & Account Settings Events
     // -------------------------------------------------------------
-    function closeProfileModal() {
-        authElements.profileModalOverlay.classList.add('hidden');
-    }
-
-    async function openProfileModal() {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        // Reset state
-        profileAvatarBase64 = null;
-        authElements.profileForm.reset();
-        
-        // Default avatar or user avatar
-        if (user.photoURL) {
-            authElements.profileAvatarPreview.innerHTML = `<img src="${user.photoURL}" alt="Profile">`;
-        } else {
-            authElements.profileAvatarPreview.innerHTML = `<i data-lucide="user" class="default-avatar-icon"></i>`;
-            lucide.createIcons();
-        }
-
-        // Load data from Firestore
-        const profileData = await loadUserProfile(user);
-        if (profileData) {
-            authElements.profileFirstname.value = profileData.firstname || '';
-            authElements.profileLastname.value = profileData.lastname || '';
-            authElements.profileDob.value = profileData.dob || '';
-        } else {
-            // Fallback to Auth display name
-            if (user.displayName) {
-                const parts = user.displayName.split(' ');
-                authElements.profileFirstname.value = parts[0] || '';
-                authElements.profileLastname.value = parts.slice(1).join(' ') || '';
-            }
-        }
-
-        authElements.profileModalOverlay.classList.remove('hidden');
-    }
-
-    // Open Modal
+    
+    // Open profile settings when clicking header avatar/name
     authElements.userProfileSection.addEventListener('click', openProfileModal);
-
-    // Close Modal
-    authElements.profileModalClose.addEventListener('click', closeProfileModal);
-    authElements.profileModalCancel.addEventListener('click', closeProfileModal);
-    authElements.profileModalOverlay.addEventListener('click', (e) => {
-        if (e.target === authElements.profileModalOverlay) closeProfileModal();
-    });
-
-    // Avatar File Input Change
-    authElements.profileAvatarInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Check size (e.g. max 5MB for upload before resize)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('ไฟล์รูปภาพมีขนาดใหญ่เกิน 5MB');
-                return;
-            }
-            
-            // Resize and preview
-            resizeImageToBase64(file, (base64) => {
-                profileAvatarBase64 = base64;
-                authElements.profileAvatarPreview.innerHTML = `<img src="${base64}" alt="Preview">`;
-            });
-        }
-    });
-
-    // Save Profile Form
-    authElements.profileForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;border-width:2px;"></div><span> กำลังบันทึก...</span>';
-
-        try {
-            await updateUserProfile(user, {
-                firstname: authElements.profileFirstname.value.trim(),
-                lastname: authElements.profileLastname.value.trim(),
-                dob: authElements.profileDob.value,
-                photoBase64: profileAvatarBase64
-            });
-            closeProfileModal();
-            // Show toast from app.js if available
-            if (typeof showToast === 'function') {
-                showToast('อัปเดตโปรไฟล์เรียบร้อยแล้ว', 'success');
-            } else {
-                alert('อัปเดตโปรไฟล์เรียบร้อยแล้ว');
-            }
-        } catch (error) {
-            alert('ไม่สามารถอัปเดตโปรไฟล์ได้');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i data-lucide="save"></i><span>บันทึก</span>';
-            lucide.createIcons();
-        }
-    });
-
-    // Delete Account Button
-    authElements.btnDeleteAccount.addEventListener('click', async () => {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const confirm1 = confirm('คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีนี้?');
-        if (!confirm1) return;
-
-        const confirm2 = confirm('ข้อมูลรายรับ-รายจ่ายทั้งหมดจะถูกลบอย่างถาวร และไม่สามารถกู้คืนได้ ยืนยันการลบหรือไม่?');
-        if (!confirm2) return;
-
-        try {
-            closeProfileModal();
-            if (typeof showToast === 'function') {
-                showToast('กำลังลบข้อมูลและบัญชีผู้ใช้...', 'warning');
-            }
-            
-            await deleteUserAccount(user);
-            
-            // After successful deletion, Firebase auth observer will catch logout
-            if (typeof showToast === 'function') {
-                showToast('ลบบัญชีสำเร็จแล้ว', 'info');
-            } else {
-                alert('ลบบัญชีสำเร็จแล้ว');
-            }
-        } catch (error) {
-            // Error is handled in deleteUserAccount function
-        }
-    });
+    
+    // Close profile settings
+    authElements.btnProfileClose.addEventListener('click', closeProfileModal);
+    authElements.btnProfileCancel.addEventListener('click', closeProfileModal);
+    
+    // Profile pic edit button click simulations
+    authElements.profileAvatarPreview.addEventListener('click', () => authElements.profilePicInput.click());
+    document.getElementById('btn-upload-avatar').addEventListener('click', () => authElements.profilePicInput.click());
+    
+    // Profile pic input changes
+    authElements.profilePicInput.addEventListener('change', handleProfilePicSelection);
+    
+    // Submit profile updates form
+    authElements.profileForm.addEventListener('submit', saveUserProfileData);
+    
+    // Open Delete Account confirm modal
+    authElements.btnDeleteAccount.addEventListener('click', openDeleteConfirmModal);
+    
+    // Close Delete Confirmation Modal
+    authElements.deleteConfirmClose.addEventListener('click', closeDeleteConfirmModal);
+    authElements.deleteConfirmCancel.addEventListener('click', closeDeleteConfirmModal);
+    
+    // Real-time input validation for DELETE confirm form
+    authElements.deleteConfirmText.addEventListener('input', validateDeleteInputs);
+    authElements.deleteConfirmEmail.addEventListener('input', validateDeleteInputs);
+    
+    // Execute Delete Account form submission
+    authElements.deleteConfirmForm.addEventListener('submit', executeDeleteAccount);
 });
