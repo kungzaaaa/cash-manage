@@ -72,14 +72,27 @@ const authElements = {
 // Auth State Observer — the heart of the auth system
 // ---------------------------------------------------------------
 auth.onAuthStateChanged(async (user) => {
-    // Hide loading overlay
-    authElements.loadingOverlay.classList.add('hidden');
-
     if (user) {
         // User is signed in
-        showApp(user);
+        
+        // 1. Load user profile from Firestore to fetch custom photo URL (Base64) or display name
+        let firestorePhotoURL = '';
+        let firestoreDisplayName = '';
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                firestorePhotoURL = data.photoURL || '';
+                firestoreDisplayName = data.displayName || '';
+            }
+        } catch (error) {
+            console.error('Error fetching user profile from Firestore:', error);
+        }
 
-        // Save/update user profile in Firestore (first-time check)
+        // 2. Show the main App with Firestore data priority
+        showApp(user, firestorePhotoURL, firestoreDisplayName);
+
+        // 3. Save/update user profile in Firestore (first-time check)
         await saveUserProfile(user);
 
         // Initialize the main app with user data (defined in app.js)
@@ -95,23 +108,31 @@ auth.onAuthStateChanged(async (user) => {
             clearAppForLogout();
         }
     }
+
+    // Hide loading overlay
+    authElements.loadingOverlay.classList.add('hidden');
 });
 
 // ---------------------------------------------------------------
 // Show / Hide helpers
 // ---------------------------------------------------------------
-function showApp(user) {
+function showApp(user, customPhotoURL, customDisplayName) {
     authElements.authScreen.classList.add('hidden');
     authElements.appContainer.classList.remove('hidden');
 
+    const displayName = customDisplayName || user.displayName || user.email || 'ผู้ใช้';
+    const photoURL = customPhotoURL || user.photoURL;
+
     // Update user profile in header
-    if (user.photoURL) {
-        authElements.userAvatar.src = user.photoURL;
+    if (photoURL) {
+        authElements.userAvatar.src = photoURL;
         authElements.userAvatar.style.display = 'block';
     } else {
-        authElements.userAvatar.style.display = 'none';
+        // Falling back to beautiful Initials SVG if photo doesn't exist
+        authElements.userAvatar.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
+        authElements.userAvatar.style.display = 'block';
     }
-    authElements.userName.textContent = user.displayName || user.email || 'ผู้ใช้';
+    authElements.userName.textContent = displayName;
     authElements.userProfileSection.classList.remove('hidden');
 }
 
@@ -241,14 +262,14 @@ function openProfileModal() {
     }
 
     // Set input values
-    authElements.profileDisplayName.value = user.displayName || '';
+    authElements.profileDisplayName.value = authElements.userName.textContent || user.displayName || '';
     authElements.profileEmail.value = user.email || '';
 
-    // Set avatar preview
-    if (user.photoURL) {
-        authElements.profileAvatarPreview.src = user.photoURL;
+    // Set avatar preview from current active header avatar
+    if (authElements.userAvatar.style.display !== 'none' && authElements.userAvatar.src) {
+        authElements.profileAvatarPreview.src = authElements.userAvatar.src;
     } else {
-        authElements.profileAvatarPreview.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email || 'User')}`;
+        authElements.profileAvatarPreview.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authElements.userName.textContent || 'User')}`;
     }
 
     // Reset temporary variables and error message
@@ -322,26 +343,34 @@ async function saveUserProfileData(e) {
     authElements.loadingOverlay.classList.remove('hidden');
 
     try {
-        const updateData = { displayName: newDisplayName };
-        if (selectedProfilePicBase64) {
-            updateData.photoURL = selectedProfilePicBase64;
+        // 1. Update Firebase Auth Profile (ONLY update displayName, skip base64 photoURL as it exceeds 2KB limit!)
+        await user.updateProfile({ displayName: newDisplayName });
+
+        // 2. Fetch current Firestore doc to make sure we keep any existing fields
+        const userDocRef = db.collection('users').doc(user.uid);
+        const doc = await userDocRef.get();
+        let currentPhotoURL = user.photoURL || '';
+        
+        if (doc.exists) {
+            currentPhotoURL = doc.data().photoURL || currentPhotoURL;
         }
 
-        // 1. Update Firebase Auth Profile
-        await user.updateProfile(updateData);
+        const finalPhotoURL = selectedProfilePicBase64 || currentPhotoURL;
 
-        // 2. Update Firestore User Document
-        const userDocRef = db.collection('users').doc(user.uid);
+        // 3. Update Cloud Firestore Document (Firestore supports up to 1MB which is perfect for Base64!)
         await userDocRef.set({
             displayName: newDisplayName,
-            photoURL: selectedProfilePicBase64 || user.photoURL || '',
+            photoURL: finalPhotoURL,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        // 3. Update Current Session UI Header
+        // 4. Update Current Session UI Header in real-time
         authElements.userName.textContent = newDisplayName;
-        if (updateData.photoURL) {
-            authElements.userAvatar.src = updateData.photoURL;
+        if (finalPhotoURL) {
+            authElements.userAvatar.src = finalPhotoURL;
+            authElements.userAvatar.style.display = 'block';
+        } else {
+            authElements.userAvatar.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newDisplayName)}`;
             authElements.userAvatar.style.display = 'block';
         }
 
