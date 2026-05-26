@@ -1281,33 +1281,96 @@ body {
     display: none;
 }
 
+/* Base Auth Card */
 .auth-card {
     width: 100%;
-    max-width: 420px;
-    padding: 36px 32px;
     border-radius: var(--radius-xl);
     animation: modalSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
 }
 
-.auth-logo {
+/* Horizontal Layout for Auth */
+.auth-card-horizontal {
+    display: flex;
+    flex-direction: row;
+    max-width: 850px;
+    padding: 0;
+    background: transparent; /* Reset background as children will have it */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-glass);
+}
+
+.auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, hsl(var(--hue-primary), 20%, 8%), hsl(var(--hue-primary), 30%, 15%));
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    margin-bottom: 28px;
+    border-right: 1px solid var(--border-glass);
+    position: relative;
+    overflow: hidden;
 }
 
-.auth-logo .logo-icon-wrapper {
-    margin: 0 auto 16px;
+/* Glowing accent to auth-left */
+.auth-left::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, hsla(var(--hue-primary), 85%, 63%, 0.15) 0%, transparent 60%);
+    pointer-events: none;
 }
 
-.auth-logo h1 {
-    font-size: 24px;
+.auth-right {
+    flex: 1.2;
+    background: var(--bg-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-logo-large {
+    z-index: 1;
+}
+
+.auth-logo-large .logo-icon-wrapper-large {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-bank));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px var(--color-primary-glow);
+}
+
+.auth-logo-large .logo-icon-large {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.auth-logo-large h1 {
+    font-size: 28px;
     font-weight: 700;
     color: var(--text-title);
-    margin-bottom: 4px;
+    margin-bottom: 12px;
+    line-height: 1.2;
 }
 
-.auth-logo p {
-    font-size: 13px;
+.auth-logo-large p {
+    font-size: 14px;
     color: var(--text-muted);
+    line-height: 1.6;
 }
 
 /* Auth Tabs */
@@ -1529,26 +1592,6 @@ body {
     margin-bottom: 24px;
 }
 
-/* Profile Horizontal Layout */
-.profile-layout-horizontal {
-    display: flex;
-    flex-direction: row;
-    gap: 24px;
-    align-items: flex-start;
-    margin-bottom: 20px;
-}
-
-.profile-inputs-container {
-    flex: 1;
-    width: 100%;
-}
-
-.profile-layout-horizontal .profile-avatar-container {
-    margin-bottom: 0;
-    flex-shrink: 0;
-    width: 130px;
-}
-
 .profile-avatar-wrapper {
     position: relative;
     width: 100px;
@@ -1732,17 +1775,49 @@ body {
         grid-column: span 12;
     }
 
-    .auth-card {
-        padding: 28px 20px;
-    }
-
     .user-name {
         display: none;
     }
+}
 
-    .profile-layout-horizontal {
+@media (max-width: 850px) {
+    .auth-card-horizontal {
         flex-direction: column;
-        align-items: center;
-        gap: 16px;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    .auth-left {
+        padding: 32px 24px 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-glass);
+    }
+
+    .auth-left::before {
+        display: none;
+    }
+
+    .auth-logo-large .logo-icon-wrapper-large {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 16px;
+    }
+
+    .auth-logo-large .logo-icon-large {
+        width: 28px;
+        height: 28px;
+    }
+
+    .auth-logo-large h1 {
+        font-size: 22px;
+    }
+    
+    .auth-logo-large p {
+        font-size: 13px;
+        br { display: none; }
+    }
+
+    .auth-right {
+        padding: 24px 24px 32px;
     }
 }
