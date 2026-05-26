@@ -294,38 +294,77 @@ function closeProfileModal() {
     authElements.profileForm.reset();
 }
 
-// Handle local image file loading & size validation
-function handleProfilePicSelection(e) {
+// Compress and resize image using HTML5 Canvas to safely save as Base64 in Firestore
+function compressAndResizeImage(file, maxWidth = 200, maxHeight = 200, quality = 0.75) {
+    return new Promise((resolve, reject) => {
+        // Validate if it is an image
+        if (!file.type.startsWith('image/')) {
+            reject(new Error('กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง'));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // Calculate new dimensions while maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                // Create off-screen canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                // Draw image on canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Export to Base64 JPEG data URL with compressed quality
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+            img.onerror = () => reject(new Error('เกิดข้อผิดพลาดในการโหลดรูปภาพ'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('เกิดข้อผิดพลาดในการอ่านไฟล์'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// Handle local image file loading & client-side compression
+async function handleProfilePicSelection(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate if it is an image
-    if (!file.type.startsWith('image/')) {
-        authElements.profilePicError.textContent = 'กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง';
-        authElements.profilePicError.classList.remove('hidden');
-        return;
-    }
-
-    // Validate size (350KB = 358,400 bytes)
-    if (file.size > 350 * 1024) {
-        authElements.profilePicError.textContent = 'ขนาดรูปภาพต้องไม่เกิน 350KB (กรุณาเลือกรูปภาพอื่น)';
-        authElements.profilePicError.classList.remove('hidden');
-        return;
-    }
-
-    // Read and convert to Base64
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        selectedProfilePicBase64 = event.target.result;
+    // Show visual feedback or toast that image is processing
+    authElements.profilePicError.classList.add('hidden');
+    authElements.profilePicError.textContent = '';
+    
+    try {
+        // Compress image to max 200px width/height and 0.75 quality in real-time!
+        const compressedBase64 = await compressAndResizeImage(file, 200, 200, 0.75);
+        
+        selectedProfilePicBase64 = compressedBase64;
         authElements.profileAvatarPreview.src = selectedProfilePicBase64;
         authElements.profilePicError.classList.add('hidden');
-        authElements.profilePicError.textContent = '';
-    };
-    reader.onerror = () => {
-        authElements.profilePicError.textContent = 'เกิดข้อผิดพลาดในการอ่านไฟล์รูปภาพ';
+    } catch (error) {
+        console.error('Error compressing image:', error);
+        authElements.profilePicError.textContent = error.message || 'เกิดข้อผิดพลาดในการประมวลผลรูปภาพ';
         authElements.profilePicError.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
+    }
 }
 
 // Reset/Remove avatar back to original Google account photo or default avatar
