@@ -25,6 +25,13 @@ const TRANSLATIONS = {
         // ========== Auth Screen ==========
         'auth.brand_title': 'Cash & Bank Flow',
         'auth.brand_desc': 'จัดการการเงินของคุณอย่างมืออาชีพ<br>บันทึกและติดตามทุกรายรับ-รายจ่าย',
+        'auth.unified_title': 'เข้าสู่ระบบหรือสร้างบัญชี',
+        'auth.email_label': 'อีเมล',
+        'auth.password_label': 'รหัสผ่าน',
+        'auth.name_label': 'ชื่อ',
+        'auth.confirm_password_label': 'ยืนยันรหัสผ่าน',
+        'auth.divider_or': 'หรือใช้งานด้วย',
+        'auth.terms': 'ในการเข้าสู่ระบบ คุณยอมรับ<a href="#">ข้อตกลงในการให้บริการ</a>และ<a href="#">นโยบายความเป็นส่วนตัว</a>ของเรา',
         'auth.tab_login': 'เข้าสู่ระบบ',
         'auth.tab_register': 'สมัครบัญชีใหม่',
         'auth.google_login': 'เข้าสู่ระบบด้วย Google',
@@ -79,12 +86,6 @@ const TRANSLATIONS = {
         'dashboard.total_expense': 'รายจ่ายรวม',
         'dashboard.cash_balance': 'เงินสดคงเหลือ',
         'dashboard.bank_balance': 'เงินในธนาคารคงเหลือ',
-        'savings.title': 'กระปุกเงินเก็บ (ล็อกยอด)',
-        'savings.available': 'เงินที่สามารถใช้ได้',
-        'savings.target': 'เป้าหมาย:',
-        'savings.borrowed': 'ยืมเงินเก็บมา:',
-        'savings.prompt': 'ระบุยอดเงินที่ต้องการฟิกเก็บไว้ (บาท):',
-        'toast.savings_updated': 'อัปเดตเป้าหมายเงินเก็บแล้ว',
 
         // ========== Transaction Form ==========
         'form.title': 'บันทึกรายการใหม่',
@@ -270,6 +271,13 @@ const TRANSLATIONS = {
         // ========== Auth Screen ==========
         'auth.brand_title': 'Cash & Bank Flow',
         'auth.brand_desc': 'Manage your finances like a pro<br>Track every income & expense',
+        'auth.unified_title': 'Log in or create account',
+        'auth.email_label': 'Email',
+        'auth.password_label': 'Password',
+        'auth.name_label': 'Name',
+        'auth.confirm_password_label': 'Confirm Password',
+        'auth.divider_or': 'OR WITH',
+        'auth.terms': 'By signing in, you agree to our <a href="#">terms of service</a> and <a href="#">privacy policy</a>.',
         'auth.tab_login': 'Login',
         'auth.tab_register': 'Create Account',
         'auth.google_login': 'Sign in with Google',
@@ -324,12 +332,6 @@ const TRANSLATIONS = {
         'dashboard.total_expense': 'Total Expense',
         'dashboard.cash_balance': 'Cash Balance',
         'dashboard.bank_balance': 'Bank Balance',
-        'savings.title': 'Savings Jar (Locked)',
-        'savings.available': 'Available to Spend',
-        'savings.target': 'Target:',
-        'savings.borrowed': 'Borrowed:',
-        'savings.prompt': 'Enter your target savings amount (Baht):',
-        'toast.savings_updated': 'Savings target updated',
 
         // ========== Transaction Form ==========
         'form.title': 'New Transaction',
