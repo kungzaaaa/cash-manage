@@ -177,11 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Initialize Events
     setupEventListeners();
 
-    // 5. Create Lucide Icons
-    lucide.createIcons();
+    // 5. Initialize Custom Dropdown UI
+    initCustomDropdowns();
 
     // 6. Initialize Category Modal pickers
     initCategoryModal();
+
+    // 7. Create Lucide Icons
+    lucide.createIcons();
 
     // Note: Data loading and renderDashboard are now triggered by Firebase Auth state
     // (see initAppForUser in auth.js)
@@ -276,6 +279,9 @@ function populateCategorySelect(selectEl, isIncome) {
         option.value = cat.id;
         const iconSymbol = EMOJI_MAP[cat.id] || (cat.custom ? '✨' : (isIncome ? '📥' : '💸'));
         option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
+        // Data attributes for custom dropdown rendering
+        option.setAttribute('data-icon', cat.icon);
+        option.setAttribute('data-color', cat.color);
         selectEl.appendChild(option);
     });
 
@@ -283,6 +289,9 @@ function populateCategorySelect(selectEl, isIncome) {
     if ([...selectEl.options].some(o => o.value === currentValue)) {
         selectEl.value = currentValue;
     }
+
+    // Refresh custom dropdown UI if initialized
+    refreshCustomDropdown(selectEl);
 }
 
 // -------------------------------------------------------------
@@ -896,10 +905,12 @@ function openEditModal(id) {
     // Populate categories for the correct type, then select the right one
     updateEditCategorySelectOptions();
     elements.editTxCategory.value = tx.category;
+    refreshCustomDropdown(elements.editTxCategory);
 
     // Fill remaining fields
     elements.editTxAmount.value = tx.amount;
     elements.editTxMethod.value = tx.method;
+    refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;
     elements.editTxDescription.value = tx.description || '';
 
@@ -1223,6 +1234,7 @@ async function handleCategoryFormSubmit(e) {
 
     // Select the new category in the active dropdown
     elements.txCategory.value = id;
+    refreshCustomDropdown(elements.txCategory);
 
     closeCategoryModal();
     showToast(t('toast.cat_added'), 'success');
@@ -1260,4 +1272,187 @@ async function loadCustomCategories(user) {
     } catch (error) {
         console.error('Error loading custom categories:', error);
     }
+}
+
+// -------------------------------------------------------------
+// Custom Dropdown System (Minimal Design)
+// -------------------------------------------------------------
+const customDropdownMap = new Map();
+
+const METHOD_DISPLAY = {
+    cash: { icon: 'banknote', color: 'hsl(150, 80%, 42%)' },
+    bank: { icon: 'landmark', color: 'hsl(205, 90%, 50%)' }
+};
+
+function initCustomDropdowns() {
+    // Set data attributes on method select options
+    initMethodSelectData(elements.txMethod);
+    initMethodSelectData(elements.editTxMethod);
+
+    // Create custom dropdowns for all selects
+    createCustomDropdown(elements.txMethod);
+    createCustomDropdown(elements.txCategory);
+    createCustomDropdown(elements.editTxMethod);
+    createCustomDropdown(elements.editTxCategory);
+
+    // Global close on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select')) {
+            closeAllDropdowns();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllDropdowns();
+    });
+}
+
+function initMethodSelectData(selectEl) {
+    if (!selectEl) return;
+    [...selectEl.options].forEach(opt => {
+        const meta = METHOD_DISPLAY[opt.value];
+        if (meta) {
+            opt.setAttribute('data-icon', meta.icon);
+            opt.setAttribute('data-color', meta.color);
+        }
+    });
+}
+
+function createCustomDropdown(selectEl) {
+    if (!selectEl || customDropdownMap.has(selectEl)) return;
+
+    // Hide native select but keep for form value
+    selectEl.style.cssText = 'position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important;';
+
+    // Create wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'custom-select';
+    selectEl.insertAdjacentElement('afterend', wrapper);
+
+    // Trigger button
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'cs-trigger';
+    trigger.innerHTML = `
+        <span class="cs-icon"></span>
+        <span class="cs-label"></span>
+        <svg class="cs-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+    wrapper.appendChild(trigger);
+
+    // Dropdown panel
+    const panel = document.createElement('div');
+    panel.className = 'cs-panel';
+    wrapper.appendChild(panel);
+
+    // Store reference
+    customDropdownMap.set(selectEl, { wrapper, trigger, panel });
+
+    // Toggle event
+    trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const wasOpen = wrapper.classList.contains('open');
+        closeAllDropdowns();
+        if (!wasOpen) wrapper.classList.add('open');
+    });
+
+    // Initial render
+    refreshCustomDropdown(selectEl);
+}
+
+function refreshCustomDropdown(selectEl) {
+    if (!selectEl) return;
+    const data = customDropdownMap.get(selectEl);
+    if (!data) return;
+
+    const { wrapper, trigger, panel } = data;
+    const options = [...selectEl.options];
+    const selectedVal = selectEl.value;
+
+    // Rebuild panel
+    panel.innerHTML = '';
+    options.forEach(opt => {
+        const item = document.createElement('div');
+        const isActive = opt.value === selectedVal;
+        item.className = 'cs-option' + (isActive ? ' active' : '');
+
+        const iconName = opt.getAttribute('data-icon');
+        const color = opt.getAttribute('data-color') || '';
+
+        // Parse label: strip leading emoji from textContent
+        const fullText = opt.textContent;
+        const spaceIdx = fullText.indexOf(' ');
+        let emoji = '';
+        let label = fullText;
+        if (spaceIdx > 0 && spaceIdx <= 3) {
+            emoji = fullText.substring(0, spaceIdx);
+            label = fullText.substring(spaceIdx + 1);
+        }
+
+        // Build icon HTML - prefer Lucide icon, fallback to emoji
+        let iconHTML;
+        if (iconName) {
+            iconHTML = `<span class="cs-opt-icon" style="${color ? 'color:' + color : ''}"><i data-lucide="${iconName}"></i></span>`;
+        } else {
+            iconHTML = `<span class="cs-opt-icon">${emoji}</span>`;
+        }
+
+        item.innerHTML = `${iconHTML}<span class="cs-opt-label">${label}</span>`;
+
+        // Active item colored highlight
+        if (isActive && color) {
+            item.style.backgroundColor = hslToHsla(color, 0.1);
+            item.querySelector('.cs-opt-label').style.color = color;
+            item.querySelector('.cs-opt-label').style.fontWeight = '500';
+        }
+
+        // Click handler
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectEl.value = opt.value;
+            selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            wrapper.classList.remove('open');
+            refreshCustomDropdown(selectEl);
+        });
+
+        panel.appendChild(item);
+    });
+
+    // Update trigger to show selected item
+    const selectedOpt = options.find(o => o.value === selectedVal) || options[0];
+    if (selectedOpt) {
+        const iconName = selectedOpt.getAttribute('data-icon');
+        const color = selectedOpt.getAttribute('data-color') || '';
+        const fullText = selectedOpt.textContent;
+        const spaceIdx = fullText.indexOf(' ');
+        let emoji = '';
+        let label = fullText;
+        if (spaceIdx > 0 && spaceIdx <= 3) {
+            emoji = fullText.substring(0, spaceIdx);
+            label = fullText.substring(spaceIdx + 1);
+        }
+
+        const triggerIcon = trigger.querySelector('.cs-icon');
+        if (iconName) {
+            triggerIcon.innerHTML = `<i data-lucide="${iconName}" style="${color ? 'color:' + color : ''}"></i>`;
+        } else {
+            triggerIcon.textContent = emoji;
+        }
+        trigger.querySelector('.cs-label').textContent = label;
+    }
+
+    // Re-render Lucide icons
+    lucide.createIcons();
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.custom-select.open').forEach(d => d.classList.remove('open'));
+}
+
+// Helper: Convert hsl() to hsla() with alpha
+function hslToHsla(hsl, alpha) {
+    if (!hsl) return '';
+    return hsl.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);
 }

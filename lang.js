@@ -612,6 +612,14 @@ function setLanguage(lang) {
     if (typeof updateCategorySelectOptions === 'function') {
         updateCategorySelectOptions();
     }
+
+    // Refresh method custom dropdowns after translation
+    if (typeof refreshCustomDropdown === 'function') {
+        const txMethod = document.getElementById('tx-method');
+        const editTxMethod = document.getElementById('edit-tx-method');
+        if (txMethod) refreshCustomDropdown(txMethod);
+        if (editTxMethod) refreshCustomDropdown(editTxMethod);
+    }
 }
 
 /**
