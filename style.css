@@ -2332,19 +2332,20 @@ body {
 
 @media (max-width: 580px) {
     .app-container {
-        padding: 12px;
+        padding: 10px;
     }
 
+    .card {
+        padding: 14px;
+    }
+
+    /* 2. จัดการ Header และปุ่มไอคอน (ส่วนที่คุณทำไว้ดีแล้ว) */
     .app-header {
         flex-direction: column;
         align-items: center;
         text-align: center;
         gap: 16px;
         padding: 16px 12px;
-    }
-
-    .card {
-        padding: 16px;
     }
 
     .logo-area {
@@ -2361,7 +2362,6 @@ body {
         gap: 10px;
     }
 
-    /* 2. ซ่อนข้อความในปุ่ม Header และย่อปุ่มให้เป็นสี่เหลี่ยมจัตุรัส */
     .header-actions .btn-sm span {
         display: none;
     }
@@ -2371,6 +2371,52 @@ body {
         border-radius: var(--radius-md);
     }
 
+    .user-name {
+        display: none;
+    }
+
+    /* 3. จัดการการ์ดยอดเงินรวม (ป้องกันตัวเลขยาวทะลุกล่อง) */
+    .card-total-balance .card-header {
+        flex-wrap: wrap;
+        /* ปล่อยให้ป้าย Badge ปัดตกบรรทัดได้ถ้าที่แคบ */
+        gap: 8px;
+    }
+
+    .balance-value {
+        font-size: 26px !important;
+        /* ลดขนาดฟอนต์ตัวเลขหลักล้าน */
+        flex-wrap: wrap;
+        word-break: break-word;
+        /* สั่งให้หักคำได้ถ้าจำเป็นจริงๆ */
+    }
+
+    .balance-value .currency {
+        font-size: 20px !important;
+    }
+
+    /* 4. จัดการแถบ รายรับรวม/รายจ่ายรวม ไม่ให้เบียดกัน */
+    .card-total-balance .card-footer {
+        gap: 8px;
+        padding-top: 12px;
+    }
+
+    .sub-metric svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .sub-metric .value {
+        font-size: 12px;
+        /* ย่อตัวเลขย่อยลง */
+        word-break: break-word;
+    }
+
+    .sub-metric .label {
+        font-size: 11px;
+    }
+
+    /* 5. จัดการการ์ดบัญชี เงินสด/ธนาคาร ให้ซ้อนกัน 1 แถวอย่างพอดี */
     .account-cards-grid {
         grid-template-columns: 1fr;
     }
@@ -2379,20 +2425,19 @@ body {
         grid-column: span 12;
     }
 
-    .user-name {
-        display: none;
+    .account-balance {
+        font-size: 16px;
     }
 
-    /* 3. ปรับขนาดยอดเงินรวมไม่ให้ใหญ่ล้นจอ */
-    .balance-value {
-        font-size: 32px;
+    /* ป้องกันตัวเลขกระแสเงินสดย่อยไหลออกนอกกล่อง */
+    .account-mini-flow {
+        font-size: 11px;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
     }
 
-    .balance-value .currency {
-        font-size: 24px;
-    }
-
-    /* 4. ลดขนาดกล่อง Modal เมื่อแสดงบนมือถือ */
+    /* 6. ลดขนาดกล่อง Modal (หน้าต่างป๊อปอัป) */
     .modal-card {
         padding: 20px 16px;
     }
