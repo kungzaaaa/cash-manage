@@ -38,39 +38,67 @@
 
     <!-- Auth Login / Register Screen -->
     <div id="auth-screen" class="auth-screen hidden">
-        <div class="auth-card auth-card-single">
+        <div class="auth-card auth-card-horizontal">
             <!-- Language Toggle on Auth Screen -->
             <button id="auth-lang-toggle" class="btn-icon auth-lang-btn" aria-label="Switch Language" title="EN / ไทย">
                 <span id="auth-lang-flag">EN</span>
             </button>
 
-            <!-- Right Forms Column (Now Full Card) -->
-            <div class="auth-content">
-                
-                <!-- Main Title -->
-                <div class="auth-main-title">
-                    <h2 data-i18n="auth.unified_title">Log in or create account</h2>
+            <!-- Left Branding Column -->
+            <div class="auth-left">
+                <div class="auth-logo-large">
+                    <div class="logo-icon-wrapper-large">
+                        <i data-lucide="wallet" class="logo-icon-large"></i>
+                    </div>
+                    <h1 data-i18n="auth.brand_title">Cash & Bank Flow</h1>
+                    <p data-i18n-html="auth.brand_desc">จัดการการเงินของคุณอย่างมืออาชีพ<br>บันทึกและติดตามทุกรายรับ-รายจ่าย</p>
                 </div>
+            </div>
 
-                <!-- Auth Tabs (can be styled minimally or hidden if a unified flow is used, but kept for logic) -->
-                <div class="auth-tabs minimal-tabs">
+            <!-- Right Forms Column -->
+            <div class="auth-right">
+                <!-- Auth Tabs -->
+                <div class="auth-tabs">
                     <button id="auth-tab-login" class="auth-tab active" data-i18n="auth.tab_login">เข้าสู่ระบบ</button>
                     <button id="auth-tab-register" class="auth-tab" data-i18n="auth.tab_register">สมัครบัญชีใหม่</button>
                 </div>
 
+                <!-- Google Login -->
+                <button id="btn-google-login" class="btn-google">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                            fill="#4285F4" />
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853" />
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                            fill="#FBBC05" />
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                            fill="#EA4335" />
+                    </svg>
+                    <span data-i18n="auth.google_login">เข้าสู่ระบบด้วย Google</span>
+                </button>
+
+                <!-- Divider -->
+                <div class="auth-divider"><span data-i18n="auth.divider">หรือใช้อีเมล</span></div>
+
                 <!-- Login Form -->
                 <div id="login-form-container">
                     <form id="login-form" class="auth-form" autocomplete="off">
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="login-email" data-i18n="auth.email_label">Email</label>
-                            <input type="email" id="login-email" placeholder="john@company.com" required>
+                        <div class="auth-input-group">
+                            <i data-lucide="mail" class="auth-input-icon"></i>
+                            <input type="email" id="login-email" placeholder="อีเมล" data-i18n-placeholder="auth.email_placeholder" required>
                         </div>
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="login-password" data-i18n="auth.password_label">Password</label>
-                            <input type="password" id="login-password" placeholder="••••••••" required>
+                        <div class="auth-input-group">
+                            <i data-lucide="lock" class="auth-input-icon"></i>
+                            <input type="password" id="login-password" placeholder="รหัสผ่าน" data-i18n-placeholder="auth.password_placeholder" required>
                         </div>
-                        <button type="submit" class="btn btn-black btn-block btn-lg">
-                            <span data-i18n="auth.login_btn">Sign in</span>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i data-lucide="log-in"></i>
+                            <span data-i18n="auth.login_btn">เข้าสู่ระบบ</span>
                         </button>
                     </form>
                 </div>
@@ -78,44 +106,28 @@
                 <!-- Register Form -->
                 <div id="register-form-container" class="hidden">
                     <form id="register-form" class="auth-form" autocomplete="off">
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="register-name" data-i18n="auth.name_label">Name</label>
-                            <input type="text" id="register-name" placeholder="John Doe">
+                        <div class="auth-input-group">
+                            <i data-lucide="user" class="auth-input-icon"></i>
+                            <input type="text" id="register-name" placeholder="ชื่อที่แสดง" data-i18n-placeholder="auth.register_name_placeholder">
                         </div>
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="register-email" data-i18n="auth.email_label">Email</label>
-                            <input type="email" id="register-email" placeholder="john@company.com" required>
+                        <div class="auth-input-group">
+                            <i data-lucide="mail" class="auth-input-icon"></i>
+                            <input type="email" id="register-email" placeholder="อีเมล" data-i18n-placeholder="auth.register_email_placeholder" required>
                         </div>
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="register-password" data-i18n="auth.password_label">Password</label>
-                            <input type="password" id="register-password" placeholder="••••••••" required>
+                        <div class="auth-input-group">
+                            <i data-lucide="lock" class="auth-input-icon"></i>
+                            <input type="password" id="register-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)"
+                                data-i18n-placeholder="auth.register_password_placeholder" required>
                         </div>
-                        <div class="auth-input-group auth-input-group-labeled">
-                            <label for="register-password-confirm" data-i18n="auth.confirm_password_label">Confirm Password</label>
-                            <input type="password" id="register-password-confirm" placeholder="••••••••" required>
+                        <div class="auth-input-group">
+                            <i data-lucide="shield-check" class="auth-input-icon"></i>
+                            <input type="password" id="register-password-confirm" placeholder="ยืนยันรหัสผ่าน" data-i18n-placeholder="auth.register_confirm_placeholder" required>
                         </div>
-                        <button type="submit" class="btn btn-black btn-block btn-lg">
-                            <span data-i18n="auth.register_btn">Sign up</span>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i data-lucide="user-plus"></i>
+                            <span data-i18n="auth.register_btn">สมัครบัญชีใหม่</span>
                         </button>
                     </form>
-                </div>
-                
-                <!-- Divider -->
-                <div class="auth-divider"><span data-i18n="auth.divider_or">OR WITH</span></div>
-
-                <!-- Google Login -->
-                <button id="btn-google-login" class="btn-google-outline">
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#000000" />
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#000000" />
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#000000" />
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#000000" />
-                    </svg>
-                    <span data-i18n="auth.google_login">Sign in with Google</span>
-                </button>
-
-                <div class="auth-terms">
-                    <p data-i18n-html="auth.terms">By signing in, you agree to our <a href="#">terms of service</a> and <a href="#">privacy policy</a>.</p>
                 </div>
 
                 <!-- Auth Error -->

@@ -253,9 +253,11 @@ function populateCategorySelect(selectEl, isIncome) {
 // Theme Management
 // -------------------------------------------------------------
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    // Force all pages to default to the light theme on initial load
+    const savedTheme = 'light';
     state.currentTheme = savedTheme;
     elements.html.setAttribute('data-theme', savedTheme);
+    localStorage.setItem('theme', 'light');
 }
 
 function toggleTheme() {
