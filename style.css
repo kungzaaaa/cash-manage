@@ -105,12 +105,16 @@
     font-family: var(--font-thai);
 }
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 body {
     background-color: var(--bg-app);
     color: var(--text-body);
     font-family: var(--font-thai);
     min-height: 100vh;
-    overflow-x: hidden;
     position: relative;
     transition: background-color var(--transition-smooth);
     line-height: 1.6;
@@ -2241,15 +2245,24 @@ body {
 @media (max-width: 580px) {
     .app-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
         gap: 16px;
-        padding: 16px;
+        padding: 20px 16px;
+    }
+
+    .logo-area {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
     }
     
     .header-actions {
         width: 100%;
-        justify-content: flex-end;
+        justify-content: center;
         flex-wrap: wrap;
+        gap: 12px;
     }
     
     .account-cards-grid {
