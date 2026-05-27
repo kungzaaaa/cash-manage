@@ -143,63 +143,66 @@
 
         <!-- ========== TOP BAR ========== -->
         <header class="app-header" id="app-topbar">
-            <!-- Left: Profile + Dropdown -->
-            <div class="topbar-left">
-                <div class="topbar-profile-wrapper">
-                    <div id="user-profile-section" class="user-profile hidden" role="button"
-                        data-i18n-aria="header.profile_label" data-i18n-title="header.profile_label"
-                        aria-label="จัดการโปรไฟล์" title="จัดการโปรไฟล์">
-                        <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
-                        <span id="user-name" class="user-name">ผู้ใช้</span>
-                        <i data-lucide="chevron-down" class="profile-chevron"></i>
-                    </div>
+            <div class="header-inner">
+                <!-- Left: Profile + Dropdown -->
+                <div class="topbar-left">
+                    <div class="topbar-profile-wrapper">
+                        <div id="user-profile-section" class="user-profile hidden" role="button"
+                            data-i18n-aria="header.profile_label" data-i18n-title="header.profile_label"
+                            aria-label="จัดการโปรไฟล์" title="จัดการโปรไฟล์">
+                            <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
+                            <span id="user-name" class="user-name">ผู้ใช้</span>
+                            <i data-lucide="chevron-down" class="profile-chevron"></i>
+                        </div>
 
-                    <!-- Profile Dropdown Menu -->
-                    <div id="profile-dropdown" class="profile-dropdown hidden">
-                        <button type="button" id="btn-open-profile" class="dropdown-item">
-                            <i data-lucide="user-cog"></i>
-                            <span data-i18n="dropdown.profile">จัดการโปรไฟล์</span>
-                        </button>
-                        <button type="button" id="btn-manage-data" class="dropdown-item">
-                            <i data-lucide="database"></i>
-                            <span data-i18n="dropdown.manage_data">จัดการข้อมูล</span>
-                        </button>
-                        <div class="dropdown-divider"></div>
-                        <button type="button" id="btn-logout" class="dropdown-item dropdown-item-danger">
-                            <i data-lucide="log-out"></i>
-                            <span data-i18n="header.logout">ออกจากระบบ</span>
-                        </button>
+                        <!-- Profile Dropdown Menu -->
+                        <div id="profile-dropdown" class="profile-dropdown hidden">
+                            <button type="button" id="btn-open-profile" class="dropdown-item">
+                                <i data-lucide="user-cog"></i>
+                                <span data-i18n="dropdown.profile">จัดการโปรไฟล์</span>
+                            </button>
+                            <button type="button" id="btn-manage-data" class="dropdown-item">
+                                <i data-lucide="database"></i>
+                                <span data-i18n="dropdown.manage_data">จัดการข้อมูล</span>
+                            </button>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <!-- Theme Toggle Button inside Dropdown -->
+                            <button type="button" id="theme-toggle" class="dropdown-item" aria-label="Toggle Theme">
+                                <span class="dropdown-theme-icons" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-right: 2px;">
+                                    <i data-lucide="sun" class="sun-icon"></i>
+                                    <i data-lucide="moon" class="moon-icon"></i>
+                                </span>
+                                <span data-i18n="dropdown.theme">โหมดมืด / สว่าง</span>
+                            </button>
+
+                            <!-- Language Toggle Button inside Dropdown -->
+                            <button type="button" id="lang-toggle" class="dropdown-item" aria-label="Switch Language" title="EN / ไทย">
+                                <i data-lucide="languages"></i>
+                                <span data-i18n="dropdown.lang">ภาษา (Language)</span>
+                                <span id="lang-flag">EN</span>
+                            </button>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <button type="button" id="btn-logout" class="dropdown-item dropdown-item-danger">
+                                <i data-lucide="log-out"></i>
+                                <span data-i18n="header.logout">ออกจากระบบ</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Center: Add Transaction + Theme + Lang -->
-            <div class="topbar-center">
-                <button type="button" id="btn-add-transaction" class="btn-add-tx">
-                    <i data-lucide="plus"></i>
-                    <span data-i18n="topbar.add_transaction">บันทึกรายการ</span>
-                </button>
-
-                <!-- Theme Toggle Button -->
-                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
-                    <i data-lucide="sun" class="sun-icon"></i>
-                    <i data-lucide="moon" class="moon-icon"></i>
-                </button>
-
-                <!-- Language Toggle Button -->
-                <button id="lang-toggle" class="btn-icon" aria-label="Switch Language" title="EN / ไทย">
-                    <span id="lang-flag">EN</span>
-                </button>
-            </div>
-
-            <!-- Right: Logo + Website Name + Subtitle -->
-            <div class="topbar-right">
-                <div class="topbar-brand-text">
-                    <h1>Cash & Bank Flow</h1>
-                    <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่าย</p>
-                </div>
-                <div class="logo-icon-wrapper">
-                    <i data-lucide="wallet" class="logo-icon"></i>
+                <!-- Right: Logo + Website Name + Subtitle -->
+                <div class="topbar-right">
+                    <div class="topbar-brand-text">
+                        <h1>Cash & Bank Flow</h1>
+                        <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่าย</p>
+                    </div>
+                    <div class="logo-icon-wrapper">
+                        <i data-lucide="wallet" class="logo-icon"></i>
+                    </div>
                 </div>
             </div>
         </header>
@@ -215,6 +218,10 @@
                             <span class="hero-label" data-i18n="dashboard.total_balance">ยอดเงินคงเหลือทั้งหมด</span>
                             <div class="hero-badge" data-i18n="dashboard.all_accounts">รวมทุกบัญชี</div>
                         </div>
+                        <button type="button" id="btn-add-transaction" class="btn-add-tx">
+                            <i data-lucide="plus"></i>
+                            <span data-i18n="topbar.add_transaction">บันทึกรายการ</span>
+                        </button>
                     </div>
                     <div class="hero-balance">
                         <span class="hero-currency">฿</span>

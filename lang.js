@@ -61,6 +61,10 @@ const TRANSLATIONS = {
         'header.mock_data': 'ข้อมูลทดลอง',
         'header.clear_all': 'ล้างข้อมูล',
         'header.logout': 'ออกจากระบบ',
+        'dropdown.profile': 'จัดการโปรไฟล์',
+        'dropdown.manage_data': 'จัดการข้อมูล',
+        'dropdown.theme': 'โหมดมืด / สว่าง',
+        'dropdown.lang': 'ภาษา (Language)',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'ยอดเงินคงเหลือทั้งหมด',
@@ -290,6 +294,10 @@ const TRANSLATIONS = {
         'header.mock_data': 'Demo Data',
         'header.clear_all': 'Clear All',
         'header.logout': 'Logout',
+        'dropdown.profile': 'Manage Profile',
+        'dropdown.manage_data': 'Manage Data',
+        'dropdown.theme': 'Dark / Light Mode',
+        'dropdown.lang': 'Language (ภาษา)',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'Total Balance',
