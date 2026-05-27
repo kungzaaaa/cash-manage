@@ -224,6 +224,11 @@ const TRANSLATIONS = {
 
         // ========== Language Toggle ==========
         'lang.switch': 'EN',
+
+        'cat.add_new': 'เพิ่มหมวดหมู่ใหม่...',
+        'prompt.add_category': 'กรุณากรอกชื่อหมวดหมู่ใหม่ที่คุณต้องการเพิ่ม:',
+        'toast.cat_added': 'เพิ่มหมวดหมู่สำเร็จแล้ว!',
+        'toast.cat_error': 'ไม่สามารถบันทึกหมวดหมู่ใหม่ได้',
     },
 
     en: {
@@ -435,6 +440,11 @@ const TRANSLATIONS = {
 
         // ========== Language Toggle ==========
         'lang.switch': 'TH',
+
+        'cat.add_new': 'Add New Category...',
+        'prompt.add_category': 'Please enter the name of the new category:',
+        'toast.cat_added': 'Category added successfully!',
+        'toast.cat_error': 'Failed to save new category',
     }
 };
 
@@ -470,12 +480,12 @@ const CATEGORY_TRANSLATION_MAP = {
 function t(key, params = {}) {
     const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['th'];
     let text = dict[key] || TRANSLATIONS['th'][key] || key;
-    
+
     // Simple interpolation: replace {{key}} with value
     Object.keys(params).forEach(param => {
         text = text.replace(new RegExp(`{{${param}}}`, 'g'), params[param]);
     });
-    
+
     return text;
 }
 

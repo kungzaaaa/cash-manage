@@ -72,10 +72,12 @@ const MOCK_TRANSACTIONS = [
         description: t('mock.shopping')
     }
 ];
-
+// ประกาศตัวแปร Unsubscribe เพิ่มเติมเหนือวัตถุ state
+let unsubscribeCat = null;
 // App State Management
 let state = {
     transactions: [],
+    customCategories: { income: [], expense: [] },
     filters: {
         type: 'all', // all, income, expense, cash, bank
         search: ''
@@ -95,7 +97,7 @@ const elements = {
     btnLoadMock: document.getElementById('btn-load-mock'),
     btnClearAll: document.getElementById('btn-clear-all'),
     btnExportCsv: document.getElementById('btn-export-csv'),
-    
+
     // Summary values
     totalBalance: document.getElementById('total-balance'),
     totalIncome: document.getElementById('total-income'),
@@ -106,7 +108,7 @@ const elements = {
     bankBalance: document.getElementById('bank-balance'),
     bankIncome: document.getElementById('bank-income'),
     bankExpense: document.getElementById('bank-expense'),
-    
+
     // Transaction Form
     transactionForm: document.getElementById('transaction-form'),
     typeIncomeRadio: document.getElementById('type-income'),
@@ -116,18 +118,18 @@ const elements = {
     txCategory: document.getElementById('tx-category'),
     txDate: document.getElementById('tx-date'),
     txDescription: document.getElementById('tx-description'),
-    
+
     // Ledger / Filter elements
     ledgerSearch: document.getElementById('ledger-search'),
     filterButtons: document.querySelectorAll('.filter-btn'),
     ledgerList: document.getElementById('ledger-list'),
     ledgerEmptyState: document.getElementById('ledger-empty-state'),
-    
+
     // Chart tab switchers
     chartTabs: document.querySelectorAll('.chart-tab'),
     chartFlowContainer: document.getElementById('chart-flow-container'),
     chartCategoryContainer: document.getElementById('chart-category-container'),
-    
+
     // Toast
     toast: document.getElementById('notification-toast'),
 
@@ -152,16 +154,16 @@ const elements = {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initialize Date input value to current local time (formatted as YYYY-MM-DDTHH:MM)
     initFormDateTime();
-    
+
     // 2. Initialize Theme configuration
     initTheme();
-    
+
     // 3. Initialize Categories options
     updateCategorySelectOptions();
-    
+
     // 4. Initialize Events
     setupEventListeners();
-    
+
     // 5. Create Lucide Icons
     lucide.createIcons();
 
@@ -178,22 +180,30 @@ let unsubscribeSnapshot = null;
 async function initAppForUser(user) {
     state.currentUser = user;
     txRef = db.collection('users').doc(user.uid).collection('transactions');
-    
-    // Set up real-time listener
+
+    // ➕ ดึงข้อมูลหมวดหมู่ที่สร้างขึ้นเองจากคลังฐานข้อมูล Firestore
+    const customCatRef = db.collection('users').doc(user.uid).collection('custom_categories');
+    unsubscribeCat = customCatRef.onSnapshot((snapshot) => {
+        state.customCategories = { income: [], expense: [] };
+        snapshot.docs.forEach(doc => {
+            const cat = doc.data();
+            if (cat.type === 'income') state.customCategories.income.push(cat);
+            else state.customCategories.expense.push(cat);
+        });
+
+        // สั่งอัปเดตหน้าต่างตัวเลือกใหม่ทุกครั้งเมื่อข้อมูลมีการเปลี่ยนแปลง
+        updateCategorySelectOptions();
+        updateEditCategorySelectOptions();
+    }, (error) => {
+        console.error("Error fetching custom categories:", error);
+    });
+
+    // Set up real-time listener (โค้ดดึงข้อมูลประวัติการทำรายการเดิมของคุณคงไว้เหมือนเดิม)
     unsubscribeSnapshot = txRef.onSnapshot((snapshot) => {
         state.transactions = snapshot.docs.map(doc => {
             return { id: doc.id, ...doc.data() };
         });
-        
-        // Sort by date descending
         state.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        // If it's a completely new user with no transactions, load mock data automatically
-        if (state.transactions.length === 0 && snapshot.metadata.fromCache === false && snapshot.size === 0) {
-            // Check if user just signed up (we'll only load mock if the collection is truly empty)
-            // But to be safe, we'll wait for them to click "ข้อมูลทดลอง" manually instead of auto-populating
-        }
-        
         renderDashboard();
     }, (error) => {
         console.error("Error fetching transactions: ", error);
@@ -205,9 +215,16 @@ function clearAppForLogout() {
     state.currentUser = null;
     txRef = null;
     state.transactions = [];
+    state.customCategories = { income: [], expense: [] }; // เคลียร์ค่าหมวดหมู่ที่เพิ่มเอง
+
     if (unsubscribeSnapshot) {
         unsubscribeSnapshot();
         unsubscribeSnapshot = null;
+    }
+    // สั่งปิดการเชื่อมต่อคลังข้อมูลหมวดหมู่ตอนผู้ใช้ออกจากระบบ
+    if (unsubscribeCat) {
+        unsubscribeCat();
+        unsubscribeCat = null;
     }
     renderDashboard();
 }
@@ -221,7 +238,7 @@ function initFormDateTime() {
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    
+
     elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
@@ -240,8 +257,12 @@ function updateEditCategorySelectOptions() {
 
 // Reusable helper: populates a <select> with category options
 function populateCategorySelect(selectEl, isIncome) {
-    const activeCategories = isIncome ? CATEGORIES.income : CATEGORIES.expense;
-    const currentValue = selectEl.value; // preserve selection when possible
+    const defaultCategories = isIncome ? CATEGORIES.income : CATEGORIES.expense;
+    const customCategories = isIncome ? (state.customCategories?.income || []) : (state.customCategories?.expense || []);
+
+    // รวมรายการหมวดหมู่ทั้งหมดเพื่อแสดงผล
+    const activeCategories = [...defaultCategories, ...customCategories];
+    const currentValue = selectEl.value;
     selectEl.innerHTML = '';
 
     const EMOJI_MAP = {
@@ -253,10 +274,20 @@ function populateCategorySelect(selectEl, isIncome) {
     activeCategories.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
-        const iconSymbol = EMOJI_MAP[cat.id] || (isIncome ? '📥' : '💸');
-        option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
+
+        // จัดหาไอคอนแสดงผล: หากเป็นหมวดหมู่สร้างเองจะใช้ไอคอนมาตรฐาน 🏷️
+        const iconSymbol = EMOJI_MAP[cat.id] || cat.emoji || (isIncome ? '📥' : '💸');
+
+        // ดึงข้อความแสดงผล (รองรับทั้งคำแปลภาษาเดิม และชื่อที่คุณพิมพ์ตั้งขึ้นมาใหม่)
+        const labelText = cat.labelKey ? t(cat.labelKey) : cat.label;
+        option.textContent = `${iconSymbol} ${labelText}`;
         selectEl.appendChild(option);
     });
+
+    const addNewOption = document.createElement('option');
+    addNewOption.value = 'ACTION_ADD_NEW';
+    addNewOption.textContent = t('cat.add_new');
+    selectEl.appendChild(addNewOption);
 
     // Restore previous selection if it still exists in the new list
     if ([...selectEl.options].some(o => o.value === currentValue)) {
@@ -278,7 +309,7 @@ function toggleTheme() {
     state.currentTheme = nextTheme;
     elements.html.setAttribute('data-theme', nextTheme);
     localStorage.setItem('theme', nextTheme);
-    
+
     // Re-draw charts with appropriate text colors for Light/Dark themes
     updateCharts();
 }
@@ -316,7 +347,7 @@ function renderDashboard() {
     elements.totalBalance.textContent = formatCurrency(overallBalance);
     elements.totalIncome.textContent = `+฿${formatCurrency(overallIncome)}`;
     elements.totalExpense.textContent = `-฿${formatCurrency(overallExpense)}`;
-    
+
     elements.cashBalance.textContent = formatCurrency(currentCashBalance);
     elements.cashIncome.textContent = `+฿${formatCurrency(totalCashIncome)}`;
     elements.cashExpense.textContent = `-฿${formatCurrency(totalCashExpense)}`;
@@ -355,31 +386,31 @@ function formatCurrency(number) {
 function renderLedgerList() {
     const listContainer = elements.ledgerList;
     listContainer.innerHTML = '';
-    
+
     // Sort transactions chronologically (Newest first)
     const sortedTx = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     // Apply filters
     const searchVal = state.filters.search.toLowerCase().trim();
     const filterType = state.filters.type;
-    
+
     const filteredTx = sortedTx.filter(tx => {
         // Filter by Type/Method
         if (filterType === 'income' && tx.type !== 'income') return false;
         if (filterType === 'expense' && tx.type !== 'expense') return false;
         if (filterType === 'cash' && tx.method !== 'cash') return false;
         if (filterType === 'bank' && tx.method !== 'bank') return false;
-        
+
         // Filter by Search Keyword (Amount, Description, or Category display name)
         if (searchVal) {
             const amountStr = tx.amount.toString();
             const descStr = (tx.description || '').toLowerCase();
             const categoryObj = getCategoryObj(tx.type, tx.category);
             const categoryLabel = categoryObj ? t(categoryObj.labelKey).toLowerCase() : '';
-            
+
             return amountStr.includes(searchVal) || descStr.includes(searchVal) || categoryLabel.includes(searchVal);
         }
-        
+
         return true;
     });
 
@@ -387,21 +418,21 @@ function renderLedgerList() {
         elements.ledgerEmptyState.classList.remove('hidden');
         return;
     }
-    
+
     elements.ledgerEmptyState.classList.add('hidden');
 
     filteredTx.forEach(tx => {
         const itemLi = document.createElement('li');
         itemLi.className = 'ledger-item';
-        
+
         const categoryObj = getCategoryObj(tx.type, tx.category);
         const iconName = categoryObj ? categoryObj.icon : 'help-circle';
         const colorVal = categoryObj ? categoryObj.color : 'var(--text-muted)';
         const categoryLabel = categoryObj ? t(categoryObj.labelKey) : t('ledger.category_default');
-        
+
         const sign = tx.type === 'income' ? '+' : '-';
         const amountClass = tx.type === 'income' ? 'text-success' : 'text-danger';
-        
+
         // Clean beautiful relative dates
         const dateObj = new Date(tx.date);
         const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
@@ -413,7 +444,7 @@ function renderLedgerList() {
         });
 
         const methodBadgeIcon = tx.method === 'cash' ? 'banknote' : 'landmark';
-        
+
         itemLi.innerHTML = `
             <div class="ledger-item-left">
                 <div class="item-icon-wrapper" style="background-color: ${colorVal}18; border: 1px solid ${colorVal}30;">
@@ -469,8 +500,10 @@ function renderLedgerList() {
 
 // Find Category configuration helper
 function getCategoryObj(type, categoryId) {
-    const list = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
-    return list.find(item => item.id === categoryId) || null;
+    const defaultList = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
+    const customList = type === 'income' ? (state.customCategories?.income || []) : (state.customCategories?.expense || []);
+    const combinedList = [...defaultList, ...customList];
+    return combinedList.find(item => item.id === categoryId) || null;
 }
 
 // -------------------------------------------------------------
@@ -498,7 +531,7 @@ function updateCharts() {
     if (flowChartInstance) {
         flowChartInstance.destroy();
     }
-    
+
     flowChartInstance = new Chart(flowCtx, {
         type: 'doughnut',
         data: {
@@ -631,7 +664,7 @@ function updateCharts() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 const val = context.raw || 0;
                                 const percentage = ((val / totalExpenses) * 100).toFixed(1);
                                 return ` ${context.label}: ฿${formatCurrency(val)} (${percentage}%)`;
@@ -702,7 +735,7 @@ function setupEventListeners() {
     // 4. Form Submission
     elements.transactionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (!txRef) {
             showToast(t('toast.login_required'), 'danger');
             return;
@@ -746,7 +779,7 @@ function setupEventListeners() {
         tab.addEventListener('click', (e) => {
             elements.chartTabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
+
             const chartType = tab.getAttribute('data-chart');
             state.activeChartTab = chartType;
 
@@ -757,7 +790,7 @@ function setupEventListeners() {
                 elements.chartFlowContainer.classList.remove('active');
                 elements.chartCategoryContainer.classList.add('active');
             }
-            
+
             updateCharts();
         });
     });
@@ -773,7 +806,7 @@ function setupEventListeners() {
         btn.addEventListener('click', () => {
             elements.filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             state.filters.type = btn.getAttribute('data-filter');
             renderLedgerList();
         });
@@ -827,6 +860,52 @@ function setupEventListeners() {
             showToast(t('toast.tx_edit_error'), 'danger');
         }
     });
+
+    elements.txCategory.addEventListener('change', async (e) => {
+        if (e.target.value === 'ACTION_ADD_NEW') {
+            await handleAddNewCategoryAction(false);
+        }
+    });
+
+    elements.editTxCategory.addEventListener('change', async (e) => {
+        if (e.target.value === 'ACTION_ADD_NEW') {
+            await handleAddNewCategoryAction(true);
+        }
+    });
+
+    async function handleAddNewCategoryAction(isEditForm) {
+        const selectEl = isEditForm ? elements.editTxCategory : elements.txCategory;
+        const isIncome = isEditForm ? elements.editTypeIncome.checked : elements.typeIncomeRadio.checked;
+
+        const catName = prompt(t('prompt.add_category'));
+
+        if (!catName || catName.trim() === '') {
+            selectEl.value = selectEl.options[0].value;
+            return;
+        }
+
+        const cleanName = catName.trim();
+        const catId = 'custom-' + Date.now();
+
+        const newCategory = {
+            id: catId,
+            label: cleanName,
+            type: isIncome ? 'income' : 'expense',
+            icon: isIncome ? 'plus-circle' : 'minus-circle',
+            color: isIncome ? 'hsl(150, 80%, 42%)' : 'hsl(0, 0%, 55%)',
+            emoji: '🏷️'
+        };
+
+        try {
+            await db.collection('users').doc(state.currentUser.uid).collection('custom_categories').doc(catId).set(newCategory);
+            showToast(t('toast.cat_added'), 'success');
+            setTimeout(() => { selectEl.value = catId; }, 100);
+        } catch (error) {
+            console.error("Error creating category:", error);
+            showToast(t('toast.cat_error'), 'danger');
+            selectEl.value = selectEl.options[0].value;
+        }
+    }
 }
 
 // -------------------------------------------------------------
@@ -892,9 +971,9 @@ function showToast(message, type = 'success') {
     const toast = elements.toast;
     const icon = toast.querySelector('.toast-icon');
     const msgSpan = toast.querySelector('.toast-message');
-    
+
     msgSpan.textContent = message;
-    
+
     // Set appropriate color badges
     toast.className = 'toast'; // reset classes
     if (type === 'success') {
@@ -906,11 +985,11 @@ function showToast(message, type = 'success') {
     } else {
         icon.setAttribute('data-lucide', 'info');
     }
-    
+
     lucide.createIcons();
-    
+
     toast.classList.remove('hidden');
-    
+
     // Auto-hide after 3 seconds
     setTimeout(() => {
         toast.classList.add('hidden');
@@ -938,7 +1017,7 @@ function exportToCSV() {
         const description = (tx.description || '').replace(/"/g, '""'); // escape quotes
 
         const formattedDate = new Date(tx.date).toLocaleString(getDateLocale());
-        
+
         csvContent += `"${formattedDate}","${typeLabel}",${tx.amount},"${methodLabel}","${catLabel}","${description}"\r\n`;
     });
 
@@ -946,14 +1025,14 @@ function exportToCSV() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `cash_bank_report_${new Date().toISOString().slice(0, 10)}.csv`);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     showToast(t('toast.csv_success'), 'success');
 }
