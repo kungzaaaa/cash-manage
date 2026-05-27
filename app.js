@@ -4,7 +4,7 @@
  */
 
 // Category Configurations with emojis and Lucide icon keys
-const CATEGORIES = {
+let CATEGORIES = {
     income: [
         { id: 'salary', labelKey: 'cat.salary', icon: 'briefcase', color: 'hsl(150, 80%, 42%)' },
         { id: 'business', labelKey: 'cat.business', icon: 'store', color: 'hsl(205, 90%, 50%)' },
@@ -143,7 +143,22 @@ const elements = {
     editTxMethod: document.getElementById('edit-tx-method'),
     editTxCategory: document.getElementById('edit-tx-category'),
     editTxDate: document.getElementById('edit-tx-date'),
-    editTxDescription: document.getElementById('edit-tx-description')
+    editTxDescription: document.getElementById('edit-tx-description'),
+
+    // Category Modal
+    categoryModalOverlay: document.getElementById('category-modal-overlay'),
+    categoryModalClose: document.getElementById('category-modal-close'),
+    categoryModalCancel: document.getElementById('category-modal-cancel'),
+    categoryForm: document.getElementById('category-form'),
+    catTypeIndicator: document.getElementById('cat-type-indicator'),
+    catTypeLabel: document.getElementById('cat-type-label'),
+    catName: document.getElementById('cat-name'),
+    iconPickerGrid: document.getElementById('icon-picker-grid'),
+    colorPickerGrid: document.getElementById('color-picker-grid'),
+    catPreviewIcon: document.getElementById('cat-preview-icon'),
+    catPreviewName: document.getElementById('cat-preview-name'),
+    btnAddCategory: document.getElementById('btn-add-category'),
+    btnAddCategoryEdit: document.getElementById('btn-add-category-edit')
 };
 
 // -------------------------------------------------------------
@@ -164,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Create Lucide Icons
     lucide.createIcons();
+
+    // 6. Initialize Category Modal pickers
+    initCategoryModal();
 
     // Note: Data loading and renderDashboard are now triggered by Firebase Auth state
     // (see initAppForUser in auth.js)
@@ -199,6 +217,9 @@ async function initAppForUser(user) {
         console.error("Error fetching transactions: ", error);
         showToast(t('toast.load_error'), 'danger');
     });
+
+    // Load custom categories from Firestore
+    loadCustomCategories(user);
 }
 
 function clearAppForLogout() {
@@ -253,7 +274,7 @@ function populateCategorySelect(selectEl, isIncome) {
     activeCategories.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
-        const iconSymbol = EMOJI_MAP[cat.id] || (isIncome ? '📥' : '💸');
+        const iconSymbol = EMOJI_MAP[cat.id] || (cat.custom ? '✨' : (isIncome ? '📥' : '💸'));
         option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
         selectEl.appendChild(option);
     });
@@ -827,6 +848,17 @@ function setupEventListeners() {
             showToast(t('toast.tx_edit_error'), 'danger');
         }
     });
+
+    // 12. Category Add buttons
+    elements.btnAddCategory.addEventListener('click', () => {
+        const isIncome = elements.typeIncomeRadio.checked;
+        openCategoryModal(isIncome ? 'income' : 'expense');
+    });
+
+    elements.btnAddCategoryEdit.addEventListener('click', () => {
+        const isIncome = elements.editTypeIncome.checked;
+        openCategoryModal(isIncome ? 'income' : 'expense');
+    });
 }
 
 // -------------------------------------------------------------
@@ -956,4 +988,276 @@ function exportToCSV() {
     document.body.removeChild(link);
 
     showToast(t('toast.csv_success'), 'success');
+}
+
+// -------------------------------------------------------------
+// Category Management System
+// -------------------------------------------------------------
+
+// Available icons for user selection in category modal
+const AVAILABLE_ICONS = [
+    'tag', 'wallet', 'credit-card', 'piggy-bank', 'coins',
+    'building-2', 'car', 'plane', 'train', 'bike',
+    'coffee', 'utensils', 'shopping-bag', 'shirt', 'scissors',
+    'heart', 'baby', 'graduation-cap', 'book', 'music',
+    'gamepad-2', 'tv', 'smartphone', 'wifi', 'zap',
+    'wrench', 'hammer', 'paintbrush', 'camera', 'flower-2',
+    'dog', 'cat', 'leaf', 'sun', 'umbrella',
+    'gift', 'sparkles', 'trophy', 'medal', 'star'
+];
+
+// Available colors for user selection in category modal
+const AVAILABLE_COLORS = [
+    'hsl(0, 80%, 55%)',      // Red
+    'hsl(15, 85%, 55%)',     // Red-Orange
+    'hsl(30, 90%, 50%)',     // Orange
+    'hsl(45, 95%, 50%)',     // Yellow-Orange
+    'hsl(55, 90%, 48%)',     // Yellow
+    'hsl(80, 70%, 45%)',     // Yellow-Green
+    'hsl(120, 60%, 42%)',    // Green
+    'hsl(150, 80%, 38%)',    // Teal
+    'hsl(175, 75%, 40%)',    // Cyan
+    'hsl(195, 85%, 45%)',    // Light Blue
+    'hsl(210, 90%, 50%)',    // Blue
+    'hsl(230, 80%, 55%)',    // Indigo
+    'hsl(260, 70%, 55%)',    // Purple
+    'hsl(280, 75%, 55%)',    // Violet
+    'hsl(310, 70%, 50%)',    // Magenta
+    'hsl(330, 80%, 55%)',    // Pink
+    'hsl(350, 85%, 55%)',    // Rose
+    'hsl(0, 0%, 50%)',       // Gray
+    'hsl(200, 15%, 40%)',    // Slate
+    'hsl(25, 75%, 45%)',     // Brown
+];
+
+// Category modal state
+let categoryModalState = {
+    type: 'income', // or 'expense'
+    selectedIcon: 'tag',
+    selectedColor: 'hsl(210, 90%, 50%)'
+};
+
+// Initialize the category modal (populate icon & color pickers)
+function initCategoryModal() {
+    // Populate Icon Picker
+    const iconGrid = elements.iconPickerGrid;
+    iconGrid.innerHTML = '';
+    AVAILABLE_ICONS.forEach(iconName => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'icon-pick-btn' + (iconName === 'tag' ? ' active' : '');
+        btn.setAttribute('data-icon', iconName);
+        btn.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        btn.addEventListener('click', () => selectCategoryIcon(iconName));
+        iconGrid.appendChild(btn);
+    });
+
+    // Populate Color Picker
+    const colorGrid = elements.colorPickerGrid;
+    colorGrid.innerHTML = '';
+    AVAILABLE_COLORS.forEach((color, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'color-pick-btn' + (idx === 10 ? ' active' : ''); // Default: Blue
+        btn.style.background = color;
+        btn.setAttribute('data-color', color);
+        btn.addEventListener('click', () => selectCategoryColor(color));
+        colorGrid.appendChild(btn);
+    });
+
+    // Category modal close events
+    elements.categoryModalClose.addEventListener('click', closeCategoryModal);
+    elements.categoryModalCancel.addEventListener('click', closeCategoryModal);
+    elements.categoryModalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.categoryModalOverlay) closeCategoryModal();
+    });
+
+    // Category form submission
+    elements.categoryForm.addEventListener('submit', handleCategoryFormSubmit);
+
+    // Live preview on name input
+    elements.catName.addEventListener('input', updateCategoryPreview);
+
+    // Render Lucide icons in the picker
+    lucide.createIcons();
+}
+
+function selectCategoryIcon(iconName) {
+    categoryModalState.selectedIcon = iconName;
+    // Update active state
+    elements.iconPickerGrid.querySelectorAll('.icon-pick-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-icon') === iconName);
+    });
+    updateCategoryPreview();
+}
+
+function selectCategoryColor(color) {
+    categoryModalState.selectedColor = color;
+    // Update active state
+    elements.colorPickerGrid.querySelectorAll('.color-pick-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
+    });
+    updateCategoryPreview();
+}
+
+function updateCategoryPreview() {
+    const name = elements.catName.value.trim() || t('category.default_name');
+    const color = categoryModalState.selectedColor;
+    const icon = categoryModalState.selectedIcon;
+
+    elements.catPreviewName.textContent = name;
+    elements.catPreviewIcon.style.backgroundColor = color + '18';
+    elements.catPreviewIcon.style.border = `1px solid ${color}30`;
+    elements.catPreviewIcon.innerHTML = `<i data-lucide="${icon}" style="color: ${color}"></i>`;
+    lucide.createIcons();
+}
+
+function openCategoryModal(type) {
+    categoryModalState.type = type;
+    categoryModalState.selectedIcon = 'tag';
+    categoryModalState.selectedColor = AVAILABLE_COLORS[10]; // Blue default
+
+    // Reset form
+    elements.categoryForm.reset();
+
+    // Update type indicator
+    const indicator = elements.catTypeIndicator;
+    indicator.className = 'cat-type-indicator';
+    if (type === 'income') {
+        indicator.classList.add('type-income');
+        indicator.querySelector('.cat-type-icon').setAttribute('data-lucide', 'arrow-down-left');
+        elements.catTypeLabel.textContent = t('category.for_income');
+    } else {
+        indicator.classList.add('type-expense');
+        indicator.querySelector('.cat-type-icon').setAttribute('data-lucide', 'arrow-up-right');
+        elements.catTypeLabel.textContent = t('category.for_expense');
+    }
+
+    // Reset icon selection
+    elements.iconPickerGrid.querySelectorAll('.icon-pick-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-icon') === 'tag');
+    });
+
+    // Reset color selection
+    elements.colorPickerGrid.querySelectorAll('.color-pick-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-color') === AVAILABLE_COLORS[10]);
+    });
+
+    // Update preview
+    updateCategoryPreview();
+
+    // Show modal
+    elements.categoryModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    lucide.createIcons();
+
+    // Focus name input
+    setTimeout(() => elements.catName.focus(), 100);
+}
+
+function closeCategoryModal() {
+    elements.categoryModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    elements.categoryForm.reset();
+}
+
+async function handleCategoryFormSubmit(e) {
+    e.preventDefault();
+
+    const name = elements.catName.value.trim();
+    if (!name) {
+        showToast(t('toast.cat_name_required'), 'danger');
+        return;
+    }
+
+    const type = categoryModalState.type;
+    const icon = categoryModalState.selectedIcon;
+    const color = categoryModalState.selectedColor;
+
+    // Generate a unique ID based on name
+    const id = 'custom-' + name.toLowerCase().replace(/[^a-z0-9฀-๿]/gi, '-').replace(/-+/g, '-').substring(0, 30) + '-' + Date.now().toString(36);
+
+    // Check for duplicate name
+    const existingList = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
+    const labelKey = `cat.custom.${id}`;
+
+    // Add translation dynamically for the custom category name
+    if (TRANSLATIONS.th) TRANSLATIONS.th[labelKey] = name;
+    if (TRANSLATIONS.en) TRANSLATIONS.en[labelKey] = name;
+
+    // Create new category object
+    const newCat = {
+        id: id,
+        labelKey: labelKey,
+        icon: icon,
+        color: color,
+        custom: true,
+        customName: name
+    };
+
+    // Add to CATEGORIES
+    if (type === 'income') {
+        CATEGORIES.income.push(newCat);
+    } else {
+        CATEGORIES.expense.push(newCat);
+    }
+
+    // Save to Firestore if logged in
+    if (state.currentUser) {
+        try {
+            await db.collection('users').doc(state.currentUser.uid)
+                .collection('customCategories').doc(id).set({
+                    id, type, labelKey, icon, color, custom: true, customName: name
+                });
+        } catch (error) {
+            console.error('Error saving custom category:', error);
+            showToast(t('toast.cat_save_error'), 'danger');
+        }
+    }
+
+    // Refresh category dropdowns
+    updateCategorySelectOptions();
+    if (elements.editModalOverlay && !elements.editModalOverlay.classList.contains('hidden')) {
+        updateEditCategorySelectOptions();
+    }
+
+    // Select the new category in the active dropdown
+    elements.txCategory.value = id;
+
+    closeCategoryModal();
+    showToast(t('toast.cat_added'), 'success');
+}
+
+// Load custom categories from Firestore for the logged-in user
+async function loadCustomCategories(user) {
+    try {
+        const snapshot = await db.collection('users').doc(user.uid)
+            .collection('customCategories').get();
+
+        snapshot.docs.forEach(doc => {
+            const catData = doc.data();
+            // Add translation entry
+            if (TRANSLATIONS.th) TRANSLATIONS.th[catData.labelKey] = catData.customName;
+            if (TRANSLATIONS.en) TRANSLATIONS.en[catData.labelKey] = catData.customName;
+
+            // Check if already exists
+            const targetList = catData.type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
+            const exists = targetList.some(c => c.id === catData.id);
+            if (!exists) {
+                targetList.push({
+                    id: catData.id,
+                    labelKey: catData.labelKey,
+                    icon: catData.icon,
+                    color: catData.color,
+                    custom: true,
+                    customName: catData.customName
+                });
+            }
+        });
+
+        // Refresh dropdowns with loaded custom categories
+        updateCategorySelectOptions();
+    } catch (error) {
+        console.error('Error loading custom categories:', error);
+    }
 }

@@ -317,9 +317,14 @@
                             <!-- Input Category -->
                             <div class="form-group col-6">
                                 <label for="tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
-                                <select id="tx-category" required>
-                                    <!-- Options will be dynamically populated in JavaScript to match Income/Expense context -->
-                                </select>
+                                <div class="category-select-row">
+                                    <select id="tx-category" required>
+                                        <!-- Options will be dynamically populated in JavaScript to match Income/Expense context -->
+                                    </select>
+                                    <button type="button" id="btn-add-category" class="btn-icon btn-add-cat" title="เพิ่มหมวดหมู่" data-i18n-title="form.add_category">
+                                        <i data-lucide="plus"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Input Date -->
@@ -488,7 +493,12 @@
 
                     <div class="form-group col-6">
                         <label for="edit-tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
-                        <select id="edit-tx-category" required></select>
+                        <div class="category-select-row">
+                            <select id="edit-tx-category" required></select>
+                            <button type="button" id="btn-add-category-edit" class="btn-icon btn-add-cat" title="เพิ่มหมวดหมู่" data-i18n-title="form.add_category">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group col-12">
@@ -650,6 +660,78 @@
                     <button type="submit" id="btn-confirm-delete-account" class="btn btn-danger btn-lg" disabled>
                         <i data-lucide="trash-2"></i>
                         <span id="btn-confirm-delete-text">กรุณารอยืนยัน... (5)</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="category-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="layers" class="title-icon text-primary"></i>
+                    <h2 data-i18n="category.modal_title">เพิ่มหมวดหมู่ใหม่</h2>
+                </div>
+                <button id="category-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="category-form" autocomplete="off">
+                <!-- Category type indicator -->
+                <div class="cat-type-indicator" id="cat-type-indicator">
+                    <i data-lucide="arrow-down-left" class="cat-type-icon"></i>
+                    <span id="cat-type-label" data-i18n="category.for_income">สำหรับรายรับ</span>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Category Name -->
+                    <div class="form-group col-12">
+                        <label for="cat-name" data-i18n="category.name_label">ชื่อหมวดหมู่ <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="tag" class="input-icon-left"></i>
+                            <input type="text" id="cat-name" placeholder="เช่น ค่าเช่า, เงินออม..." data-i18n-placeholder="category.name_placeholder" required maxlength="30">
+                        </div>
+                    </div>
+
+                    <!-- Icon Picker -->
+                    <div class="form-group col-6">
+                        <label data-i18n="category.icon_label">เลือกไอคอน</label>
+                        <div class="icon-picker-grid" id="icon-picker-grid">
+                            <!-- Icons populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Color Picker -->
+                    <div class="form-group col-6">
+                        <label data-i18n="category.color_label">เลือกสี</label>
+                        <div class="color-picker-grid" id="color-picker-grid">
+                            <!-- Colors populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="cat-preview-section">
+                    <label data-i18n="category.preview_label">ตัวอย่าง</label>
+                    <div class="cat-preview-item" id="cat-preview-item">
+                        <div class="cat-preview-icon" id="cat-preview-icon">
+                            <i data-lucide="tag"></i>
+                        </div>
+                        <span id="cat-preview-name">หมวดหมู่ใหม่</span>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="category-modal-cancel" class="btn btn-secondary btn-lg">
+                        <i data-lucide="x"></i>
+                        <span data-i18n="category.cancel">ยกเลิก</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-lucide="plus-circle"></i>
+                        <span data-i18n="category.save">เพิ่มหมวดหมู่</span>
                     </button>
                 </div>
             </form>

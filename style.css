@@ -86,6 +86,10 @@
     --color-danger-bg: hsla(355, 80%, 48%, 0.08);
     
     --glow-opacity: 0.06;
+
+    /* Light theme input backgrounds */
+    --bg-input: hsla(var(--hue-primary), 15%, 92%, 0.5);
+    --bg-input-focus: hsla(var(--hue-primary), 15%, 88%, 0.6);
 }
 
 /* Global Utility Classes */
@@ -644,12 +648,14 @@ body {
     color: var(--text-title);
 }
 
-.type-selector-tabs input[id="type-income"]:checked + .label-income {
+.type-selector-tabs input[id="type-income"]:checked + .label-income,
+.type-selector-tabs input[id="edit-type-income"]:checked + .label-income {
     color: var(--color-success);
     border: 1px solid hsla(145, 80%, 42%, 0.15);
 }
 
-.type-selector-tabs input[id="type-expense"]:checked + .label-expense {
+.type-selector-tabs input[id="type-expense"]:checked + .label-expense,
+.type-selector-tabs input[id="edit-type-expense"]:checked + .label-expense {
     color: var(--color-danger);
     border: 1px solid hsla(355, 85%, 55%, 0.15);
 }
@@ -1782,6 +1788,259 @@ body {
     font-size: 11px;
     margin-top: 4px;
     font-weight: 500;
+}
+
+/* ============================================================= 
+   Category Select Row & Add Category Button
+   ============================================================= */
+.category-select-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.category-select-row select {
+    flex: 1;
+    min-width: 0;
+}
+
+.btn-add-cat {
+    width: 44px;
+    height: auto;
+    min-height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, hsla(var(--hue-primary), 60%, 55%, 0.15), hsla(var(--hue-primary), 60%, 55%, 0.08));
+    border: 1px dashed hsla(var(--hue-primary), 80%, 65%, 0.3);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.btn-add-cat:hover {
+    background: linear-gradient(135deg, hsla(var(--hue-primary), 60%, 55%, 0.25), hsla(var(--hue-primary), 60%, 55%, 0.15));
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+}
+
+.btn-add-cat svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* =============================================================
+   Add Category Modal Styles
+   ============================================================= */
+
+/* Type Indicator Badge */
+.cat-type-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.cat-type-indicator.type-income {
+    background: hsla(145, 80%, 42%, 0.1);
+    border: 1px solid hsla(145, 80%, 42%, 0.2);
+    color: var(--color-success);
+}
+
+.cat-type-indicator.type-expense {
+    background: hsla(355, 85%, 55%, 0.1);
+    border: 1px solid hsla(355, 85%, 55%, 0.2);
+    color: var(--color-danger);
+}
+
+.cat-type-indicator .cat-type-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Icon Picker Grid */
+.icon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.icon-pick-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: hsla(var(--hue-primary), 20%, 50%, 0.06);
+    border: 1.5px solid var(--border-glass);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+}
+
+.icon-pick-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.icon-pick-btn:hover {
+    background: hsla(var(--hue-primary), 20%, 50%, 0.15);
+    border-color: var(--border-glass-hover);
+    color: var(--text-title);
+    transform: scale(1.08);
+}
+
+.icon-pick-btn.active {
+    background: var(--color-primary-glow);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0 2px 8px var(--color-primary-glow);
+}
+
+/* Color Picker Grid */
+.color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.color-pick-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.color-pick-btn:hover {
+    transform: scale(1.12);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.color-pick-btn.active {
+    border-color: var(--text-title);
+    transform: scale(1.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.color-pick-btn.active::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Category Preview Section */
+.cat-preview-section {
+    margin-bottom: 20px;
+}
+
+.cat-preview-section label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.cat-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: hsla(var(--hue-primary), 20%, 20%, 0.12);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.cat-preview-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.cat-preview-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.cat-preview-item span {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-title);
+}
+
+/* =============================================================
+   Improved Form Select Styling (consistent with theme)
+   ============================================================= */
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c7f91' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.form-group select option {
+    background: var(--bg-surface-solid);
+    color: var(--text-title);
+    padding: 8px;
+}
+
+/* Light theme override for select dropdown arrow */
+[data-theme="light"] .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234e515d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+/* Light theme: consistent input/select backgrounds */
+[data-theme="light"] .input-with-icon input,
+[data-theme="light"] .form-group select {
+    background-color: var(--bg-input);
+}
+
+[data-theme="light"] .input-with-icon input:focus,
+[data-theme="light"] .form-group select:focus {
+    background-color: var(--bg-input-focus);
+}
+
+[data-theme="light"] .search-box input {
+    background-color: var(--bg-input);
+}
+
+[data-theme="light"] .auth-input-group input {
+    background-color: var(--bg-input);
+}
+
+[data-theme="light"] .auth-input-group input:focus {
+    background-color: var(--bg-input-focus);
 }
 
 /* Responsive Web Design Breakdown */

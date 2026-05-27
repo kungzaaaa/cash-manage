@@ -83,6 +83,7 @@ const TRANSLATIONS = {
         'form.description': 'บันทึกเพิ่มเติม',
         'form.description_placeholder': 'รายละเอียด หรือคำอธิบายเพิ่มเติม...',
         'form.submit': 'บันทึกรายการ',
+        'form.add_category': 'เพิ่มหมวดหมู่ใหม่',
 
         // ========== Charts ==========
         'chart.title': 'วิเคราะห์สัดส่วนและการเงิน',
@@ -203,6 +204,23 @@ const TRANSLATIONS = {
         'cat.entertainment': 'ท่องเที่ยว & บันเทิง',
         'cat.others_expense': 'รายจ่ายอื่น ๆ',
 
+        // ========== Category Management Modal ==========
+        'category.modal_title': 'เพิ่มหมวดหมู่ใหม่',
+        'category.for_income': 'สำหรับรายรับ',
+        'category.for_expense': 'สำหรับรายจ่าย',
+        'category.name_label': 'ชื่อหมวดหมู่',
+        'category.name_placeholder': 'เช่น ค่าเช่า, เงินออม...',
+        'category.icon_label': 'เลือกไอคอน',
+        'category.color_label': 'เลือกสี',
+        'category.preview_label': 'ตัวอย่าง',
+        'category.cancel': 'ยกเลิก',
+        'category.save': 'เพิ่มหมวดหมู่',
+        'category.default_name': 'หมวดหมู่ใหม่',
+        'toast.cat_added': 'เพิ่มหมวดหมู่ใหม่เรียบร้อย!',
+        'toast.cat_name_required': 'กรุณากรอกชื่อหมวดหมู่',
+        'toast.cat_exists': 'หมวดหมู่นี้มีอยู่แล้ว',
+        'toast.cat_save_error': 'ไม่สามารถบันทึกหมวดหมู่ได้',
+
         // ========== CSV Headers ==========
         'csv.date': 'วันเวลา',
         'csv.type': 'ประเภท',
@@ -294,6 +312,7 @@ const TRANSLATIONS = {
         'form.description': 'Notes',
         'form.description_placeholder': 'Additional details or notes...',
         'form.submit': 'Save Transaction',
+        'form.add_category': 'Add new category',
 
         // ========== Charts ==========
         'chart.title': 'Financial Analysis',
@@ -413,6 +432,23 @@ const TRANSLATIONS = {
         'cat.health': 'Health & Medical',
         'cat.entertainment': 'Travel & Entertainment',
         'cat.others_expense': 'Other Expenses',
+
+        // ========== Category Management Modal ==========
+        'category.modal_title': 'Add New Category',
+        'category.for_income': 'For Income',
+        'category.for_expense': 'For Expense',
+        'category.name_label': 'Category Name',
+        'category.name_placeholder': 'e.g. Rent, Savings...',
+        'category.icon_label': 'Choose Icon',
+        'category.color_label': 'Choose Color',
+        'category.preview_label': 'Preview',
+        'category.cancel': 'Cancel',
+        'category.save': 'Add Category',
+        'category.default_name': 'New Category',
+        'toast.cat_added': 'New category added successfully!',
+        'toast.cat_name_required': 'Please enter a category name',
+        'toast.cat_exists': 'This category already exists',
+        'toast.cat_save_error': 'Failed to save category',
 
         // ========== CSV Headers ==========
         'csv.date': 'Date',
