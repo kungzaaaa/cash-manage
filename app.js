@@ -1,7 +1,22 @@
 /**
  * Application State & Logic
- * Cash & Bank Flow Tracker
+ * Cash & Bank Flow Tracker — Minimalist Edition
  */
+
+// # ============================================
+// # PAYMENT / DONATION INTEGRATION (Future)
+// # ============================================
+// # function initPaymentSystem() { ... }
+// # function processDonation(amount, method) { ... }
+// # function generateQRCode(amount) { ... }
+// # function handlePaymentWebhook(event) { ... }
+// # 
+// # Supported methods (planned):
+// #   - Stripe Payment Gateway
+// #   - PromptPay QR Code
+// #   - PayPal Donations
+// #   - Crypto Wallet
+// # ============================================
 
 // Category Configurations with emojis and Lucide icon keys
 let CATEGORIES = {
@@ -24,64 +39,16 @@ let CATEGORIES = {
     ]
 };
 
-// Initial Mock Data (used if localStorage is completely empty for demonstration)
-const MOCK_TRANSACTIONS = [
-    {
-        id: 'mock-1',
-        type: 'income',
-        amount: 32000.00,
-        method: 'bank',
-        category: 'salary',
-        date: '2026-05-25T09:00',
-        description: t('mock.salary')
-    },
-    {
-        id: 'mock-2',
-        type: 'expense',
-        amount: 1420.00,
-        method: 'bank',
-        category: 'bills',
-        date: '2026-05-25T11:30',
-        description: t('mock.bills')
-    },
-    {
-        id: 'mock-3',
-        type: 'income',
-        amount: 3000.00,
-        method: 'cash',
-        category: 'gift',
-        date: '2026-05-25T18:00',
-        description: t('mock.gift')
-    },
-    {
-        id: 'mock-4',
-        type: 'expense',
-        amount: 280.00,
-        method: 'cash',
-        category: 'food',
-        date: '2026-05-26T08:15',
-        description: t('mock.food')
-    },
-    {
-        id: 'mock-5',
-        type: 'expense',
-        amount: 1800.00,
-        method: 'bank',
-        category: 'shopping',
-        date: '2026-05-26T14:40',
-        description: t('mock.shopping')
-    }
-];
-
 // App State Management
 let state = {
     transactions: [],
     filters: {
-        type: 'all', // all, income, expense, cash, bank
+        type: 'all',
         search: ''
     },
-    currentTheme: 'dark',
-    activeChartTab: 'flow' // flow, category
+    currentTheme: 'light',
+    activeChartTab: 'flow',
+    currentView: 'home' // 'home' or 'detail'
 };
 
 // Chart.js Instances
@@ -92,9 +59,8 @@ let categoryChartInstance = null;
 const elements = {
     html: document.documentElement,
     themeToggleBtn: document.getElementById('theme-toggle'),
-    btnLoadMock: document.getElementById('btn-load-mock'),
-    btnClearAll: document.getElementById('btn-clear-all'),
     btnExportCsv: document.getElementById('btn-export-csv'),
+    btnClearAll: document.getElementById('btn-clear-all'),
 
     // Summary values
     totalBalance: document.getElementById('total-balance'),
@@ -107,7 +73,10 @@ const elements = {
     bankIncome: document.getElementById('bank-income'),
     bankExpense: document.getElementById('bank-expense'),
 
-    // Transaction Form
+    // Transaction Form (now inside modal)
+    addTxModalOverlay: document.getElementById('add-tx-modal-overlay'),
+    addTxModalClose: document.getElementById('add-tx-modal-close'),
+    btnAddTransaction: document.getElementById('btn-add-transaction'),
     transactionForm: document.getElementById('transaction-form'),
     typeIncomeRadio: document.getElementById('type-income'),
     typeExpenseRadio: document.getElementById('type-expense'),
@@ -117,7 +86,17 @@ const elements = {
     txDate: document.getElementById('tx-date'),
     txDescription: document.getElementById('tx-description'),
 
-    // Ledger / Filter elements
+    // Recent List (home view)
+    recentList: document.getElementById('recent-list'),
+    recentEmptyState: document.getElementById('recent-empty-state'),
+    btnViewAll: document.getElementById('btn-view-all'),
+
+    // Views
+    homeView: document.getElementById('home-view'),
+    detailView: document.getElementById('detail-view'),
+    btnBackHome: document.getElementById('btn-back-home'),
+
+    // Ledger / Filter elements (detail view)
     ledgerSearch: document.getElementById('ledger-search'),
     filterButtons: document.querySelectorAll('.filter-btn'),
     ledgerList: document.getElementById('ledger-list'),
@@ -145,6 +124,16 @@ const elements = {
     editTxDate: document.getElementById('edit-tx-date'),
     editTxDescription: document.getElementById('edit-tx-description'),
 
+    // Data Management Modal
+    dataManageModalOverlay: document.getElementById('data-manage-modal-overlay'),
+    dataManageModalClose: document.getElementById('data-manage-modal-close'),
+    btnManageData: document.getElementById('btn-manage-data'),
+    btnExportData: document.getElementById('btn-export-data'),
+
+    // Profile Dropdown
+    profileDropdown: document.getElementById('profile-dropdown'),
+    btnOpenProfile: document.getElementById('btn-open-profile'),
+
     // Category Modal
     categoryModalOverlay: document.getElementById('category-modal-overlay'),
     categoryModalClose: document.getElementById('category-modal-close'),
@@ -165,29 +154,13 @@ const elements = {
 // Core Initialization
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initialize Date input value to current local time (formatted as YYYY-MM-DDTHH:MM)
     initFormDateTime();
-
-    // 2. Initialize Theme configuration
     initTheme();
-
-    // 3. Initialize Categories options
     updateCategorySelectOptions();
-
-    // 4. Initialize Events
     setupEventListeners();
-
-    // 5. Initialize Custom Dropdown UI
     initCustomDropdowns();
-
-    // 6. Initialize Category Modal pickers
     initCategoryModal();
-
-    // 7. Create Lucide Icons
     lucide.createIcons();
-
-    // Note: Data loading and renderDashboard are now triggered by Firebase Auth state
-    // (see initAppForUser in auth.js)
 });
 
 // -------------------------------------------------------------
@@ -200,28 +173,17 @@ async function initAppForUser(user) {
     state.currentUser = user;
     txRef = db.collection('users').doc(user.uid).collection('transactions');
 
-    // Set up real-time listener
     unsubscribeSnapshot = txRef.onSnapshot((snapshot) => {
         state.transactions = snapshot.docs.map(doc => {
             return { id: doc.id, ...doc.data() };
         });
-
-        // Sort by date descending
         state.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        // If it's a completely new user with no transactions, load mock data automatically
-        if (state.transactions.length === 0 && snapshot.metadata.fromCache === false && snapshot.size === 0) {
-            // Check if user just signed up (we'll only load mock if the collection is truly empty)
-            // But to be safe, we'll wait for them to click "ข้อมูลทดลอง" manually instead of auto-populating
-        }
-
         renderDashboard();
     }, (error) => {
         console.error("Error fetching transactions: ", error);
         showToast(t('toast.load_error'), 'danger');
     });
 
-    // Load custom categories from Firestore
     loadCustomCategories(user);
 }
 
@@ -236,21 +198,18 @@ function clearAppForLogout() {
     renderDashboard();
 }
 
-// Setup DateTime local picker input correctly
 function initFormDateTime() {
     const now = new Date();
-    // Offset local timezone
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-
     elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 // -------------------------------------------------------------
-// Category management based on Type selection
+// Category management
 // -------------------------------------------------------------
 function updateCategorySelectOptions() {
     const isIncome = elements.typeIncomeRadio.checked;
@@ -262,10 +221,9 @@ function updateEditCategorySelectOptions() {
     populateCategorySelect(elements.editTxCategory, isIncome);
 }
 
-// Reusable helper: populates a <select> with category options
 function populateCategorySelect(selectEl, isIncome) {
     const activeCategories = isIncome ? CATEGORIES.income : CATEGORIES.expense;
-    const currentValue = selectEl.value; // preserve selection when possible
+    const currentValue = selectEl.value;
     selectEl.innerHTML = '';
 
     const EMOJI_MAP = {
@@ -279,18 +237,15 @@ function populateCategorySelect(selectEl, isIncome) {
         option.value = cat.id;
         const iconSymbol = EMOJI_MAP[cat.id] || (cat.custom ? '✨' : (isIncome ? '📥' : '💸'));
         option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
-        // Data attributes for custom dropdown rendering
         option.setAttribute('data-icon', cat.icon);
         option.setAttribute('data-color', cat.color);
         selectEl.appendChild(option);
     });
 
-    // Restore previous selection if it still exists in the new list
     if ([...selectEl.options].some(o => o.value === currentValue)) {
         selectEl.value = currentValue;
     }
 
-    // Refresh custom dropdown UI if initialized
     refreshCustomDropdown(selectEl);
 }
 
@@ -298,7 +253,7 @@ function populateCategorySelect(selectEl, isIncome) {
 // Theme Management
 // -------------------------------------------------------------
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     state.currentTheme = savedTheme;
     elements.html.setAttribute('data-theme', savedTheme);
 }
@@ -308,18 +263,87 @@ function toggleTheme() {
     state.currentTheme = nextTheme;
     elements.html.setAttribute('data-theme', nextTheme);
     localStorage.setItem('theme', nextTheme);
-
-    // Re-draw charts with appropriate text colors for Light/Dark themes
     updateCharts();
 }
 
-// Removed loadStateFromStorage and saveStateToStorage as we now use Firestore.
+// -------------------------------------------------------------
+// View Navigation (Home / Detail)
+// -------------------------------------------------------------
+function showHomeView() {
+    state.currentView = 'home';
+    elements.homeView.classList.remove('hidden');
+    elements.detailView.classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showDetailView() {
+    state.currentView = 'detail';
+    elements.homeView.classList.add('hidden');
+    elements.detailView.classList.remove('hidden');
+    renderLedgerList();
+    updateCharts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    lucide.createIcons();
+}
 
 // -------------------------------------------------------------
-// Core Calculations and Layout Render Engine
+// Add Transaction Modal
+// -------------------------------------------------------------
+function openAddTxModal() {
+    initFormDateTime();
+    elements.addTxModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    lucide.createIcons();
+    // Focus amount input after animation
+    setTimeout(() => elements.txAmount.focus(), 200);
+}
+
+function closeAddTxModal() {
+    elements.addTxModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// -------------------------------------------------------------
+// Profile Dropdown Toggle
+// -------------------------------------------------------------
+function toggleProfileDropdown() {
+    const dropdown = elements.profileDropdown;
+    const profileSection = document.getElementById('user-profile-section');
+    
+    if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        profileSection.classList.add('dropdown-open');
+    } else {
+        dropdown.classList.add('hidden');
+        profileSection.classList.remove('dropdown-open');
+    }
+}
+
+function closeProfileDropdown() {
+    elements.profileDropdown.classList.add('hidden');
+    const profileSection = document.getElementById('user-profile-section');
+    profileSection.classList.remove('dropdown-open');
+}
+
+// -------------------------------------------------------------
+// Data Management Modal
+// -------------------------------------------------------------
+function openDataManageModal() {
+    closeProfileDropdown();
+    elements.dataManageModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    lucide.createIcons();
+}
+
+function closeDataManageModal() {
+    elements.dataManageModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// -------------------------------------------------------------
+// Core Render Engine
 // -------------------------------------------------------------
 function renderDashboard() {
-    // 1. Calculate values
     let totalCashIncome = 0;
     let totalCashExpense = 0;
     let totalBankIncome = 0;
@@ -342,38 +366,40 @@ function renderDashboard() {
     const overallIncome = totalCashIncome + totalBankIncome;
     const overallExpense = totalCashExpense + totalBankExpense;
 
-    // 2. Format & Update DOM Elements safely
+    // Update Hero Card
     elements.totalBalance.textContent = formatCurrency(overallBalance);
     elements.totalIncome.textContent = `+฿${formatCurrency(overallIncome)}`;
     elements.totalExpense.textContent = `-฿${formatCurrency(overallExpense)}`;
 
-    elements.cashBalance.textContent = formatCurrency(currentCashBalance);
+    elements.cashBalance.textContent = `฿${formatCurrency(currentCashBalance)}`;
     elements.cashIncome.textContent = `+฿${formatCurrency(totalCashIncome)}`;
     elements.cashExpense.textContent = `-฿${formatCurrency(totalCashExpense)}`;
 
-    elements.bankBalance.textContent = formatCurrency(currentBankBalance);
+    elements.bankBalance.textContent = `฿${formatCurrency(currentBankBalance)}`;
     elements.bankIncome.textContent = `+฿${formatCurrency(totalBankIncome)}`;
     elements.bankExpense.textContent = `-฿${formatCurrency(totalBankExpense)}`;
 
-    // Add green/red aesthetic to overall balances
-    elements.totalBalance.parentElement.className = 'balance-value';
+    // Color negative balance
     if (overallBalance < 0) {
-        elements.totalBalance.parentElement.classList.add('text-danger');
+        elements.totalBalance.parentElement.classList.add('text-expense');
+    } else {
+        elements.totalBalance.parentElement.classList.remove('text-expense');
     }
 
-    // 3. Render Historical List
-    renderLedgerList();
+    // Render recent list on home
+    renderRecentList();
 
-    // 4. Update Charts
-    updateCharts();
+    // If on detail view, update ledger and charts
+    if (state.currentView === 'detail') {
+        renderLedgerList();
+        updateCharts();
+    }
 
-    // 5. Re-apply translations for dynamically rendered content
     if (typeof applyTranslations === 'function') {
         applyTranslations();
     }
 }
 
-// Format numbers nicely: 12500 -> 12,500.00
 function formatCurrency(number) {
     return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
@@ -381,32 +407,57 @@ function formatCurrency(number) {
     }).format(number);
 }
 
-// Render ledger rows
+// -------------------------------------------------------------
+// Render Recent List (Home — max 5 items)
+// -------------------------------------------------------------
+function renderRecentList() {
+    const listContainer = elements.recentList;
+    listContainer.innerHTML = '';
+
+    const sortedTx = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const recentTx = sortedTx.slice(0, 5);
+
+    if (recentTx.length === 0) {
+        elements.recentEmptyState.classList.remove('hidden');
+        return;
+    }
+
+    elements.recentEmptyState.classList.add('hidden');
+
+    recentTx.forEach(tx => {
+        const itemLi = document.createElement('li');
+        itemLi.className = 'recent-item';
+        itemLi.innerHTML = buildTransactionItemHTML(tx);
+        setupTransactionItemEvents(itemLi, tx);
+        listContainer.appendChild(itemLi);
+    });
+
+    lucide.createIcons();
+}
+
+// -------------------------------------------------------------
+// Render Full Ledger List (Detail View)
+// -------------------------------------------------------------
 function renderLedgerList() {
     const listContainer = elements.ledgerList;
     listContainer.innerHTML = '';
 
-    // Sort transactions chronologically (Newest first)
     const sortedTx = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Apply filters
     const searchVal = state.filters.search.toLowerCase().trim();
     const filterType = state.filters.type;
 
     const filteredTx = sortedTx.filter(tx => {
-        // Filter by Type/Method
         if (filterType === 'income' && tx.type !== 'income') return false;
         if (filterType === 'expense' && tx.type !== 'expense') return false;
         if (filterType === 'cash' && tx.method !== 'cash') return false;
         if (filterType === 'bank' && tx.method !== 'bank') return false;
 
-        // Filter by Search Keyword (Amount, Description, or Category display name)
         if (searchVal) {
             const amountStr = tx.amount.toString();
             const descStr = (tx.description || '').toLowerCase();
             const categoryObj = getCategoryObj(tx.type, tx.category);
             const categoryLabel = categoryObj ? t(categoryObj.labelKey).toLowerCase() : '';
-
             return amountStr.includes(searchVal) || descStr.includes(searchVal) || categoryLabel.includes(searchVal);
         }
 
@@ -423,95 +474,96 @@ function renderLedgerList() {
     filteredTx.forEach(tx => {
         const itemLi = document.createElement('li');
         itemLi.className = 'ledger-item';
-
-        const categoryObj = getCategoryObj(tx.type, tx.category);
-        const iconName = categoryObj ? categoryObj.icon : 'help-circle';
-        const colorVal = categoryObj ? categoryObj.color : 'var(--text-muted)';
-        const categoryLabel = categoryObj ? t(categoryObj.labelKey) : t('ledger.category_default');
-
-        const sign = tx.type === 'income' ? '+' : '-';
-        const amountClass = tx.type === 'income' ? 'text-success' : 'text-danger';
-
-        // Clean beautiful relative dates
-        const dateObj = new Date(tx.date);
-        const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        const methodBadgeIcon = tx.method === 'cash' ? 'banknote' : 'landmark';
-
-        itemLi.innerHTML = `
-            <div class="ledger-item-left">
-                <div class="item-icon-wrapper" style="background-color: ${colorVal}18; border: 1px solid ${colorVal}30;">
-                    <i data-lucide="${iconName}" style="color: ${colorVal}"></i>
-                    <div class="method-indicator bg-${tx.method}" title="${tx.method === 'cash' ? t('ledger.method_cash_title') : t('ledger.method_bank_title')}">
-                        <i data-lucide="${methodBadgeIcon}"></i>
-                    </div>
-                </div>
-                <div class="item-title-desc">
-                    <div class="item-title-row">
-                        <span class="item-title">${categoryLabel}</span>
-                        <span class="method-text-badge bg-${tx.method} text-${tx.method}">${tx.method === 'cash' ? t('ledger.method_cash') : t('ledger.method_bank')}</span>
-                    </div>
-                    ${tx.description ? `<span class="item-desc">${tx.description}</span>` : ''}
-                    <span class="item-date">${formattedDate}</span>
-                </div>
-            </div>
-            <div class="ledger-item-right">
-                <div class="item-amount-wrapper">
-                    <span class="item-amount ${amountClass}">${sign}฿${formatCurrency(tx.amount)}</span>
-                </div>
-                <div class="item-actions">
-                    <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
-                        <i data-lucide="pencil"></i>
-                    </button>
-                    <button class="btn-action-sm btn-delete" title="${t('ledger.delete_title')}" data-id="${tx.id}">
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Setup Edit button Event
-        const editBtn = itemLi.querySelector('.btn-edit');
-        editBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openEditModal(tx.id);
-        });
-
-        // Setup Delete button Event
-        const deleteBtn = itemLi.querySelector('.btn-delete');
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteTransaction(tx.id);
-        });
-
+        itemLi.innerHTML = buildTransactionItemHTML(tx);
+        setupTransactionItemEvents(itemLi, tx);
         listContainer.appendChild(itemLi);
     });
 
-    // Re-create icons dynamically
     lucide.createIcons();
 }
 
-// Find Category configuration helper
+// Shared HTML builder for transaction items
+function buildTransactionItemHTML(tx) {
+    const categoryObj = getCategoryObj(tx.type, tx.category);
+    const iconName = categoryObj ? categoryObj.icon : 'help-circle';
+    const colorVal = categoryObj ? categoryObj.color : 'var(--text-muted)';
+    const categoryLabel = categoryObj ? t(categoryObj.labelKey) : t('ledger.category_default');
+
+    const sign = tx.type === 'income' ? '+' : '-';
+    const amountClass = tx.type === 'income' ? 'text-income' : 'text-expense';
+
+    const dateObj = new Date(tx.date);
+    const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const methodBadgeIcon = tx.method === 'cash' ? 'banknote' : 'landmark';
+
+    return `
+        <div class="ledger-item-left">
+            <div class="item-icon-wrapper" style="background-color: ${colorVal}10; border: 1px solid ${colorVal}20;">
+                <i data-lucide="${iconName}" style="color: ${colorVal}"></i>
+                <div class="method-indicator bg-${tx.method}" title="${tx.method === 'cash' ? t('ledger.method_cash_title') : t('ledger.method_bank_title')}">
+                    <i data-lucide="${methodBadgeIcon}"></i>
+                </div>
+            </div>
+            <div class="item-title-desc">
+                <div class="item-title-row">
+                    <span class="item-title">${categoryLabel}</span>
+                    <span class="method-text-badge">${tx.method === 'cash' ? t('ledger.method_cash') : t('ledger.method_bank')}</span>
+                </div>
+                ${tx.description ? `<span class="item-desc">${tx.description}</span>` : ''}
+                <span class="item-date">${formattedDate}</span>
+            </div>
+        </div>
+        <div class="ledger-item-right">
+            <div class="item-amount-wrapper">
+                <span class="item-amount ${amountClass}">${sign}฿${formatCurrency(tx.amount)}</span>
+            </div>
+            <div class="item-actions">
+                <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
+                    <i data-lucide="pencil"></i>
+                </button>
+                <button class="btn-action-sm btn-delete" title="${t('ledger.delete_title')}" data-id="${tx.id}">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Setup events for each transaction item
+function setupTransactionItemEvents(itemLi, tx) {
+    const editBtn = itemLi.querySelector('.btn-edit');
+    editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditModal(tx.id);
+    });
+
+    const deleteBtn = itemLi.querySelector('.btn-delete');
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteTransaction(tx.id);
+    });
+}
+
 function getCategoryObj(type, categoryId) {
     const list = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
     return list.find(item => item.id === categoryId) || null;
 }
 
 // -------------------------------------------------------------
-// Interactive Charting Engine (Chart.js)
+// Charts
 // -------------------------------------------------------------
 function updateCharts() {
     const isDark = state.currentTheme === 'dark';
-    const textBaseColor = isDark ? '#a0a3b0' : '#4e515d';
-    const borderGridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+    const textBaseColor = isDark ? '#9CA3AF' : '#6B7280';
+    const borderGridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
 
-    // Compute Cash vs Bank values
     let totalCash = 0;
     let totalBank = 0;
     state.transactions.forEach(tx => {
@@ -523,25 +575,25 @@ function updateCharts() {
         }
     });
 
-    // 1. FLOW CHART (Doughnut Chart displaying Asset Split)
-    const flowCtx = document.getElementById('flowChart').getContext('2d');
-    if (flowChartInstance) {
-        flowChartInstance.destroy();
-    }
+    // Flow Chart (Doughnut)
+    const flowCtx = document.getElementById('flowChart');
+    if (!flowCtx) return;
 
-    flowChartInstance = new Chart(flowCtx, {
+    if (flowChartInstance) flowChartInstance.destroy();
+
+    flowChartInstance = new Chart(flowCtx.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: [t('chart.cash_label'), t('chart.bank_label')],
             datasets: [{
                 data: [Math.max(0, totalCash), Math.max(0, totalBank)],
                 backgroundColor: [
-                    'rgba(16, 185, 129, 0.75)',  // Cash Emerald Green
-                    'rgba(59, 130, 246, 0.75)'   // Bank Sky Blue
+                    isDark ? 'rgba(52, 211, 153, 0.7)' : 'rgba(5, 150, 105, 0.7)',
+                    isDark ? 'rgba(99, 102, 241, 0.7)' : 'rgba(79, 70, 229, 0.7)'
                 ],
-                borderColor: isDark ? '#14151a' : '#ffffff',
+                borderColor: isDark ? '#1A1B1E' : '#ffffff',
                 borderWidth: 2,
-                hoverOffset: 6
+                hoverOffset: 4
             }]
         },
         options: {
@@ -550,10 +602,7 @@ function updateCharts() {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: {
-                        color: textBaseColor,
-                        font: { family: 'Kanit', size: 12 }
-                    }
+                    labels: { color: textBaseColor, font: { family: 'Kanit', size: 12 } }
                 },
                 tooltip: {
                     titleFont: { family: 'Kanit' },
@@ -564,16 +613,10 @@ function updateCharts() {
         }
     });
 
-    // 2. CATEGORY CHART (Pie Chart analyzing Expenses Breakdown)
-    // Gather all expenses and group them by category
+    // Category Chart (Pie)
     const expenseData = {};
-    // Populate categories initially
     CATEGORIES.expense.forEach(c => {
-        expenseData[c.id] = {
-            label: t(c.labelKey),
-            amount: 0,
-            color: c.color
-        };
+        expenseData[c.id] = { label: t(c.labelKey), amount: 0, color: c.color };
     });
 
     let totalExpenses = 0;
@@ -584,16 +627,14 @@ function updateCharts() {
             if (expenseData[tx.category]) {
                 expenseData[tx.category].amount += amount;
             } else {
-                // Unknown Category fallback
                 if (!expenseData['others-expense']) {
-                    expenseData['others-expense'] = { label: t('chart.others'), amount: 0, color: '#777' };
+                    expenseData['others-expense'] = { label: t('chart.others'), amount: 0, color: '#9CA3AF' };
                 }
                 expenseData['others-expense'].amount += amount;
             }
         }
     });
 
-    // Extract categories with values > 0 for standard display
     const chartLabels = [];
     const chartData = [];
     const chartColors = [];
@@ -607,20 +648,19 @@ function updateCharts() {
         }
     });
 
-    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-    if (categoryChartInstance) {
-        categoryChartInstance.destroy();
-    }
+    const categoryCtx = document.getElementById('categoryChart');
+    if (!categoryCtx) return;
+
+    if (categoryChartInstance) categoryChartInstance.destroy();
 
     if (chartData.length === 0) {
-        // Empty state for category chart
-        categoryChartInstance = new Chart(categoryCtx, {
+        categoryChartInstance = new Chart(categoryCtx.getContext('2d'), {
             type: 'pie',
             data: {
                 labels: [t('chart.no_expense_data')],
                 datasets: [{
                     data: [1],
-                    backgroundColor: [isDark ? '#2a2b36' : '#e2e8f0'],
+                    backgroundColor: [isDark ? '#25262B' : '#E5E7EB'],
                     borderWidth: 0
                 }]
             },
@@ -637,14 +677,14 @@ function updateCharts() {
             }
         });
     } else {
-        categoryChartInstance = new Chart(categoryCtx, {
+        categoryChartInstance = new Chart(categoryCtx.getContext('2d'), {
             type: 'pie',
             data: {
                 labels: chartLabels,
                 datasets: [{
                     data: chartData,
                     backgroundColor: chartColors,
-                    borderColor: isDark ? '#14151a' : '#ffffff',
+                    borderColor: isDark ? '#1A1B1E' : '#ffffff',
                     borderWidth: 2
                 }]
             },
@@ -677,36 +717,52 @@ function updateCharts() {
 }
 
 // -------------------------------------------------------------
-// Interactive Events Handlers
+// Event Listeners
 // -------------------------------------------------------------
 function setupEventListeners() {
-    // 1. Theme Toggle
+    // Theme Toggle
     elements.themeToggleBtn.addEventListener('click', toggleTheme);
 
-    // 2. Quick Demo / Reset
-    elements.btnLoadMock.addEventListener('click', async () => {
-        if (!txRef) {
-            showToast(t('toast.login_required'), 'danger');
-            return;
-        }
-        if (confirm(t('confirm.load_mock'))) {
-            try {
-                const batch = db.batch();
-                MOCK_TRANSACTIONS.forEach(tx => {
-                    const newId = 'tx-mock-' + Date.now() + Math.random().toString(36).substr(2, 5);
-                    const newTx = { ...tx, id: newId };
-                    const docRef = txRef.doc(newId);
-                    batch.set(docRef, newTx);
-                });
-                await batch.commit();
-                showToast(t('toast.mock_loaded'), 'success');
-            } catch (error) {
-                console.error(error);
-                showToast(t('toast.mock_error'), 'danger');
-            }
+    // Add Transaction Modal
+    elements.btnAddTransaction.addEventListener('click', openAddTxModal);
+    elements.addTxModalClose.addEventListener('click', closeAddTxModal);
+    elements.addTxModalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.addTxModalOverlay) closeAddTxModal();
+    });
+
+    // Profile Dropdown
+    document.getElementById('user-profile-section').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleProfileDropdown();
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.topbar-profile-wrapper')) {
+            closeProfileDropdown();
         }
     });
 
+    // Profile dropdown items
+    elements.btnOpenProfile.addEventListener('click', () => {
+        closeProfileDropdown();
+        if (typeof openProfileModal === 'function') openProfileModal();
+    });
+
+    // Data Management
+    elements.btnManageData.addEventListener('click', openDataManageModal);
+    elements.dataManageModalClose.addEventListener('click', closeDataManageModal);
+    elements.dataManageModalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.dataManageModalOverlay) closeDataManageModal();
+    });
+
+    // Export data from management modal
+    elements.btnExportData.addEventListener('click', () => {
+        closeDataManageModal();
+        exportToCSV();
+    });
+
+    // Clear all data
     elements.btnClearAll.addEventListener('click', async () => {
         if (!txRef) return;
         if (confirm(t('confirm.clear_all'))) {
@@ -717,6 +773,7 @@ function setupEventListeners() {
                     batch.delete(doc.ref);
                 });
                 await batch.commit();
+                closeDataManageModal();
                 showToast(t('toast.clear_success'), 'danger');
             } catch (error) {
                 console.error(error);
@@ -725,11 +782,15 @@ function setupEventListeners() {
         }
     });
 
-    // 3. Tab Selectors dynamically changing Categories list
+    // View Navigation
+    elements.btnViewAll.addEventListener('click', showDetailView);
+    elements.btnBackHome.addEventListener('click', showHomeView);
+
+    // Type tabs change categories
     elements.typeIncomeRadio.addEventListener('change', updateCategorySelectOptions);
     elements.typeExpenseRadio.addEventListener('change', updateCategorySelectOptions);
 
-    // 4. Form Submission
+    // Form Submission
     elements.transactionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -740,7 +801,7 @@ function setupEventListeners() {
 
         const type = elements.typeIncomeRadio.checked ? 'income' : 'expense';
         const amount = parseFloat(elements.txAmount.value);
-        const method = elements.txMethod.value; // cash or bank
+        const method = elements.txMethod.value;
         const category = elements.txCategory.value;
         const date = elements.txDate.value;
         const description = elements.txDescription.value.trim();
@@ -760,10 +821,10 @@ function setupEventListeners() {
 
         try {
             await txRef.doc(txId).set(newTx);
-            // Reset Inputs
             elements.txAmount.value = '';
             elements.txDescription.value = '';
-            initFormDateTime(); // reset back to current date/time
+            initFormDateTime();
+            closeAddTxModal();
             showToast(t('toast.tx_added'), 'success');
         } catch (error) {
             console.error(error);
@@ -771,7 +832,7 @@ function setupEventListeners() {
         }
     });
 
-    // 5. Chart Tabs Toggling
+    // Chart Tabs
     elements.chartTabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             elements.chartTabs.forEach(t => t.classList.remove('active'));
@@ -792,41 +853,39 @@ function setupEventListeners() {
         });
     });
 
-    // 6. Ledger Search
+    // Ledger Search
     elements.ledgerSearch.addEventListener('input', (e) => {
         state.filters.search = e.target.value;
         renderLedgerList();
     });
 
-    // 7. Ledger Filter Buttons
+    // Ledger Filter Buttons
     elements.filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             elements.filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             state.filters.type = btn.getAttribute('data-filter');
             renderLedgerList();
         });
     });
 
-    // 8. CSV Exporter
+    // CSV Exporter (from detail view)
     elements.btnExportCsv.addEventListener('click', exportToCSV);
 
-    // 9. Edit Modal – close actions
+    // Edit Modal – close
     elements.editModalClose.addEventListener('click', closeEditModal);
     elements.editModalCancel.addEventListener('click', closeEditModal);
     elements.editModalOverlay.addEventListener('click', (e) => {
         if (e.target === elements.editModalOverlay) closeEditModal();
     });
 
-    // 10. Edit Modal – type tabs change categories
+    // Edit Modal – type tabs
     elements.editTypeIncome.addEventListener('change', updateEditCategorySelectOptions);
     elements.editTypeExpense.addEventListener('change', updateEditCategorySelectOptions);
 
-    // 11. Edit Modal – form submission
+    // Edit Modal – form submission
     elements.editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         if (!txRef) return;
 
         const id = elements.editTxId.value;
@@ -858,7 +917,7 @@ function setupEventListeners() {
         }
     });
 
-    // 12. Category Add buttons
+    // Category Add buttons
     elements.btnAddCategory.addEventListener('click', () => {
         const isIncome = elements.typeIncomeRadio.checked;
         openCategoryModal(isIncome ? 'income' : 'expense');
@@ -886,50 +945,43 @@ function deleteTransaction(id) {
 }
 
 // -------------------------------------------------------------
-// Edit Modal: Open / Close / Populate
+// Edit Modal
 // -------------------------------------------------------------
 function openEditModal(id) {
     const tx = state.transactions.find(t => t.id === id);
     if (!tx) return;
 
-    // Set hidden ID
     elements.editTxId.value = tx.id;
 
-    // Set type radio
     if (tx.type === 'income') {
         elements.editTypeIncome.checked = true;
     } else {
         elements.editTypeExpense.checked = true;
     }
 
-    // Populate categories for the correct type, then select the right one
     updateEditCategorySelectOptions();
     elements.editTxCategory.value = tx.category;
     refreshCustomDropdown(elements.editTxCategory);
 
-    // Fill remaining fields
     elements.editTxAmount.value = tx.amount;
     elements.editTxMethod.value = tx.method;
     refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;
     elements.editTxDescription.value = tx.description || '';
 
-    // Show modal
     elements.editModalOverlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // prevent background scroll
-
-    // Re-create icons for the modal
+    document.body.style.overflow = 'hidden';
     lucide.createIcons();
 }
 
 function closeEditModal() {
     elements.editModalOverlay.classList.add('hidden');
-    document.body.style.overflow = ''; // restore scroll
+    document.body.style.overflow = '';
     elements.editForm.reset();
 }
 
 // -------------------------------------------------------------
-// Toast Notifications
+// Toast
 // -------------------------------------------------------------
 function showToast(message, type = 'success') {
     const toast = elements.toast;
@@ -937,9 +989,8 @@ function showToast(message, type = 'success') {
     const msgSpan = toast.querySelector('.toast-message');
 
     msgSpan.textContent = message;
+    toast.className = 'toast';
 
-    // Set appropriate color badges
-    toast.className = 'toast'; // reset classes
     if (type === 'success') {
         toast.classList.add('toast-success');
         icon.setAttribute('data-lucide', 'check-circle-2');
@@ -951,17 +1002,12 @@ function showToast(message, type = 'success') {
     }
 
     lucide.createIcons();
-
     toast.classList.remove('hidden');
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        toast.classList.add('hidden');
-    }, 3000);
+    setTimeout(() => { toast.classList.add('hidden'); }, 3000);
 }
 
 // -------------------------------------------------------------
-// CSV Exporter engine with Excel-friendly UTF-8 BOM representation
+// CSV Export
 // -------------------------------------------------------------
 function exportToCSV() {
     if (state.transactions.length === 0) {
@@ -969,8 +1015,7 @@ function exportToCSV() {
         return;
     }
 
-    // Set CSV Header columns
-    let csvContent = '\uFEFF'; // Excel UTF-8 BOM to prevent Thai char corruption
+    let csvContent = '\uFEFF';
     csvContent += `${t('csv.date')},${t('csv.type')},${t('csv.amount')},${t('csv.method')},${t('csv.category')},${t('csv.description')}\r\n`;
 
     state.transactions.forEach(tx => {
@@ -978,34 +1023,26 @@ function exportToCSV() {
         const methodLabel = tx.method === 'cash' ? t('csv.cash') : t('csv.bank');
         const catObj = getCategoryObj(tx.type, tx.category);
         const catLabel = catObj ? t(catObj.labelKey) : tx.category;
-        const description = (tx.description || '').replace(/"/g, '""'); // escape quotes
-
+        const description = (tx.description || '').replace(/"/g, '""');
         const formattedDate = new Date(tx.date).toLocaleString(getDateLocale());
-
         csvContent += `"${formattedDate}","${typeLabel}",${tx.amount},"${methodLabel}","${catLabel}","${description}"\r\n`;
     });
 
-    // Create Download Trigger
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-
     link.setAttribute('href', url);
     link.setAttribute('download', `cash_bank_report_${new Date().toISOString().slice(0, 10)}.csv`);
     link.style.visibility = 'hidden';
-
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
     showToast(t('toast.csv_success'), 'success');
 }
 
 // -------------------------------------------------------------
 // Category Management System
 // -------------------------------------------------------------
-
-// Available icons for user selection in category modal
 const AVAILABLE_ICONS = [
     'tag', 'wallet', 'credit-card', 'piggy-bank', 'coins',
     'building-2', 'car', 'plane', 'train', 'bike',
@@ -1017,40 +1054,23 @@ const AVAILABLE_ICONS = [
     'gift', 'sparkles', 'trophy', 'medal', 'star'
 ];
 
-// Available colors for user selection in category modal
 const AVAILABLE_COLORS = [
-    'hsl(0, 80%, 55%)',      // Red
-    'hsl(15, 85%, 55%)',     // Red-Orange
-    'hsl(30, 90%, 50%)',     // Orange
-    'hsl(45, 95%, 50%)',     // Yellow-Orange
-    'hsl(55, 90%, 48%)',     // Yellow
-    'hsl(80, 70%, 45%)',     // Yellow-Green
-    'hsl(120, 60%, 42%)',    // Green
-    'hsl(150, 80%, 38%)',    // Teal
-    'hsl(175, 75%, 40%)',    // Cyan
-    'hsl(195, 85%, 45%)',    // Light Blue
-    'hsl(210, 90%, 50%)',    // Blue
-    'hsl(230, 80%, 55%)',    // Indigo
-    'hsl(260, 70%, 55%)',    // Purple
-    'hsl(280, 75%, 55%)',    // Violet
-    'hsl(310, 70%, 50%)',    // Magenta
-    'hsl(330, 80%, 55%)',    // Pink
-    'hsl(350, 85%, 55%)',    // Rose
-    'hsl(0, 0%, 50%)',       // Gray
-    'hsl(200, 15%, 40%)',    // Slate
-    'hsl(25, 75%, 45%)',     // Brown
+    'hsl(0, 80%, 55%)', 'hsl(15, 85%, 55%)', 'hsl(30, 90%, 50%)',
+    'hsl(45, 95%, 50%)', 'hsl(55, 90%, 48%)', 'hsl(80, 70%, 45%)',
+    'hsl(120, 60%, 42%)', 'hsl(150, 80%, 38%)', 'hsl(175, 75%, 40%)',
+    'hsl(195, 85%, 45%)', 'hsl(210, 90%, 50%)', 'hsl(230, 80%, 55%)',
+    'hsl(260, 70%, 55%)', 'hsl(280, 75%, 55%)', 'hsl(310, 70%, 50%)',
+    'hsl(330, 80%, 55%)', 'hsl(350, 85%, 55%)', 'hsl(0, 0%, 50%)',
+    'hsl(200, 15%, 40%)', 'hsl(25, 75%, 45%)'
 ];
 
-// Category modal state
 let categoryModalState = {
-    type: 'income', // or 'expense'
+    type: 'income',
     selectedIcon: 'tag',
     selectedColor: 'hsl(210, 90%, 50%)'
 };
 
-// Initialize the category modal (populate icon & color pickers)
 function initCategoryModal() {
-    // Populate Icon Picker
     const iconGrid = elements.iconPickerGrid;
     iconGrid.innerHTML = '';
     AVAILABLE_ICONS.forEach(iconName => {
@@ -1063,39 +1083,31 @@ function initCategoryModal() {
         iconGrid.appendChild(btn);
     });
 
-    // Populate Color Picker
     const colorGrid = elements.colorPickerGrid;
     colorGrid.innerHTML = '';
     AVAILABLE_COLORS.forEach((color, idx) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'color-pick-btn' + (idx === 10 ? ' active' : ''); // Default: Blue
+        btn.className = 'color-pick-btn' + (idx === 10 ? ' active' : '');
         btn.style.background = color;
         btn.setAttribute('data-color', color);
         btn.addEventListener('click', () => selectCategoryColor(color));
         colorGrid.appendChild(btn);
     });
 
-    // Category modal close events
     elements.categoryModalClose.addEventListener('click', closeCategoryModal);
     elements.categoryModalCancel.addEventListener('click', closeCategoryModal);
     elements.categoryModalOverlay.addEventListener('click', (e) => {
         if (e.target === elements.categoryModalOverlay) closeCategoryModal();
     });
 
-    // Category form submission
     elements.categoryForm.addEventListener('submit', handleCategoryFormSubmit);
-
-    // Live preview on name input
     elements.catName.addEventListener('input', updateCategoryPreview);
-
-    // Render Lucide icons in the picker
     lucide.createIcons();
 }
 
 function selectCategoryIcon(iconName) {
     categoryModalState.selectedIcon = iconName;
-    // Update active state
     elements.iconPickerGrid.querySelectorAll('.icon-pick-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-icon') === iconName);
     });
@@ -1104,7 +1116,6 @@ function selectCategoryIcon(iconName) {
 
 function selectCategoryColor(color) {
     categoryModalState.selectedColor = color;
-    // Update active state
     elements.colorPickerGrid.querySelectorAll('.color-pick-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
@@ -1126,12 +1137,10 @@ function updateCategoryPreview() {
 function openCategoryModal(type) {
     categoryModalState.type = type;
     categoryModalState.selectedIcon = 'tag';
-    categoryModalState.selectedColor = AVAILABLE_COLORS[10]; // Blue default
+    categoryModalState.selectedColor = AVAILABLE_COLORS[10];
 
-    // Reset form
     elements.categoryForm.reset();
 
-    // Update type indicator
     const indicator = elements.catTypeIndicator;
     indicator.className = 'cat-type-indicator';
     if (type === 'income') {
@@ -1144,25 +1153,19 @@ function openCategoryModal(type) {
         elements.catTypeLabel.textContent = t('category.for_expense');
     }
 
-    // Reset icon selection
     elements.iconPickerGrid.querySelectorAll('.icon-pick-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-icon') === 'tag');
     });
 
-    // Reset color selection
     elements.colorPickerGrid.querySelectorAll('.color-pick-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-color') === AVAILABLE_COLORS[10]);
     });
 
-    // Update preview
     updateCategoryPreview();
 
-    // Show modal
     elements.categoryModalOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     lucide.createIcons();
-
-    // Focus name input
     setTimeout(() => elements.catName.focus(), 100);
 }
 
@@ -1184,36 +1187,22 @@ async function handleCategoryFormSubmit(e) {
     const type = categoryModalState.type;
     const icon = categoryModalState.selectedIcon;
     const color = categoryModalState.selectedColor;
-
-    // Generate a unique ID based on name
     const id = 'custom-' + name.toLowerCase().replace(/[^a-z0-9฀-๿]/gi, '-').replace(/-+/g, '-').substring(0, 30) + '-' + Date.now().toString(36);
-
-    // Check for duplicate name
-    const existingList = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
     const labelKey = `cat.custom.${id}`;
 
-    // Add translation dynamically for the custom category name
     if (TRANSLATIONS.th) TRANSLATIONS.th[labelKey] = name;
     if (TRANSLATIONS.en) TRANSLATIONS.en[labelKey] = name;
 
-    // Create new category object
     const newCat = {
-        id: id,
-        labelKey: labelKey,
-        icon: icon,
-        color: color,
-        custom: true,
-        customName: name
+        id, labelKey, icon, color, custom: true, customName: name
     };
 
-    // Add to CATEGORIES
     if (type === 'income') {
         CATEGORIES.income.push(newCat);
     } else {
         CATEGORIES.expense.push(newCat);
     }
 
-    // Save to Firestore if logged in
     if (state.currentUser) {
         try {
             await db.collection('users').doc(state.currentUser.uid)
@@ -1226,13 +1215,11 @@ async function handleCategoryFormSubmit(e) {
         }
     }
 
-    // Refresh category dropdowns
     updateCategorySelectOptions();
     if (elements.editModalOverlay && !elements.editModalOverlay.classList.contains('hidden')) {
         updateEditCategorySelectOptions();
     }
 
-    // Select the new category in the active dropdown
     elements.txCategory.value = id;
     refreshCustomDropdown(elements.txCategory);
 
@@ -1240,7 +1227,6 @@ async function handleCategoryFormSubmit(e) {
     showToast(t('toast.cat_added'), 'success');
 }
 
-// Load custom categories from Firestore for the logged-in user
 async function loadCustomCategories(user) {
     try {
         const snapshot = await db.collection('users').doc(user.uid)
@@ -1248,11 +1234,9 @@ async function loadCustomCategories(user) {
 
         snapshot.docs.forEach(doc => {
             const catData = doc.data();
-            // Add translation entry
             if (TRANSLATIONS.th) TRANSLATIONS.th[catData.labelKey] = catData.customName;
             if (TRANSLATIONS.en) TRANSLATIONS.en[catData.labelKey] = catData.customName;
 
-            // Check if already exists
             const targetList = catData.type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
             const exists = targetList.some(c => c.id === catData.id);
             if (!exists) {
@@ -1267,7 +1251,6 @@ async function loadCustomCategories(user) {
             }
         });
 
-        // Refresh dropdowns with loaded custom categories
         updateCategorySelectOptions();
     } catch (error) {
         console.error('Error loading custom categories:', error);
@@ -1275,7 +1258,7 @@ async function loadCustomCategories(user) {
 }
 
 // -------------------------------------------------------------
-// Custom Dropdown System (Minimal Design)
+// Custom Dropdown System
 // -------------------------------------------------------------
 const customDropdownMap = new Map();
 
@@ -1285,24 +1268,20 @@ const METHOD_DISPLAY = {
 };
 
 function initCustomDropdowns() {
-    // Set data attributes on method select options
     initMethodSelectData(elements.txMethod);
     initMethodSelectData(elements.editTxMethod);
 
-    // Create custom dropdowns for all selects
     createCustomDropdown(elements.txMethod);
     createCustomDropdown(elements.txCategory);
     createCustomDropdown(elements.editTxMethod);
     createCustomDropdown(elements.editTxCategory);
 
-    // Global close on outside click
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select')) {
             closeAllDropdowns();
         }
     });
 
-    // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeAllDropdowns();
     });
@@ -1322,15 +1301,12 @@ function initMethodSelectData(selectEl) {
 function createCustomDropdown(selectEl) {
     if (!selectEl || customDropdownMap.has(selectEl)) return;
 
-    // Hide native select but keep for form value
     selectEl.style.cssText = 'position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important;';
 
-    // Create wrapper
     const wrapper = document.createElement('div');
     wrapper.className = 'custom-select';
     selectEl.insertAdjacentElement('afterend', wrapper);
 
-    // Trigger button
     const trigger = document.createElement('button');
     trigger.type = 'button';
     trigger.className = 'cs-trigger';
@@ -1341,15 +1317,12 @@ function createCustomDropdown(selectEl) {
     `;
     wrapper.appendChild(trigger);
 
-    // Dropdown panel
     const panel = document.createElement('div');
     panel.className = 'cs-panel';
     wrapper.appendChild(panel);
 
-    // Store reference
     customDropdownMap.set(selectEl, { wrapper, trigger, panel });
 
-    // Toggle event
     trigger.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1358,7 +1331,6 @@ function createCustomDropdown(selectEl) {
         if (!wasOpen) wrapper.classList.add('open');
     });
 
-    // Initial render
     refreshCustomDropdown(selectEl);
 }
 
@@ -1371,7 +1343,6 @@ function refreshCustomDropdown(selectEl) {
     const options = [...selectEl.options];
     const selectedVal = selectEl.value;
 
-    // Rebuild panel
     panel.innerHTML = '';
     options.forEach(opt => {
         const item = document.createElement('div');
@@ -1381,7 +1352,6 @@ function refreshCustomDropdown(selectEl) {
         const iconName = opt.getAttribute('data-icon');
         const color = opt.getAttribute('data-color') || '';
 
-        // Parse label: strip leading emoji from textContent
         const fullText = opt.textContent;
         const spaceIdx = fullText.indexOf(' ');
         let emoji = '';
@@ -1391,7 +1361,6 @@ function refreshCustomDropdown(selectEl) {
             label = fullText.substring(spaceIdx + 1);
         }
 
-        // Build icon HTML - prefer Lucide icon, fallback to emoji
         let iconHTML;
         if (iconName) {
             iconHTML = `<span class="cs-opt-icon" style="${color ? 'color:' + color : ''}"><i data-lucide="${iconName}"></i></span>`;
@@ -1401,14 +1370,12 @@ function refreshCustomDropdown(selectEl) {
 
         item.innerHTML = `${iconHTML}<span class="cs-opt-label">${label}</span>`;
 
-        // Active item colored highlight
         if (isActive && color) {
-            item.style.backgroundColor = hslToHsla(color, 0.1);
+            item.style.backgroundColor = hslToHsla(color, 0.08);
             item.querySelector('.cs-opt-label').style.color = color;
             item.querySelector('.cs-opt-label').style.fontWeight = '500';
         }
 
-        // Click handler
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             selectEl.value = opt.value;
@@ -1420,7 +1387,6 @@ function refreshCustomDropdown(selectEl) {
         panel.appendChild(item);
     });
 
-    // Update trigger to show selected item
     const selectedOpt = options.find(o => o.value === selectedVal) || options[0];
     if (selectedOpt) {
         const iconName = selectedOpt.getAttribute('data-icon');
@@ -1443,7 +1409,6 @@ function refreshCustomDropdown(selectEl) {
         trigger.querySelector('.cs-label').textContent = label;
     }
 
-    // Re-render Lucide icons
     lucide.createIcons();
 }
 
@@ -1451,7 +1416,6 @@ function closeAllDropdowns() {
     document.querySelectorAll('.custom-select.open').forEach(d => d.classList.remove('open'));
 }
 
-// Helper: Convert hsl() to hsla() with alpha
 function hslToHsla(hsl, alpha) {
     if (!hsl) return '';
     return hsl.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);

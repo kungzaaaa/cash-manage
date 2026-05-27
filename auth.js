@@ -647,12 +647,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Profile & Account Settings Events
     // -------------------------------------------------------------
 
-    // Open profile settings when clicking header avatar/name
-    authElements.userProfileSection.addEventListener('click', openProfileModal);
+    // Profile modal is now opened via dropdown menu in app.js (btn-open-profile)
+    // No direct click on userProfileSection to open modal.
 
     // Close profile settings
     authElements.btnProfileClose.addEventListener('click', closeProfileModal);
     authElements.btnProfileCancel.addEventListener('click', closeProfileModal);
+    authElements.profileModalOverlay.addEventListener('click', (e) => {
+        if (e.target === authElements.profileModalOverlay) closeProfileModal();
+    });
 
     // Profile pic edit button click simulations
     authElements.profileAvatarPreview.addEventListener('click', () => authElements.profilePicInput.click());

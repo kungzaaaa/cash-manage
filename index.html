@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="th" data-theme="dark">
+<html lang="th" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash & Bank Flow Tracker | เครื่องมือบันทึกรายรับ-รายจ่าย</title>
+    <meta name="description" content="ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี แบบมืออาชีพ">
     <link rel="icon" type="image/png" href="เปลี่ยนไอคอน Tap Web ตรงนี้">
     <!-- Google Fonts: Kanit (Thai) & Inter (English/Numbers) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,11 +30,6 @@
 </head>
 
 <body>
-    <!-- Background Elements for Glassmorphism visual depth -->
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-    <div class="bg-glow bg-glow-3"></div>
-
     <!-- Loading Overlay (shown while Firebase checks auth state) -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner"></div>
@@ -42,7 +38,7 @@
 
     <!-- Auth Login / Register Screen -->
     <div id="auth-screen" class="auth-screen hidden">
-        <div class="auth-card auth-card-horizontal glass-card">
+        <div class="auth-card auth-card-horizontal">
             <!-- Language Toggle on Auth Screen -->
             <button id="auth-lang-toggle" class="btn-icon auth-lang-btn" aria-label="Switch Language" title="EN / ไทย">
                 <span id="auth-lang-flag">EN</span>
@@ -140,31 +136,48 @@
         </div>
     </div>
 
+    <!-- ============================================================= -->
+    <!-- MAIN APP CONTAINER                                            -->
+    <!-- ============================================================= -->
     <div class="app-container hidden" id="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo-area">
-                <div class="logo-icon-wrapper">
-                    <i data-lucide="wallet" class="logo-icon"></i>
-                </div>
-                <div>
-                    <h1>Cash & Bank Flow</h1>
-                    <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี</p>
+
+        <!-- ========== TOP BAR ========== -->
+        <header class="app-header" id="app-topbar">
+            <!-- Left: Profile + Dropdown -->
+            <div class="topbar-left">
+                <div class="topbar-profile-wrapper">
+                    <div id="user-profile-section" class="user-profile hidden" role="button"
+                        data-i18n-aria="header.profile_label" data-i18n-title="header.profile_label"
+                        aria-label="จัดการโปรไฟล์" title="จัดการโปรไฟล์">
+                        <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
+                        <span id="user-name" class="user-name">ผู้ใช้</span>
+                        <i data-lucide="chevron-down" class="profile-chevron"></i>
+                    </div>
+
+                    <!-- Profile Dropdown Menu -->
+                    <div id="profile-dropdown" class="profile-dropdown hidden">
+                        <button type="button" id="btn-open-profile" class="dropdown-item">
+                            <i data-lucide="user-cog"></i>
+                            <span data-i18n="dropdown.profile">จัดการโปรไฟล์</span>
+                        </button>
+                        <button type="button" id="btn-manage-data" class="dropdown-item">
+                            <i data-lucide="database"></i>
+                            <span data-i18n="dropdown.manage_data">จัดการข้อมูล</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button type="button" id="btn-logout" class="dropdown-item dropdown-item-danger">
+                            <i data-lucide="log-out"></i>
+                            <span data-i18n="header.logout">ออกจากระบบ</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="header-actions">
-                <!-- User Profile -->
-                <div id="user-profile-section" class="user-profile hidden" role="button" data-i18n-aria="header.profile_label"
-                    data-i18n-title="header.profile_label" aria-label="จัดการโปรไฟล์"
-                    title="จัดการโปรไฟล์">
-                    <img id="user-avatar" src="" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer">
-                    <span id="user-name" class="user-name">ผู้ใช้</span>
-                </div>
-
-                <!-- Language Toggle Button -->
-                <button id="lang-toggle" class="btn-icon" aria-label="Switch Language" title="EN / ไทย">
-                    <span id="lang-flag">EN</span>
+            <!-- Center: Add Transaction + Theme + Lang -->
+            <div class="topbar-center">
+                <button type="button" id="btn-add-transaction" class="btn-add-tx">
+                    <i data-lucide="plus"></i>
+                    <span data-i18n="topbar.add_transaction">บันทึกรายการ</span>
                 </button>
 
                 <!-- Theme Toggle Button -->
@@ -173,270 +186,210 @@
                     <i data-lucide="moon" class="moon-icon"></i>
                 </button>
 
-                <!-- Quick Reset / Demo Data buttons -->
-                <button id="btn-load-mock" class="btn btn-secondary btn-sm">
-                    <i data-lucide="sparkles"></i>
-                    <span data-i18n="header.mock_data">ข้อมูลทดลอง</span>
+                <!-- Language Toggle Button -->
+                <button id="lang-toggle" class="btn-icon" aria-label="Switch Language" title="EN / ไทย">
+                    <span id="lang-flag">EN</span>
                 </button>
-                <button id="btn-clear-all" class="btn btn-danger-outline btn-sm">
-                    <i data-lucide="trash-2"></i>
-                    <span data-i18n="header.clear_all">ล้างข้อมูล</span>
-                </button>
-                <button id="btn-logout" class="btn btn-danger-outline btn-sm">
-                    <i data-lucide="log-out"></i>
-                    <span data-i18n="header.logout">ออกจากระบบ</span>
-                </button>
+            </div>
+
+            <!-- Right: Logo + Website Name + Subtitle -->
+            <div class="topbar-right">
+                <div class="topbar-brand-text">
+                    <h1>Cash & Bank Flow</h1>
+                    <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่าย</p>
+                </div>
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="wallet" class="logo-icon"></i>
+                </div>
             </div>
         </header>
 
-        <!-- Main Dashboard Layout -->
-        <main class="dashboard-grid">
+        <!-- ========== HOME VIEW ========== -->
+        <main id="home-view" class="home-view">
 
-            <!-- LEFT COLUMN: Dashboard Metrics & Quick Form -->
-            <section class="left-column">
-
-                <!-- Balance Overview Cards -->
-                <div class="metrics-container">
-                    <!-- Total Balance Card -->
-                    <div class="card card-total-balance glass-card">
-                        <div class="card-header">
-                            <span data-i18n="dashboard.total_balance">ยอดเงินคงเหลือทั้งหมด</span>
-                            <div class="badge badge-accent" data-i18n="dashboard.all_accounts">รวมทุกบัญชี</div>
+            <!-- Hero Card — Balance Overview -->
+            <section class="hero-section">
+                <div class="hero-card">
+                    <div class="hero-card-header">
+                        <div class="hero-title-area">
+                            <span class="hero-label" data-i18n="dashboard.total_balance">ยอดเงินคงเหลือทั้งหมด</span>
+                            <div class="hero-badge" data-i18n="dashboard.all_accounts">รวมทุกบัญชี</div>
                         </div>
-                        <div class="balance-value">
-                            <span class="currency">฿</span>
-                            <span id="total-balance">0.00</span>
-                        </div>
-                        <div class="card-footer">
-                            <div class="sub-metric">
-                                <i data-lucide="trending-up" class="text-success"></i>
-                                <div>
-                                    <span class="label" data-i18n="dashboard.total_income">รายรับรวม</span>
-                                    <span id="total-income" class="value text-success">+฿0.00</span>
-                                </div>
+                    </div>
+                    <div class="hero-balance">
+                        <span class="hero-currency">฿</span>
+                        <span id="total-balance">0.00</span>
+                    </div>
+                    <div class="hero-summary">
+                        <div class="hero-metric hero-metric-income">
+                            <i data-lucide="arrow-down-left"></i>
+                            <div>
+                                <span class="hero-metric-label" data-i18n="dashboard.total_income">รายรับรวม</span>
+                                <span id="total-income" class="hero-metric-value text-income">+฿0.00</span>
                             </div>
-                            <div class="sub-metric">
-                                <i data-lucide="trending-down" class="text-danger"></i>
-                                <div>
-                                    <span class="label" data-i18n="dashboard.total_expense">รายจ่ายรวม</span>
-                                    <span id="total-expense" class="value text-danger">-฿0.00</span>
-                                </div>
+                        </div>
+                        <div class="hero-metric hero-metric-expense">
+                            <i data-lucide="arrow-up-right"></i>
+                            <div>
+                                <span class="hero-metric-label" data-i18n="dashboard.total_expense">รายจ่ายรวม</span>
+                                <span id="total-expense" class="hero-metric-value text-expense">-฿0.00</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Cash & Bank Separated Cards -->
-                    <div class="account-cards-grid">
-                        <!-- Cash Account Card -->
-                        <div class="card card-account glass-card" id="card-cash">
-                            <div class="account-info">
-                                <div class="icon-avatar bg-cash">
-                                    <i data-lucide="banknote" class="text-cash"></i>
-                                </div>
-                                <div>
-                                    <span class="label" data-i18n="dashboard.cash_balance">เงินสดคงเหลือ</span>
-                                    <div class="account-balance">
-                                        <span class="currency">฿</span>
-                                        <span id="cash-balance">0.00</span>
-                                    </div>
-                                </div>
+                    <!-- Account Split -->
+                    <div class="hero-accounts">
+                        <div class="hero-account" id="card-cash">
+                            <div class="hero-account-icon">
+                                <i data-lucide="banknote"></i>
                             </div>
-                            <div class="account-mini-flow">
-                                <span class="text-success" id="cash-income">+฿0.00</span>
-                                <span class="separator">|</span>
-                                <span class="text-danger" id="cash-expense">-฿0.00</span>
+                            <div class="hero-account-info">
+                                <span class="hero-account-label" data-i18n="dashboard.cash_balance">เงินสด</span>
+                                <span class="hero-account-value" id="cash-balance">฿0.00</span>
+                            </div>
+                            <div class="hero-account-flow">
+                                <span class="text-income" id="cash-income">+฿0.00</span>
+                                <span class="flow-sep">·</span>
+                                <span class="text-expense" id="cash-expense">-฿0.00</span>
                             </div>
                         </div>
-
-                        <!-- Bank Account Card -->
-                        <div class="card card-account glass-card" id="card-bank">
-                            <div class="account-info">
-                                <div class="icon-avatar bg-bank">
-                                    <i data-lucide="landmark" class="text-bank"></i>
-                                </div>
-                                <div>
-                                    <span class="label" data-i18n="dashboard.bank_balance">เงินในธนาคารคงเหลือ</span>
-                                    <div class="account-balance">
-                                        <span class="currency">฿</span>
-                                        <span id="bank-balance">0.00</span>
-                                    </div>
-                                </div>
+                        <div class="hero-account" id="card-bank">
+                            <div class="hero-account-icon hero-account-icon-bank">
+                                <i data-lucide="landmark"></i>
                             </div>
-                            <div class="account-mini-flow">
-                                <span class="text-success" id="bank-income">+฿0.00</span>
-                                <span class="separator">|</span>
-                                <span class="text-danger" id="bank-expense">-฿0.00</span>
+                            <div class="hero-account-info">
+                                <span class="hero-account-label" data-i18n="dashboard.bank_balance">ธนาคาร</span>
+                                <span class="hero-account-value" id="bank-balance">฿0.00</span>
+                            </div>
+                            <div class="hero-account-flow">
+                                <span class="text-income" id="bank-income">+฿0.00</span>
+                                <span class="flow-sep">·</span>
+                                <span class="text-expense" id="bank-expense">-฿0.00</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Transaction Entry Form -->
-                <div class="card glass-card form-card">
-                    <div class="card-title">
-                        <i data-lucide="plus-circle" class="title-icon text-primary"></i>
-                        <h2 data-i18n="form.title">บันทึกรายการใหม่</h2>
-                    </div>
-
-                    <form id="transaction-form" autocomplete="off">
-                        <!-- Form Tabs for Income / Expense Selection -->
-                        <div class="type-selector-tabs">
-                            <input type="radio" id="type-income" name="tx-type" value="income" checked>
-                            <label for="type-income" class="tab-label label-income">
-                                <i data-lucide="arrow-down-left"></i>
-                                <span data-i18n="form.income">รายรับ (Income)</span>
-                            </label>
-
-                            <input type="radio" id="type-expense" name="tx-type" value="expense">
-                            <label for="type-expense" class="tab-label label-expense">
-                                <i data-lucide="arrow-up-right"></i>
-                                <span data-i18n="form.expense">รายจ่าย (Expense)</span>
-                            </label>
-                        </div>
-
-                        <div class="form-grid">
-                            <!-- Input Amount -->
-                            <div class="form-group col-12">
-                                <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
-                                <div class="input-with-icon amount-input-wrapper">
-                                    <span class="input-prefix">฿</span>
-                                    <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01"
-                                        required>
-                                </div>
-                            </div>
-
-                            <!-- Input Account/Wallet (Cash vs Bank) -->
-                            <div class="form-group col-6">
-                                <label for="tx-method" data-i18n="form.method">ช่องทางการเงิน <span class="required">*</span></label>
-                                <select id="tx-method" required>
-                                    <option value="cash" data-i18n="form.method_cash">💵 เงินสด (Cash)</option>
-                                    <option value="bank" selected data-i18n="form.method_bank">🏦 บัญชีธนาคาร (Bank)</option>
-                                </select>
-                            </div>
-
-                            <!-- Input Category -->
-                            <div class="form-group col-6">
-                                <label for="tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
-                                <div class="category-select-row">
-                                    <select id="tx-category" required>
-                                        <!-- Options will be dynamically populated in JavaScript to match Income/Expense context -->
-                                    </select>
-                                    <button type="button" id="btn-add-category" class="btn-icon btn-add-cat" title="เพิ่มหมวดหมู่" data-i18n-title="form.add_category">
-                                        <i data-lucide="plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Input Date -->
-                            <div class="form-group col-12">
-                                <label for="tx-date" data-i18n="form.date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
-                                <div class="input-with-icon">
-                                    <i data-lucide="calendar" class="input-icon-left"></i>
-                                    <input type="datetime-local" id="tx-date" required>
-                                </div>
-                            </div>
-
-                            <!-- Input Description -->
-                            <div class="form-group col-12">
-                                <label for="tx-description" data-i18n="form.description">บันทึกเพิ่มเติม</label>
-                                <div class="input-with-icon">
-                                    <i data-lucide="file-text" class="input-icon-left"></i>
-                                    <input type="text" id="tx-description"
-                                        placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม..." data-i18n-placeholder="form.description_placeholder">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-tx">
-                            <i data-lucide="check-circle-2"></i>
-                            <span data-i18n="form.submit">บันทึกรายการ</span>
-                        </button>
-                    </form>
-                </div>
-
             </section>
 
-            <!-- RIGHT COLUMN: Charts, Budgeting & Historical Ledger -->
-            <section class="right-column">
+            <!-- Recent Transactions -->
+            <section class="recent-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i data-lucide="clock"></i>
+                        <h2 data-i18n="home.recent_title">รายการล่าสุด</h2>
+                    </div>
+                    <button type="button" id="btn-view-all" class="btn-view-all">
+                        <span data-i18n="home.view_all">ดูทั้งหมด</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+                <div class="recent-list-wrapper">
+                    <ul id="recent-list" class="recent-list">
+                        <!-- Items dynamically populated by JS (max 5) -->
+                    </ul>
+                    <!-- Empty State UI -->
+                    <div id="recent-empty-state" class="empty-state hidden">
+                        <div class="empty-icon-wrapper">
+                            <i data-lucide="inbox"></i>
+                        </div>
+                        <h3 data-i18n="ledger.empty_title">ไม่พบรายการธุรกรรม</h3>
+                        <p data-i18n="home.empty_desc">กดปุ่ม "บันทึกรายการ" ด้านบนเพื่อเริ่มบันทึกรายรับ-รายจ่าย</p>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-                <!-- Visual Charts Section -->
-                <div class="card glass-card chart-card">
-                    <div class="card-title-row">
-                        <div class="card-title">
-                            <i data-lucide="pie-chart" class="title-icon text-warning"></i>
-                            <h2 data-i18n="chart.title">วิเคราะห์สัดส่วนและการเงิน</h2>
+        <!-- ========== DETAIL VIEW (Charts + Full Ledger) ========== -->
+        <main id="detail-view" class="detail-view hidden">
+            <!-- Back Button -->
+            <div class="detail-topbar">
+                <button type="button" id="btn-back-home" class="btn-back">
+                    <i data-lucide="arrow-left"></i>
+                    <span data-i18n="detail.back">กลับหน้าหลัก</span>
+                </button>
+                <h2 class="detail-page-title" data-i18n="detail.title">รายละเอียดข้อมูล</h2>
+                <button id="btn-export-csv" class="btn-export">
+                    <i data-lucide="download"></i>
+                    <span data-i18n="ledger.export_csv">ส่งออก CSV</span>
+                </button>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="detail-charts">
+                <div class="detail-card chart-card">
+                    <div class="detail-card-header">
+                        <div class="section-title">
+                            <i data-lucide="pie-chart"></i>
+                            <h2 data-i18n="chart.title">วิเคราะห์การเงิน</h2>
                         </div>
                         <div class="chart-tab-buttons">
                             <button class="chart-tab active" data-chart="flow" data-i18n="chart.tab_flow">กระแสเงินสด</button>
                             <button class="chart-tab" data-chart="category" data-i18n="chart.tab_category">แยกตามหมวดหมู่</button>
                         </div>
                     </div>
-
                     <div class="chart-wrapper">
-                        <!-- Balance / Cash-Bank Flow Chart Canvas -->
                         <div class="chart-container active" id="chart-flow-container">
                             <canvas id="flowChart"></canvas>
                         </div>
-                        <!-- Category Distribution Chart Canvas -->
                         <div class="chart-container" id="chart-category-container">
                             <canvas id="categoryChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Transaction Ledger (History) -->
-                <div class="card glass-card ledger-card">
-                    <div class="ledger-header">
-                        <div class="card-title">
-                            <i data-lucide="history" class="title-icon text-success"></i>
-                            <h2 data-i18n="ledger.title">ประวัติรายการเดินบัญชี</h2>
-                        </div>
-                        <button id="btn-export-csv" class="btn btn-secondary-outline btn-sm">
-                            <i data-lucide="download"></i>
-                            <span data-i18n="ledger.export_csv">ส่งออก CSV</span>
-                        </button>
-                    </div>
-
-                    <!-- Ledger Search & Filters -->
-                    <div class="ledger-filters">
-                        <div class="search-box">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" id="ledger-search" placeholder="ค้นหาบันทึก หรือจำนวนเงิน..." data-i18n-placeholder="ledger.search_placeholder">
-                        </div>
-
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" data-filter="all" data-i18n="ledger.filter_all">ทั้งหมด</button>
-                            <button class="filter-btn" data-filter="income" data-i18n="ledger.filter_income">รายรับ</button>
-                            <button class="filter-btn" data-filter="expense" data-i18n="ledger.filter_expense">รายจ่าย</button>
-                            <button class="filter-btn" data-filter="cash" data-i18n="ledger.filter_cash">เงินสด</button>
-                            <button class="filter-btn" data-filter="bank" data-i18n="ledger.filter_bank">ธนาคาร</button>
-                        </div>
-                    </div>
-
-                    <!-- History Items Container -->
-                    <div class="ledger-list-wrapper">
-                        <ul id="ledger-list" class="ledger-list">
-                            <!-- Items dynamically populated by JS -->
-                        </ul>
-                        <!-- Empty State UI -->
-                        <div id="ledger-empty-state" class="empty-state hidden">
-                            <div class="empty-icon-wrapper">
-                                <i data-lucide="folder-open"></i>
-                            </div>
-                            <h3 data-i18n="ledger.empty_title">ไม่พบรายการธุรกรรม</h3>
-                            <p data-i18n="ledger.empty_desc">ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่ หรือกดโหลดข้อมูลจำลองเพื่อดูการแสดงผล</p>
-                        </div>
+            <!-- Full Ledger -->
+            <div class="detail-card ledger-card">
+                <div class="ledger-header">
+                    <div class="section-title">
+                        <i data-lucide="list"></i>
+                        <h2 data-i18n="ledger.title">ประวัติรายการเดินบัญชี</h2>
                     </div>
                 </div>
 
-            </section>
+                <!-- Ledger Search & Filters -->
+                <div class="ledger-filters">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="ledger-search" placeholder="ค้นหาบันทึก หรือจำนวนเงิน..." data-i18n-placeholder="ledger.search_placeholder">
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all" data-i18n="ledger.filter_all">ทั้งหมด</button>
+                        <button class="filter-btn" data-filter="income" data-i18n="ledger.filter_income">รายรับ</button>
+                        <button class="filter-btn" data-filter="expense" data-i18n="ledger.filter_expense">รายจ่าย</button>
+                        <button class="filter-btn" data-filter="cash" data-i18n="ledger.filter_cash">เงินสด</button>
+                        <button class="filter-btn" data-filter="bank" data-i18n="ledger.filter_bank">ธนาคาร</button>
+                    </div>
+                </div>
+
+                <!-- History Items Container -->
+                <div class="ledger-list-wrapper">
+                    <ul id="ledger-list" class="ledger-list">
+                        <!-- Items dynamically populated by JS -->
+                    </ul>
+                    <!-- Empty State UI -->
+                    <div id="ledger-empty-state" class="empty-state hidden">
+                        <div class="empty-icon-wrapper">
+                            <i data-lucide="inbox"></i>
+                        </div>
+                        <h3 data-i18n="ledger.empty_title">ไม่พบรายการธุรกรรม</h3>
+                        <p data-i18n="ledger.empty_desc">ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่</p>
+                    </div>
+                </div>
+            </div>
         </main>
 
+        <!-- Footer -->
         <footer class="app-footer-bar">
             <p data-i18n="footer.text">© 2026 Cash & Bank Flow Tracker.
                 พัฒนาขึ้นด้วยเทคโนโลยีระดับพรีเมียมและคำนึงถึงความเป็นส่วนตัวของข้อมูลผู้ใช้งาน 100%</p>
         </footer>
     </div>
+
+    <!-- ============================================================= -->
+    <!-- MODALS                                                        -->
+    <!-- ============================================================= -->
 
     <!-- Notification system -->
     <div id="notification-toast" class="toast hidden">
@@ -444,12 +397,102 @@
         <span class="toast-message">บันทึกสำเร็จ</span>
     </div>
 
-    <!-- Edit Modal Overlay -->
-    <div id="edit-modal-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass-card">
+    <!-- Add Transaction Modal -->
+    <div id="add-tx-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
             <div class="modal-header">
                 <div class="card-title">
-                    <i data-lucide="pencil" class="title-icon text-warning"></i>
+                    <i data-lucide="plus-circle" class="title-icon"></i>
+                    <h2 data-i18n="form.title">บันทึกรายการใหม่</h2>
+                </div>
+                <button id="add-tx-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="transaction-form" autocomplete="off">
+                <!-- Form Tabs for Income / Expense Selection -->
+                <div class="type-selector-tabs">
+                    <input type="radio" id="type-income" name="tx-type" value="income" checked>
+                    <label for="type-income" class="tab-label label-income">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span data-i18n="form.income">รายรับ (Income)</span>
+                    </label>
+
+                    <input type="radio" id="type-expense" name="tx-type" value="expense">
+                    <label for="type-expense" class="tab-label label-expense">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span data-i18n="form.expense">รายจ่าย (Expense)</span>
+                    </label>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Input Amount -->
+                    <div class="form-group col-12">
+                        <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span class="required">*</span></label>
+                        <div class="input-with-icon amount-input-wrapper">
+                            <span class="input-prefix">฿</span>
+                            <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Input Account/Wallet (Cash vs Bank) -->
+                    <div class="form-group col-6">
+                        <label for="tx-method" data-i18n="form.method">ช่องทางการเงิน <span class="required">*</span></label>
+                        <select id="tx-method" required>
+                            <option value="cash" data-i18n="form.method_cash">💵 เงินสด (Cash)</option>
+                            <option value="bank" selected data-i18n="form.method_bank">🏦 บัญชีธนาคาร (Bank)</option>
+                        </select>
+                    </div>
+
+                    <!-- Input Category -->
+                    <div class="form-group col-6">
+                        <label for="tx-category" data-i18n="form.category">หมวดหมู่ <span class="required">*</span></label>
+                        <div class="category-select-row">
+                            <select id="tx-category" required>
+                                <!-- Options will be dynamically populated in JavaScript -->
+                            </select>
+                            <button type="button" id="btn-add-category" class="btn-icon btn-add-cat" title="เพิ่มหมวดหมู่" data-i18n-title="form.add_category">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input Date -->
+                    <div class="form-group col-12">
+                        <label for="tx-date" data-i18n="form.date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="calendar" class="input-icon-left"></i>
+                            <input type="datetime-local" id="tx-date" required>
+                        </div>
+                    </div>
+
+                    <!-- Input Description -->
+                    <div class="form-group col-12">
+                        <label for="tx-description" data-i18n="form.description">บันทึกเพิ่มเติม</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="file-text" class="input-icon-left"></i>
+                            <input type="text" id="tx-description"
+                                placeholder="รายละเอียด หรือคำอธิบายเพิ่มเติม..." data-i18n-placeholder="form.description_placeholder">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-tx">
+                    <i data-lucide="check-circle-2"></i>
+                    <span data-i18n="form.submit">บันทึกรายการ</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal Overlay -->
+    <div id="edit-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="pencil" class="title-icon"></i>
                     <h2 data-i18n="edit.title">แก้ไขรายการธุรกรรม</h2>
                 </div>
                 <button id="edit-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
@@ -533,12 +576,52 @@
         </div>
     </div>
 
-    <!-- Profile Modal Overlay -->
-    <div id="profile-modal-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass-card">
+    <!-- Data Management Modal -->
+    <div id="data-manage-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
             <div class="modal-header">
                 <div class="card-title">
-                    <i data-lucide="user" class="title-icon text-primary"></i>
+                    <i data-lucide="database" class="title-icon"></i>
+                    <h2 data-i18n="data_manage.title">จัดการข้อมูล</h2>
+                </div>
+                <button id="data-manage-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="data-manage-content">
+                <p class="data-manage-desc" data-i18n="data_manage.desc">เลือกการดำเนินการกับข้อมูลของคุณ</p>
+                
+                <button type="button" id="btn-export-data" class="data-manage-action">
+                    <div class="data-manage-action-icon">
+                        <i data-lucide="download"></i>
+                    </div>
+                    <div class="data-manage-action-text">
+                        <strong data-i18n="data_manage.export_title">ส่งออกข้อมูล (CSV)</strong>
+                        <span data-i18n="data_manage.export_desc">ดาวน์โหลดข้อมูลธุรกรรมทั้งหมดเป็นไฟล์ CSV</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="action-arrow"></i>
+                </button>
+
+                <button type="button" id="btn-clear-all" class="data-manage-action data-manage-action-danger">
+                    <div class="data-manage-action-icon data-manage-icon-danger">
+                        <i data-lucide="trash-2"></i>
+                    </div>
+                    <div class="data-manage-action-text">
+                        <strong data-i18n="data_manage.clear_title">ลบข้อมูลทั้งหมด</strong>
+                        <span data-i18n="data_manage.clear_desc">ลบธุรกรรมทั้งหมดอย่างถาวร ไม่สามารถกู้คืนได้</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="action-arrow"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal Overlay -->
+    <div id="profile-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="user" class="title-icon"></i>
                     <h2 data-i18n="profile.title">จัดการโปรไฟล์และบัญชี</h2>
                 </div>
                 <button id="profile-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
@@ -555,7 +638,7 @@
                         </div>
                     </div>
                     <input type="file" id="profile-pic-input" accept="image/*" class="hidden">
-                    <p class="avatar-help-text" data-i18n="profile.avatar_help">คลิกที่รูปเพื่ออัปโหลดรูปภาพ (ระบบบีบอัดและย่อขนาดภาพให้อัตโนมัติ)</p>
+                    <p class="avatar-help-text" data-i18n="profile.avatar_help">คลิกที่รูปเพื่ออัปโหลดรูปภาพ</p>
                     <button type="button" id="btn-remove-avatar-pic" class="btn btn-secondary btn-sm"
                         style="margin-top: 8px; font-size: 11px; padding: 6px 12px; border-radius: 20px;">
                         <i data-lucide="rotate-ccw" style="width: 12px; height: 12px; margin-right: 4px;"></i>
@@ -612,7 +695,7 @@
 
     <!-- Delete Account Confirmation Modal -->
     <div id="delete-confirm-modal-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass-card border-danger-focus">
+        <div class="modal-card border-danger-focus">
             <div class="modal-header">
                 <div class="card-title text-danger">
                     <i data-lucide="alert-triangle" class="title-icon text-danger"></i>
@@ -668,10 +751,10 @@
 
     <!-- Add Category Modal -->
     <div id="category-modal-overlay" class="modal-overlay hidden">
-        <div class="modal-card glass-card">
+        <div class="modal-card">
             <div class="modal-header">
                 <div class="card-title">
-                    <i data-lucide="layers" class="title-icon text-primary"></i>
+                    <i data-lucide="layers" class="title-icon"></i>
                     <h2 data-i18n="category.modal_title">เพิ่มหมวดหมู่ใหม่</h2>
                 </div>
                 <button id="category-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
@@ -738,6 +821,23 @@
         </div>
     </div>
 
+    <!-- # ============================================
+         # PAYMENT / DONATION SYSTEM (Future)
+         # ============================================
+         # รองรับการรับบริจาคหรือชำระเงินในอนาคต
+         # สามารถเชื่อมต่อกับ:
+         #   - Stripe Payment Gateway
+         #   - PromptPay QR Code
+         #   - PayPal Donations
+         #   - Crypto Wallet
+         # 
+         # Implementation Notes:
+         #   - เพิ่ม /donate หรือ /pay route
+         #   - สร้าง Payment Modal component
+         #   - เชื่อมต่อ Backend API สำหรับ payment processing
+         #   - รองรับ webhook สำหรับ payment confirmation
+         # ============================================ -->
+
     <!-- i18n Language System -->
     <script src="lang.js"></script>
 
@@ -747,6 +847,7 @@
 
     <!-- Custom Javascript -->
     <script src="app.js"></script>
+
 </body>
 
 </html>
