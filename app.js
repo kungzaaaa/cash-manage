@@ -72,12 +72,10 @@ const MOCK_TRANSACTIONS = [
         description: t('mock.shopping')
     }
 ];
-// ประกาศตัวแปร Unsubscribe เพิ่มเติมเหนือวัตถุ state
-let unsubscribeCat = null;
+
 // App State Management
 let state = {
     transactions: [],
-    customCategories: { income: [], expense: [] },
     filters: {
         type: 'all', // all, income, expense, cash, bank
         search: ''
@@ -181,29 +179,21 @@ async function initAppForUser(user) {
     state.currentUser = user;
     txRef = db.collection('users').doc(user.uid).collection('transactions');
 
-    // ➕ ดึงข้อมูลหมวดหมู่ที่สร้างขึ้นเองจากคลังฐานข้อมูล Firestore
-    const customCatRef = db.collection('users').doc(user.uid).collection('custom_categories');
-    unsubscribeCat = customCatRef.onSnapshot((snapshot) => {
-        state.customCategories = { income: [], expense: [] };
-        snapshot.docs.forEach(doc => {
-            const cat = doc.data();
-            if (cat.type === 'income') state.customCategories.income.push(cat);
-            else state.customCategories.expense.push(cat);
-        });
-
-        // สั่งอัปเดตหน้าต่างตัวเลือกใหม่ทุกครั้งเมื่อข้อมูลมีการเปลี่ยนแปลง
-        updateCategorySelectOptions();
-        updateEditCategorySelectOptions();
-    }, (error) => {
-        console.error("Error fetching custom categories:", error);
-    });
-
-    // Set up real-time listener (โค้ดดึงข้อมูลประวัติการทำรายการเดิมของคุณคงไว้เหมือนเดิม)
+    // Set up real-time listener
     unsubscribeSnapshot = txRef.onSnapshot((snapshot) => {
         state.transactions = snapshot.docs.map(doc => {
             return { id: doc.id, ...doc.data() };
         });
+
+        // Sort by date descending
         state.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // If it's a completely new user with no transactions, load mock data automatically
+        if (state.transactions.length === 0 && snapshot.metadata.fromCache === false && snapshot.size === 0) {
+            // Check if user just signed up (we'll only load mock if the collection is truly empty)
+            // But to be safe, we'll wait for them to click "ข้อมูลทดลอง" manually instead of auto-populating
+        }
+
         renderDashboard();
     }, (error) => {
         console.error("Error fetching transactions: ", error);
@@ -215,16 +205,9 @@ function clearAppForLogout() {
     state.currentUser = null;
     txRef = null;
     state.transactions = [];
-    state.customCategories = { income: [], expense: [] }; // เคลียร์ค่าหมวดหมู่ที่เพิ่มเอง
-
     if (unsubscribeSnapshot) {
         unsubscribeSnapshot();
         unsubscribeSnapshot = null;
-    }
-    // สั่งปิดการเชื่อมต่อคลังข้อมูลหมวดหมู่ตอนผู้ใช้ออกจากระบบ
-    if (unsubscribeCat) {
-        unsubscribeCat();
-        unsubscribeCat = null;
     }
     renderDashboard();
 }
@@ -257,12 +240,8 @@ function updateEditCategorySelectOptions() {
 
 // Reusable helper: populates a <select> with category options
 function populateCategorySelect(selectEl, isIncome) {
-    const defaultCategories = isIncome ? CATEGORIES.income : CATEGORIES.expense;
-    const customCategories = isIncome ? (state.customCategories?.income || []) : (state.customCategories?.expense || []);
-
-    // รวมรายการหมวดหมู่ทั้งหมดเพื่อแสดงผล
-    const activeCategories = [...defaultCategories, ...customCategories];
-    const currentValue = selectEl.value;
+    const activeCategories = isIncome ? CATEGORIES.income : CATEGORIES.expense;
+    const currentValue = selectEl.value; // preserve selection when possible
     selectEl.innerHTML = '';
 
     const EMOJI_MAP = {
@@ -274,20 +253,10 @@ function populateCategorySelect(selectEl, isIncome) {
     activeCategories.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
-
-        // จัดหาไอคอนแสดงผล: หากเป็นหมวดหมู่สร้างเองจะใช้ไอคอนมาตรฐาน 🏷️
-        const iconSymbol = EMOJI_MAP[cat.id] || cat.emoji || (isIncome ? '📥' : '💸');
-
-        // ดึงข้อความแสดงผล (รองรับทั้งคำแปลภาษาเดิม และชื่อที่คุณพิมพ์ตั้งขึ้นมาใหม่)
-        const labelText = cat.labelKey ? t(cat.labelKey) : cat.label;
-        option.textContent = `${iconSymbol} ${labelText}`;
+        const iconSymbol = EMOJI_MAP[cat.id] || (isIncome ? '📥' : '💸');
+        option.textContent = `${iconSymbol} ${t(cat.labelKey)}`;
         selectEl.appendChild(option);
     });
-
-    const addNewOption = document.createElement('option');
-    addNewOption.value = 'ACTION_ADD_NEW';
-    addNewOption.textContent = t('cat.add_new');
-    selectEl.appendChild(addNewOption);
 
     // Restore previous selection if it still exists in the new list
     if ([...selectEl.options].some(o => o.value === currentValue)) {
@@ -500,10 +469,8 @@ function renderLedgerList() {
 
 // Find Category configuration helper
 function getCategoryObj(type, categoryId) {
-    const defaultList = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
-    const customList = type === 'income' ? (state.customCategories?.income || []) : (state.customCategories?.expense || []);
-    const combinedList = [...defaultList, ...customList];
-    return combinedList.find(item => item.id === categoryId) || null;
+    const list = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
+    return list.find(item => item.id === categoryId) || null;
 }
 
 // -------------------------------------------------------------
@@ -860,52 +827,6 @@ function setupEventListeners() {
             showToast(t('toast.tx_edit_error'), 'danger');
         }
     });
-
-    elements.txCategory.addEventListener('change', async (e) => {
-        if (e.target.value === 'ACTION_ADD_NEW') {
-            await handleAddNewCategoryAction(false);
-        }
-    });
-
-    elements.editTxCategory.addEventListener('change', async (e) => {
-        if (e.target.value === 'ACTION_ADD_NEW') {
-            await handleAddNewCategoryAction(true);
-        }
-    });
-
-    async function handleAddNewCategoryAction(isEditForm) {
-        const selectEl = isEditForm ? elements.editTxCategory : elements.txCategory;
-        const isIncome = isEditForm ? elements.editTypeIncome.checked : elements.typeIncomeRadio.checked;
-
-        const catName = prompt(t('prompt.add_category'));
-
-        if (!catName || catName.trim() === '') {
-            selectEl.value = selectEl.options[0].value;
-            return;
-        }
-
-        const cleanName = catName.trim();
-        const catId = 'custom-' + Date.now();
-
-        const newCategory = {
-            id: catId,
-            label: cleanName,
-            type: isIncome ? 'income' : 'expense',
-            icon: isIncome ? 'plus-circle' : 'minus-circle',
-            color: isIncome ? 'hsl(150, 80%, 42%)' : 'hsl(0, 0%, 55%)',
-            emoji: '🏷️'
-        };
-
-        try {
-            await db.collection('users').doc(state.currentUser.uid).collection('custom_categories').doc(catId).set(newCategory);
-            showToast(t('toast.cat_added'), 'success');
-            setTimeout(() => { selectEl.value = catId; }, 100);
-        } catch (error) {
-            console.error("Error creating category:", error);
-            showToast(t('toast.cat_error'), 'danger');
-            selectEl.value = selectEl.options[0].value;
-        }
-    }
 }
 
 // -------------------------------------------------------------
