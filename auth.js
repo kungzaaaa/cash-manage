@@ -75,7 +75,7 @@ const authElements = {
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         // User is signed in
-        
+
         // 1. Load user profile from Firestore to fetch custom photo URL (Base64) or display name
         let firestorePhotoURL = '';
         let firestoreDisplayName = '';
@@ -352,11 +352,11 @@ async function handleProfilePicSelection(e) {
     // Show visual feedback or toast that image is processing
     authElements.profilePicError.classList.add('hidden');
     authElements.profilePicError.textContent = '';
-    
+
     try {
         // Compress image to max 200px width/height and 0.75 quality in real-time!
         const compressedBase64 = await compressAndResizeImage(file, 200, 200, 0.75);
-        
+
         selectedProfilePicBase64 = compressedBase64;
         authElements.profileAvatarPreview.src = selectedProfilePicBase64;
         authElements.profilePicError.classList.add('hidden');
@@ -386,7 +386,7 @@ function handleRemoveAvatarPic() {
         const displayName = authElements.profileDisplayName.value.trim() || user.displayName || user.email || 'User';
         authElements.profileAvatarPreview.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
     }
-    
+
     authElements.profilePicError.classList.add('hidden');
     if (typeof showToast === 'function') showToast(t('toast.avatar_reset'), 'info');
 }
@@ -414,7 +414,7 @@ async function saveUserProfileData(e) {
         const userDocRef = db.collection('users').doc(user.uid);
         const googleProfile = user.providerData.find(p => p.providerId === 'google.com');
         const googlePhotoURL = googleProfile ? googleProfile.photoURL : '';
-        
+
         let finalPhotoURL = '';
         if (selectedProfilePicBase64 === 'REMOVE') {
             finalPhotoURL = googlePhotoURL || '';
