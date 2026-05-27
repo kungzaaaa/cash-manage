@@ -2227,9 +2227,7 @@ body {
     background-color: var(--bg-input-focus);
 }
 
-/* =============================================================
-   Responsive Web Design Breakdown
-   ============================================================= */
+/* Responsive Web Design Breakdown */
 @media (max-width: 1100px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -2237,6 +2235,33 @@ body {
     
     .left-column, .right-column {
         width: 100%;
+    }
+}
+
+@media (max-width: 580px) {
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+    
+    .account-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .col-6 {
+        grid-column: span 12;
+    }
+
+    .user-name {
+        display: none;
     }
 }
 
@@ -2279,177 +2304,5 @@ body {
 
     .auth-right {
         padding: 24px 24px 32px;
-    }
-}
-
-@media (max-width: 580px) {
-    .app-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 16px;
-        padding: 16px;
-    }
-    
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-
-    .user-name {
-        display: none;
-    }
-
-    .account-cards-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .col-6 {
-        grid-column: span 12;
-    }
-
-    /* Form & Chart Layout */
-    .form-card, .chart-card {
-        padding: 16px;
-    }
-
-    .form-grid {
-        gap: 12px;
-    }
-
-    /* Modal Adjustments */
-    .modal-overlay {
-        padding: 12px;
-    }
-
-    .modal-card {
-        padding: 20px;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .modal-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .modal-actions .btn {
-        width: 100%;
-    }
-
-    /* Category Add layout */
-    .icon-picker-grid, .color-picker-grid {
-        gap: 8px;
-    }
-    
-    .cat-preview-item {
-        padding: 10px 14px;
-    }
-
-    /* Balance overview */
-    .balance-value {
-        font-size: 32px;
-    }
-    
-    .balance-value .currency {
-        font-size: 24px;
-    }
-    
-    .card-total-balance .card-footer {
-        gap: 10px;
-    }
-
-    /* Ledger item adjustments */
-    .ledger-item {
-        padding: 12px 14px;
-        gap: 8px;
-    }
-
-    .item-icon-wrapper {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-    }
-
-    .ledger-item-left {
-        gap: 10px;
-        min-width: 0;
-        flex: 1;
-    }
-
-    .item-title-desc {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .item-title-row {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .item-title {
-        font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-
-    .item-desc {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-
-    .item-amount {
-        font-size: 14px;
-    }
-    
-    .btn-action-sm {
-        /* Always show action buttons on mobile */
-        opacity: 1;
-    }
-    
-    /* Type selector tabs */
-    .tab-label {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 400px) {
-    /* Extra small screens */
-    .card-total-balance .card-footer {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .header-actions {
-        gap: 8px;
-    }
-
-    .btn-sm {
-        padding: 6px 10px;
-        font-size: 11px;
-    }
-    
-    .btn-sm svg {
-        width: 14px;
-        height: 14px;
-    }
-    
-    .auth-input-group input {
-        padding: 10px 14px 10px 38px;
-    }
-    
-    .auth-input-icon {
-        left: 12px;
-    }
-    
-    /* Ensure long values don't overflow */
-    .account-balance {
-        font-size: 16px;
-        word-break: break-all;
     }
 }
