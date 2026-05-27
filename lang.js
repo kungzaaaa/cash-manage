@@ -68,6 +68,12 @@ const TRANSLATIONS = {
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'ยอดเงินคงเหลือทั้งหมด',
+        'topbar.add_transaction': 'บันทึกรายการ',
+        'home.recent_title': 'รายการล่าสุด',
+        'home.view_all': 'ดูทั้งหมด',
+        'home.empty_desc': 'กดปุ่ม "บันทึกรายการ" ด้านบนเพื่อเริ่มบันทึกรายรับ-รายจ่าย',
+        'detail.title': 'รายละเอียดข้อมูล',
+        'detail.back': 'กลับหน้าหลัก',
         'dashboard.all_accounts': 'รวมทุกบัญชี',
         'dashboard.total_income': 'รายรับรวม',
         'dashboard.total_expense': 'รายจ่ายรวม',
@@ -301,6 +307,12 @@ const TRANSLATIONS = {
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'Total Balance',
+        'topbar.add_transaction': 'Add Transaction',
+        'home.recent_title': 'Recent Transactions',
+        'home.view_all': 'See All',
+        'home.empty_desc': 'Click "Add Transaction" above to start tracking your flow',
+        'detail.title': 'Transaction Details',
+        'detail.back': 'Back to Home',
         'dashboard.all_accounts': 'All Accounts',
         'dashboard.total_income': 'Total Income',
         'dashboard.total_expense': 'Total Expense',
