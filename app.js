@@ -42,6 +42,7 @@ let CATEGORIES = {
 // App State Management
 let state = {
     transactions: [],
+    targetSavings: 0,
     filters: {
         type: 'all',
         search: ''
@@ -72,6 +73,11 @@ const elements = {
     bankBalance: document.getElementById('bank-balance'),
     bankIncome: document.getElementById('bank-income'),
     bankExpense: document.getElementById('bank-expense'),
+    btnEditSavings: document.getElementById('btn-edit-savings'),
+    savingsAvailable: document.getElementById('savings-available'),
+    savingsTarget: document.getElementById('savings-target'),
+    savingsBorrowed: document.getElementById('savings-borrowed'),
+    savingsBorrowedContainer: document.getElementById('savings-borrowed-container'),
 
     // Transaction Form (now inside modal)
     addTxModalOverlay: document.getElementById('add-tx-modal-overlay'),
@@ -168,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------------------------------------------------
 let txRef = null;
 let unsubscribeSnapshot = null;
+let unsubscribeSavings = null;
 
 async function initAppForUser(user) {
     state.currentUser = user;
@@ -185,6 +192,11 @@ async function initAppForUser(user) {
     });
 
     loadCustomCategories(user);
+    const savingsRef = db.collection('users').doc(user.uid).collection('settings').doc('savings');
+    unsubscribeSavings = savingsRef.onSnapshot(doc => {
+        state.targetSavings = doc.exists ? (doc.data().amount || 0) : 0;
+        renderDashboard();
+    });
 }
 
 function clearAppForLogout() {
@@ -194,6 +206,10 @@ function clearAppForLogout() {
     if (unsubscribeSnapshot) {
         unsubscribeSnapshot();
         unsubscribeSnapshot = null;
+    }
+    if (unsubscribeSavings) {
+        unsubscribeSavings();
+        unsubscribeSavings = null;
     }
     renderDashboard();
 }
@@ -311,7 +327,7 @@ function closeAddTxModal() {
 function toggleProfileDropdown() {
     const dropdown = elements.profileDropdown;
     const profileSection = document.getElementById('user-profile-section');
-    
+
     if (dropdown.classList.contains('hidden')) {
         dropdown.classList.remove('hidden');
         profileSection.classList.add('dropdown-open');
@@ -367,6 +383,27 @@ function renderDashboard() {
     const overallBalance = currentCashBalance + currentBankBalance;
     const overallIncome = totalCashIncome + totalBankIncome;
     const overallExpense = totalCashExpense + totalBankExpense;
+    const target = state.targetSavings || 0;
+    let available = overallBalance - target;
+    let borrowed = 0;
+
+    if (available < 0) {
+        borrowed = Math.abs(available);
+        available = 0;
+    }
+
+    if (elements.savingsAvailable) elements.savingsAvailable.textContent = `฿${formatCurrency(available)}`;
+    if (elements.savingsTarget) elements.savingsTarget.textContent = `฿${formatCurrency(target)}`;
+    if (elements.savingsBorrowed) elements.savingsBorrowed.textContent = `฿${formatCurrency(borrowed)}`;
+
+    // Show warning if money is borrowed
+    if (elements.savingsBorrowedContainer) {
+        if (borrowed > 0) {
+            elements.savingsBorrowedContainer.classList.remove('hidden');
+        } else {
+            elements.savingsBorrowedContainer.classList.add('hidden');
+        }
+    }
 
     // Update Hero Card
     elements.totalBalance.textContent = formatCurrency(overallBalance);
@@ -724,6 +761,23 @@ function updateCharts() {
 function setupEventListeners() {
     // Theme Toggle
     elements.themeToggleBtn.addEventListener('click', toggleTheme);
+    if (elements.btnEditSavings) {
+        elements.btnEditSavings.addEventListener('click', async () => {
+            if (!state.currentUser) return;
+            const currentAmount = state.targetSavings > 0 ? state.targetSavings : '';
+            const input = prompt(t('savings.prompt'), currentAmount);
+
+            if (input !== null && input.trim() !== '') {
+                const amount = parseFloat(input);
+                if (!isNaN(amount) && amount >= 0) {
+                    await db.collection('users').doc(state.currentUser.uid).collection('settings').doc('savings').set({ amount });
+                    showToast(t('toast.savings_updated'), 'success');
+                } else {
+                    showToast(t('toast.amount_invalid'), 'danger');
+                }
+            }
+        });
+    }
 
     // Add Transaction Modal
     elements.btnAddTransaction.addEventListener('click', openAddTxModal);

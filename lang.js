@@ -79,6 +79,12 @@ const TRANSLATIONS = {
         'dashboard.total_expense': 'รายจ่ายรวม',
         'dashboard.cash_balance': 'เงินสดคงเหลือ',
         'dashboard.bank_balance': 'เงินในธนาคารคงเหลือ',
+        'savings.title': 'กระปุกเงินเก็บ (ล็อกยอด)',
+        'savings.available': 'เงินที่สามารถใช้ได้',
+        'savings.target': 'เป้าหมาย:',
+        'savings.borrowed': 'ยืมเงินเก็บมา:',
+        'savings.prompt': 'ระบุยอดเงินที่ต้องการฟิกเก็บไว้ (บาท):',
+        'toast.savings_updated': 'อัปเดตเป้าหมายเงินเก็บแล้ว',
 
         // ========== Transaction Form ==========
         'form.title': 'บันทึกรายการใหม่',
@@ -318,6 +324,12 @@ const TRANSLATIONS = {
         'dashboard.total_expense': 'Total Expense',
         'dashboard.cash_balance': 'Cash Balance',
         'dashboard.bank_balance': 'Bank Balance',
+        'savings.title': 'Savings Jar (Locked)',
+        'savings.available': 'Available to Spend',
+        'savings.target': 'Target:',
+        'savings.borrowed': 'Borrowed:',
+        'savings.prompt': 'Enter your target savings amount (Baht):',
+        'toast.savings_updated': 'Savings target updated',
 
         // ========== Transaction Form ==========
         'form.title': 'New Transaction',
