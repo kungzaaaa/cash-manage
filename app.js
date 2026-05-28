@@ -86,6 +86,8 @@ const elements = {
     txCategory: document.getElementById('tx-category'),
     txDate: document.getElementById('tx-date'),
     txDescription: document.getElementById('tx-description'),
+    txCurrency: document.getElementById('tx-currency'),
+    txCurrencySymbol: document.getElementById('tx-currency-symbol'),
 
     // Recent List (home view)
     recentList: document.getElementById('recent-list'),
@@ -124,6 +126,8 @@ const elements = {
     editTxCategory: document.getElementById('edit-tx-category'),
     editTxDate: document.getElementById('edit-tx-date'),
     editTxDescription: document.getElementById('edit-tx-description'),
+    editTxCurrency: document.getElementById('edit-tx-currency'),
+    editTxCurrencySymbol: document.getElementById('edit-tx-currency-symbol'),
 
     // Data Management Modal
     dataManageModalOverlay: document.getElementById('data-manage-modal-overlay'),
@@ -139,6 +143,18 @@ const elements = {
     profileDropdown: document.getElementById('profile-dropdown'),
     btnOpenProfile: document.getElementById('btn-open-profile'),
 
+    // Currency Converter
+    btnCurrencyConverter: document.getElementById('btn-currency-converter'),
+    converterModalOverlay: document.getElementById('converter-modal-overlay'),
+    converterModalClose: document.getElementById('converter-modal-close'),
+    converterAmount: document.getElementById('converter-amount'),
+    converterFrom: document.getElementById('converter-from'),
+    converterTo: document.getElementById('converter-to'),
+    converterSwap: document.getElementById('converter-swap'),
+    converterRateText: document.getElementById('converter-rate-text'),
+    converterFinalText: document.getElementById('converter-final-text'),
+    converterLoading: document.getElementById('converter-loading'),
+
     // Category Modal
     categoryModalOverlay: document.getElementById('category-modal-overlay'),
     categoryModalClose: document.getElementById('category-modal-close'),
@@ -153,6 +169,58 @@ const elements = {
     catPreviewName: document.getElementById('cat-preview-name'),
     btnAddCategory: document.getElementById('btn-add-category'),
     btnAddCategoryEdit: document.getElementById('btn-add-category-edit')
+};
+
+// -------------------------------------------------------------
+// Exchange Rate Service
+// -------------------------------------------------------------
+const ExchangeRateService = {
+    cache: {},
+    lastFetchTime: null,
+    CACHE_DURATION: 1000 * 60 * 60, // 1 hour
+
+    async getRates() {
+        const now = Date.now();
+        if (this.cache.rates && this.lastFetchTime && (now - this.lastFetchTime < this.CACHE_DURATION)) {
+            return this.cache;
+        }
+
+        try {
+            const response = await fetch('https://api.exchangerate-api.com/v4/latest/THB');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            this.cache = data;
+            this.lastFetchTime = now;
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch exchange rates:', error);
+            // Fallback rates if API fails
+            return {
+                rates: {
+                    THB: 1, USD: 0.027, EUR: 0.025, JPY: 4.15, CNY: 0.19, GBP: 0.021
+                }
+            };
+        }
+    },
+
+    async convert(amount, fromCurrency, toCurrency) {
+        if (fromCurrency === toCurrency) return { amount, rate: 1 };
+        
+        const data = await this.getRates();
+        const rates = data.rates;
+        
+        // Convert to base (THB) first, then to target
+        const amountInTHB = amount / rates[fromCurrency];
+        const finalAmount = amountInTHB * rates[toCurrency];
+        
+        // Calculate direct rate from -> to
+        const directRate = rates[toCurrency] / rates[fromCurrency];
+        
+        return {
+            amount: finalAmount,
+            rate: directRate
+        };
+    }
 };
 
 // -------------------------------------------------------------
@@ -447,6 +515,11 @@ function formatCurrency(number) {
     }).format(number);
 }
 
+function getCurrencySymbolStr(code) {
+    const symbols = { THB: '฿', USD: '$', EUR: '€', JPY: '¥', CNY: '¥', GBP: '£' };
+    return symbols[code] || code;
+}
+
 // -------------------------------------------------------------
 // Render Recent List (Home — max 5 items)
 // -------------------------------------------------------------
@@ -562,7 +635,13 @@ function buildTransactionItemHTML(tx) {
         </div>
         <div class="ledger-item-right">
             <div class="item-amount-wrapper">
-                <span class="item-amount ${amountClass}">${sign}${getCurrencySymbol()}${formatCurrency(tx.amount)}</span>
+                <span class="item-amount ${amountClass}">
+                    ${sign}${getCurrencySymbol()}${formatCurrency(tx.amount)}
+                </span>
+                ${tx.originalCurrency && tx.originalCurrency !== (tx.baseCurrency || 'THB') ? 
+                    `<div class="item-original-amount" style="font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px;">
+                        (${sign}${getCurrencySymbolStr(tx.originalCurrency)}${formatCurrency(tx.originalAmount)})
+                     </div>` : ''}
             </div>
             <div class="item-actions">
                 <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
@@ -893,13 +972,14 @@ function setupEventListeners() {
         }
 
         const type = elements.typeIncomeRadio.checked ? 'income' : 'expense';
-        const amount = parseFloat(elements.txAmount.value);
+        const rawAmount = parseFloat(elements.txAmount.value);
         const method = elements.txMethod.value;
         const category = elements.txCategory.value;
         const date = elements.txDate.value;
         const description = elements.txDescription.value.trim();
+        const currency = elements.txCurrency.value;
 
-        if (isNaN(amount) || amount <= 0) {
+        if (isNaN(rawAmount) || rawAmount <= 0) {
             showToast(t('toast.amount_invalid'), 'danger');
             return;
         }
@@ -909,8 +989,22 @@ function setupEventListeners() {
             return;
         }
 
+        const baseCurrency = document.getElementById('currency-select').value;
+        let amount = rawAmount;
+        let exchangeRate = 1;
+        let originalCurrency = currency;
+        let originalAmount = rawAmount;
+        
+        if (currency !== baseCurrency) {
+            // Show toast indicating saving with conversion
+            showToast(t('converter.loading') || 'Converting...', 'info');
+            const conversion = await ExchangeRateService.convert(rawAmount, currency, baseCurrency);
+            amount = conversion.amount;
+            exchangeRate = conversion.rate;
+        }
+
         const txId = 'tx-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-        const newTx = { id: txId, type, amount, method, category, date, description };
+        const newTx = { id: txId, type, amount, originalAmount, originalCurrency, exchangeRate, baseCurrency, method, category, date, description };
 
         try {
             await txRef.doc(txId).set(newTx);
@@ -983,13 +1077,14 @@ function setupEventListeners() {
 
         const id = elements.editTxId.value;
         const type = elements.editTypeIncome.checked ? 'income' : 'expense';
-        const amount = parseFloat(elements.editTxAmount.value);
+        const rawAmount = parseFloat(elements.editTxAmount.value);
         const method = elements.editTxMethod.value;
         const category = elements.editTxCategory.value;
         const date = elements.editTxDate.value;
         const description = elements.editTxDescription.value.trim();
+        const currency = elements.editTxCurrency.value;
 
-        if (isNaN(amount) || amount <= 0) {
+        if (isNaN(rawAmount) || rawAmount <= 0) {
             showToast(t('toast.amount_invalid'), 'danger');
             return;
         }
@@ -998,7 +1093,20 @@ function setupEventListeners() {
             return;
         }
 
-        const updatedTx = { id, type, amount, method, category, date, description };
+        const baseCurrency = document.getElementById('currency-select').value;
+        let amount = rawAmount;
+        let exchangeRate = 1;
+        let originalCurrency = currency;
+        let originalAmount = rawAmount;
+        
+        if (currency !== baseCurrency) {
+            showToast(t('converter.loading') || 'Converting...', 'info');
+            const conversion = await ExchangeRateService.convert(rawAmount, currency, baseCurrency);
+            amount = conversion.amount;
+            exchangeRate = conversion.rate;
+        }
+
+        const updatedTx = { id, type, amount, originalAmount, originalCurrency, exchangeRate, baseCurrency, method, category, date, description };
 
         try {
             await txRef.doc(id).set(updatedTx);
@@ -1008,6 +1116,57 @@ function setupEventListeners() {
             console.error(error);
             showToast(t('toast.tx_edit_error'), 'danger');
         }
+    });
+
+    // Currency Converter Listeners
+    elements.btnCurrencyConverter.addEventListener('click', () => {
+        closeProfileDropdown();
+        elements.converterModalOverlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        calculateConversion();
+    });
+    
+    elements.converterModalClose.addEventListener('click', () => {
+        elements.converterModalOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+    });
+    
+    elements.converterModalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.converterModalOverlay) {
+            elements.converterModalOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
+
+    const calculateConversion = async () => {
+        const amt = parseFloat(elements.converterAmount.value) || 0;
+        const from = elements.converterFrom.value;
+        const to = elements.converterTo.value;
+        
+        elements.converterLoading.classList.remove('hidden');
+        const conversion = await ExchangeRateService.convert(amt, from, to);
+        elements.converterLoading.classList.add('hidden');
+        
+        elements.converterRateText.textContent = `1 ${from} = ${conversion.rate.toFixed(4)} ${to}`;
+        elements.converterFinalText.textContent = `${conversion.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${to}`;
+    };
+
+    elements.converterAmount.addEventListener('input', calculateConversion);
+    elements.converterFrom.addEventListener('change', calculateConversion);
+    elements.converterTo.addEventListener('change', calculateConversion);
+    
+    elements.converterSwap.addEventListener('click', () => {
+        const temp = elements.converterFrom.value;
+        elements.converterFrom.value = elements.converterTo.value;
+        elements.converterTo.value = temp;
+        calculateConversion();
+    });
+
+    elements.txCurrency.addEventListener('change', () => {
+        elements.txCurrencySymbol.textContent = getCurrencySymbolStr(elements.txCurrency.value);
+    });
+    elements.editTxCurrency.addEventListener('change', () => {
+        elements.editTxCurrencySymbol.textContent = getCurrencySymbolStr(elements.editTxCurrency.value);
     });
 
     // Category Add buttons
@@ -1056,7 +1215,10 @@ function openEditModal(id) {
     elements.editTxCategory.value = tx.category;
     refreshCustomDropdown(elements.editTxCategory);
 
-    elements.editTxAmount.value = tx.amount;
+    elements.editTxAmount.value = tx.originalAmount !== undefined ? tx.originalAmount : tx.amount;
+    elements.editTxCurrency.value = tx.originalCurrency || (tx.baseCurrency || 'THB');
+    elements.editTxCurrencySymbol.textContent = getCurrencySymbolStr(elements.editTxCurrency.value);
+    
     elements.editTxMethod.value = tx.method;
     refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;

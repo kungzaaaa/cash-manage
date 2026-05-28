@@ -207,6 +207,12 @@
                                 </select>
                             </div>
 
+                            <!-- Currency Converter Button -->
+                            <button type="button" id="btn-currency-converter" class="dropdown-item">
+                                <i data-lucide="calculator"></i>
+                                <span data-i18n="dropdown.currency_converter">เครื่องมือแปลงสกุลเงิน</span>
+                            </button>
+
                             <div class="dropdown-divider"></div>
 
                             <button type="button" id="btn-logout" class="dropdown-item dropdown-item-danger">
@@ -220,7 +226,7 @@
                 <!-- Right: Logo + Website Name + Subtitle -->
                 <div class="topbar-right">
                     <div class="topbar-brand-text">
-                        <h1>Cash & Bank Flow</h1>
+                        <h1>MnCash</h1>
                         <p data-i18n="header.subtitle">ระบบบันทึกรายรับ-รายจ่าย</p>
                     </div>
                     <div class="logo-icon-wrapper">
@@ -467,8 +473,16 @@
                         <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span
                                 class="required">*</span></label>
                         <div class="input-with-icon amount-input-wrapper">
-                            <span class="input-prefix">฿</span>
+                            <span class="input-prefix" id="tx-currency-symbol">฿</span>
                             <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                            <select id="tx-currency" class="tx-currency-selector">
+                                <option value="THB">THB</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CNY">CNY</option>
+                                <option value="GBP">GBP</option>
+                            </select>
                         </div>
                     </div>
 
@@ -561,8 +575,16 @@
                         <label for="edit-tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span
                                 class="required">*</span></label>
                         <div class="input-with-icon amount-input-wrapper">
-                            <span class="input-prefix">฿</span>
+                            <span class="input-prefix" id="edit-tx-currency-symbol">฿</span>
                             <input type="number" id="edit-tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                            <select id="edit-tx-currency" class="tx-currency-selector">
+                                <option value="THB">THB</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CNY">CNY</option>
+                                <option value="GBP">GBP</option>
+                            </select>
                         </div>
                     </div>
 
@@ -914,6 +936,67 @@
          #   - เชื่อมต่อ Backend API สำหรับ payment processing
          #   - รองรับ webhook สำหรับ payment confirmation
          # ============================================ -->
+
+    <!-- Currency Converter Modal -->
+    <div id="converter-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card converter-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="calculator" class="title-icon"></i>
+                    <h2 data-i18n="converter.title">เครื่องมือแปลงสกุลเงิน</h2>
+                </div>
+                <button id="converter-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="converter-body">
+                <div class="form-group converter-group">
+                    <label data-i18n="converter.amount">จำนวนเงิน</label>
+                    <input type="number" id="converter-amount" placeholder="0.00" value="1" min="0">
+                </div>
+
+                <div class="converter-row">
+                    <div class="form-group converter-group flex-1">
+                        <label data-i18n="converter.from">จาก</label>
+                        <select id="converter-from">
+                            <option value="THB">THB</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="JPY">JPY</option>
+                            <option value="CNY">CNY</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="converter-swap" class="btn-icon swap-btn">
+                        <i data-lucide="arrow-right-left"></i>
+                    </button>
+
+                    <div class="form-group converter-group flex-1">
+                        <label data-i18n="converter.to">เป็น</label>
+                        <select id="converter-to">
+                            <option value="THB">THB</option>
+                            <option value="USD" selected>USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="JPY">JPY</option>
+                            <option value="CNY">CNY</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="converter-result-box">
+                    <div class="converter-rate" id="converter-rate-text">1 THB = 0.00 USD</div>
+                    <div class="converter-final" id="converter-final-text">0.00</div>
+                    <div class="converter-loading hidden" id="converter-loading">
+                        <i data-lucide="loader-2" class="spin-icon"></i> <span
+                            data-i18n="converter.loading">กำลังโหลด...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- i18n Language System -->
     <script src="lang.js"></script>

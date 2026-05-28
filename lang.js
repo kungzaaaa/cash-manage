@@ -86,6 +86,14 @@ const TRANSLATIONS = {
         'dropdown.theme': 'โหมดมืด / สว่าง',
         'dropdown.lang': 'ภาษา (Language)',
         'dropdown.currency': 'สกุลเงิน (Currency)',
+        'dropdown.currency_converter': 'เครื่องมือแปลงสกุลเงิน',
+
+        // ========== Currency Converter ==========
+        'converter.title': 'เครื่องมือแปลงสกุลเงิน',
+        'converter.amount': 'จำนวนเงิน',
+        'converter.from': 'จาก',
+        'converter.to': 'เป็น',
+        'converter.loading': 'กำลังโหลด...',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'ยอดเงินคงเหลือทั้งหมด',
@@ -343,6 +351,14 @@ const TRANSLATIONS = {
         'dropdown.theme': 'Dark / Light Mode',
         'dropdown.lang': 'Language (ภาษา)',
         'dropdown.currency': 'Currency (สกุลเงิน)',
+        'dropdown.currency_converter': 'Currency Converter',
+
+        // ========== Currency Converter ==========
+        'converter.title': 'Currency Converter',
+        'converter.amount': 'Amount',
+        'converter.from': 'From',
+        'converter.to': 'To',
+        'converter.loading': 'Loading...',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'Total Balance',
