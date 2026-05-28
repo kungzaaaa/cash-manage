@@ -1787,6 +1787,36 @@ input[type="number"] {
     color: var(--text-muted);
 }
 
+.btn-confirm-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: var(--color-danger);
+    border: 1.5px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    font-family: var(--font-thai);
+    font-size: 13px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex: 1;
+}
+
+.btn-confirm-clear:hover {
+    background: #b91c1c; /* slightly darker red for hover */
+    border-color: #b91c1c;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-confirm-clear svg {
+    width: 14px;
+    height: 14px;
+    color: white;
+}
+
 
 /* ============================================================= */
 .toast {

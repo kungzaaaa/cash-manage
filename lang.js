@@ -177,6 +177,7 @@ const TRANSLATIONS = {
         'data_manage.clear_desc': 'ลบธุรกรรมทั้งหมดอย่างถาวร ไม่สามารถกู้คืนได้',
         'data_manage.cooldown_warning': 'กำลังจะลบข้อมูลทั้งหมด...',
         'data_manage.cooldown_cancel': 'ยกเลิก',
+        'data_manage.cooldown_confirm': 'ลบทันที',
 
         // ========== Danger Zone ==========
         'danger.title': 'คำเตือน',
@@ -441,6 +442,7 @@ const TRANSLATIONS = {
         'data_manage.clear_desc': 'Permanently delete all transactions. Cannot be undone.',
         'data_manage.cooldown_warning': 'Clearing all data in...',
         'data_manage.cooldown_cancel': 'Cancel',
+        'data_manage.cooldown_confirm': 'Delete Now',
 
         // ========== Danger Zone ==========
         'danger.title': 'Warning',

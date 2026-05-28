@@ -153,6 +153,7 @@ const elements = {
     btnExportData: document.getElementById('btn-export-data'),
     clearCooldownPanel: document.getElementById('clear-cooldown-panel'),
     btnCancelClear: document.getElementById('btn-cancel-clear'),
+    btnConfirmClear: document.getElementById('btn-confirm-clear'),
     cooldownCounter: document.getElementById('cooldown-counter'),
     cooldownRingProgress: document.getElementById('cooldown-ring-progress'),
 
@@ -916,6 +917,21 @@ function setupEventListeners() {
         exportToCSV();
     });
 
+    async function executeDataClear() {
+        if (!txRef) return;
+        try {
+            const snapshot = await txRef.get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            closeDataManageModal();
+            showToast(t('toast.clear_success'), 'danger');
+        } catch (error) {
+            console.error(error);
+            showToast(t('toast.clear_error'), 'danger');
+        }
+    }
+
     // Clear all data — 3-second cooldown with cancel
     function startClearCooldown() {
         const DURATION = 5;
@@ -944,19 +960,7 @@ function setupEventListeners() {
                 clearInterval(clearCooldownTimer);
                 clearCooldownTimer = null;
                 resetClearCooldown();
-
-                if (!txRef) return;
-                try {
-                    const snapshot = await txRef.get();
-                    const batch = db.batch();
-                    snapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    await batch.commit();
-                    closeDataManageModal();
-                    showToast(t('toast.clear_success'), 'danger');
-                } catch (error) {
-                    console.error(error);
-                    showToast(t('toast.clear_error'), 'danger');
-                }
+                await executeDataClear();
             }
         }, 1000);
     }
@@ -982,6 +986,17 @@ function setupEventListeners() {
     elements.btnCancelClear.addEventListener('click', () => {
         resetClearCooldown();
     });
+
+    if (elements.btnConfirmClear) {
+        elements.btnConfirmClear.addEventListener('click', async () => {
+            if (clearCooldownTimer) {
+                clearInterval(clearCooldownTimer);
+                clearCooldownTimer = null;
+            }
+            resetClearCooldown();
+            await executeDataClear();
+        });
+    }
 
     // View Navigation
     elements.btnViewAll.addEventListener('click', showDetailView);
