@@ -342,37 +342,49 @@ body {
     margin: 4px 0;
 }
 
-.dropdown-item-select {
+.dropdown-currency-wrapper {
+    padding: 6px 12px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dropdown-currency-label {
     display: flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 12px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    color: var(--text-body);
-}
-
-.dropdown-select {
-    background: var(--bg-input);
-    color: var(--text-title);
-    border: 1px solid var(--border-light);
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-family: var(--font-eng);
+    gap: 8px;
     font-size: 11px;
-    font-weight: 700;
-    margin-left: auto;
-    outline: none;
-    cursor: pointer;
-    transition: all var(--transition-fast);
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
-.dropdown-select:hover {
-    border-color: var(--border-medium);
-    background: var(--bg-input-focus);
+.dropdown-currency-label svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+/* Custom Dropdown Overrides inside Profile Dropdown */
+.dropdown-currency-wrapper .custom-select {
+    width: 100%;
+}
+
+.dropdown-currency-wrapper .cs-trigger {
+    padding: 8px 10px;
+    font-size: 12px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card-hover);
+}
+
+.dropdown-currency-wrapper .cs-panel {
+    border-radius: var(--radius-sm);
+    max-height: 180px;
+}
+
+.dropdown-currency-wrapper .cs-option {
+    padding: 7px 8px;
+    font-size: 12px;
+    border-radius: 4px;
 }
 
 @keyframes dropdownFadeIn {

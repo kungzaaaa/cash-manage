@@ -16,7 +16,9 @@ const CURRENCIES = {
     USD: { symbol: '$', nameTh: 'ดอลลาร์ (USD)', nameEn: 'Dollar (USD)' },
     EUR: { symbol: '€', nameTh: 'ยูโร (EUR)', nameEn: 'Euro (EUR)' },
     JPY: { symbol: '¥', nameTh: 'เยน (JPY)', nameEn: 'Yen (JPY)' },
-    GBP: { symbol: '£', nameTh: 'ปอนด์ (GBP)', nameEn: 'Pound (GBP)' }
+    GBP: { symbol: '£', nameTh: 'ปอนด์ (GBP)', nameEn: 'Pound (GBP)' },
+    CNY: { symbol: '¥', nameTh: 'หยวน (CNY)', nameEn: 'Yuan (CNY)' },
+    KRW: { symbol: '₩', nameTh: 'วอน (KRW)', nameEn: 'Won (KRW)' }
 };
 
 function getCurrencySymbol() {

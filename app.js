@@ -1365,6 +1365,7 @@ function initCustomDropdowns() {
     createCustomDropdown(elements.txCategory);
     createCustomDropdown(elements.editTxMethod);
     createCustomDropdown(elements.editTxCategory);
+    createCustomDropdown(document.getElementById('currency-select'));
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select')) {
