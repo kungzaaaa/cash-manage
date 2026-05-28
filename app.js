@@ -1189,6 +1189,7 @@ function openEditModal(id) {
     const editTxCurrency = document.getElementById('edit-tx-currency');
     if (editTxCurrency) {
         editTxCurrency.value = tx.currency || 'THB';
+        refreshCustomDropdown(editTxCurrency);
     }
 
     elements.editModalOverlay.classList.remove('hidden');
@@ -1512,20 +1513,43 @@ const METHOD_DISPLAY = {
     bank: { icon: 'landmark', color: 'hsl(205, 90%, 50%)' }
 };
 
+const CURRENCY_DISPLAY = {
+    THB: { icon: 'coins', color: 'hsl(142, 70%, 45%)' },
+    USD: { icon: 'dollar-sign', color: 'hsl(210, 80%, 50%)' },
+    EUR: { icon: 'euro', color: 'hsl(36, 90%, 50%)' },
+    JPY: { icon: 'japanese-yen', color: 'hsl(280, 75%, 60%)' },
+    GBP: { icon: 'pound-sign', color: 'hsl(340, 75%, 55%)' },
+    CNY: { icon: 'coins', color: 'hsl(10, 80%, 55%)' }
+};
+
 function initCustomDropdowns() {
     initMethodSelectData(elements.txMethod);
     initMethodSelectData(elements.editTxMethod);
+
+    // Initialize currency dropdown data attributes
+    const currencySelect = document.getElementById('currency-select');
+    const txCurrency = document.getElementById('tx-currency');
+    const editTxCurrency = document.getElementById('edit-tx-currency');
+    const convFrom = document.getElementById('conv-from');
+    const convTo = document.getElementById('conv-to');
+
+    initCurrencySelectData(currencySelect);
+    initCurrencySelectData(txCurrency);
+    initCurrencySelectData(editTxCurrency);
+    initCurrencySelectData(convFrom);
+    initCurrencySelectData(convTo);
 
     createCustomDropdown(elements.txMethod);
     createCustomDropdown(elements.txCategory);
     createCustomDropdown(elements.editTxMethod);
     createCustomDropdown(elements.editTxCategory);
 
-    // Initialize currency custom select dropdown!
-    const currencySelect = document.getElementById('currency-select');
-    if (currencySelect) {
-        createCustomDropdown(currencySelect);
-    }
+    // Initialize custom dropdown overlays for all currency selectors
+    if (currencySelect) createCustomDropdown(currencySelect);
+    if (txCurrency) createCustomDropdown(txCurrency);
+    if (editTxCurrency) createCustomDropdown(editTxCurrency);
+    if (convFrom) createCustomDropdown(convFrom);
+    if (convTo) createCustomDropdown(convTo);
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select')) {
@@ -1542,6 +1566,17 @@ function initMethodSelectData(selectEl) {
     if (!selectEl) return;
     [...selectEl.options].forEach(opt => {
         const meta = METHOD_DISPLAY[opt.value];
+        if (meta) {
+            opt.setAttribute('data-icon', meta.icon);
+            opt.setAttribute('data-color', meta.color);
+        }
+    });
+}
+
+function initCurrencySelectData(selectEl) {
+    if (!selectEl) return;
+    [...selectEl.options].forEach(opt => {
+        const meta = CURRENCY_DISPLAY[opt.value];
         if (meta) {
             opt.setAttribute('data-icon', meta.icon);
             opt.setAttribute('data-color', meta.color);

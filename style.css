@@ -2660,6 +2660,108 @@ input[type="number"] {
     background-color: var(--bg-input-focus) !important;
 }
 
+/* Custom Select Trailing Currency selector inside amount input box */
+.amount-input-wrapper .custom-select {
+    position: absolute;
+    right: 8px;
+    width: 75px;
+    flex: none;
+    z-index: 10;
+}
+
+.amount-input-wrapper .cs-trigger {
+    height: 32px;
+    padding: 0 6px 0 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-eng);
+    gap: 4px;
+    background-color: var(--bg-app);
+    border: 1px solid var(--border-light);
+}
+
+.amount-input-wrapper .cs-trigger:hover {
+    border-color: var(--border-medium);
+    background-color: var(--bg-input-focus);
+}
+
+.amount-input-wrapper .cs-icon {
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.amount-input-wrapper .cs-icon i {
+    width: 14px;
+    height: 14px;
+}
+
+.amount-input-wrapper .cs-chevron {
+    width: 10px;
+    height: 10px;
+}
+
+.amount-input-wrapper .cs-panel {
+    min-width: 110px;
+    right: 0;
+    left: auto;
+    border-radius: 8px;
+    margin-top: 2px;
+}
+
+/* Custom Select Dropdowns in Converter Modal */
+.converter-grid .custom-select {
+    width: 100%;
+}
+
+.converter-grid .cs-trigger {
+    height: 44px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-title);
+    gap: 8px;
+}
+
+.converter-grid .cs-trigger:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-input-focus);
+}
+
+.converter-grid .cs-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.converter-grid .cs-icon i {
+    width: 18px;
+    height: 18px;
+}
+
+.converter-grid .cs-chevron {
+    width: 13px;
+    height: 13px;
+}
+
+.converter-grid .cs-panel {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    width: 100%;
+    margin-top: 4px;
+}
+
 /* Realtime Currency Converter in Profile Modal */
 .converter-section {
     background: var(--bg-app);
