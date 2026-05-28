@@ -270,6 +270,9 @@ function initCurrency() {
     const currencySelect = document.getElementById('currency-select');
     if (currencySelect) {
         currencySelect.value = currentCurrency;
+        if (typeof refreshCustomDropdown === 'function') {
+            refreshCustomDropdown(currencySelect);
+        }
         currencySelect.addEventListener('change', () => {
             currentCurrency = currencySelect.value;
             localStorage.setItem('app-currency', currentCurrency);
@@ -1365,7 +1368,12 @@ function initCustomDropdowns() {
     createCustomDropdown(elements.txCategory);
     createCustomDropdown(elements.editTxMethod);
     createCustomDropdown(elements.editTxCategory);
-    createCustomDropdown(document.getElementById('currency-select'));
+
+    // Initialize currency custom select dropdown!
+    const currencySelect = document.getElementById('currency-select');
+    if (currencySelect) {
+        createCustomDropdown(currencySelect);
+    }
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select')) {

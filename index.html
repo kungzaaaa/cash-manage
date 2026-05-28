@@ -193,22 +193,17 @@
                                 <span id="lang-flag">EN</span>
                             </button>
 
-                            <div class="dropdown-divider"></div>
-
                             <!-- Currency Selector inside Dropdown -->
-                            <div class="dropdown-currency-wrapper">
-                                <label class="dropdown-currency-label">
-                                    <i data-lucide="coins"></i>
-                                    <span data-i18n="dropdown.currency">สกุลเงิน (Currency)</span>
-                                </label>
-                                <select id="currency-select">
-                                    <option value="THB">🇹🇭 บาท (THB)</option>
-                                    <option value="USD">🇺🇸 ดอลลาร์ (USD)</option>
-                                    <option value="EUR">🇪🇺 ยูโร (EUR)</option>
-                                    <option value="JPY">🇯🇵 เยน (JPY)</option>
-                                    <option value="GBP">🇬🇧 ปอนด์ (GBP)</option>
-                                    <option value="CNY">🇨🇳 หยวน (CNY)</option>
-                                    <option value="KRW">🇰🇷 วอน (KRW)</option>
+                            <div class="dropdown-item dropdown-item-select">
+                                <i data-lucide="coins"></i>
+                                <span data-i18n="dropdown.currency">สกุลเงิน (Currency)</span>
+                                <select id="currency-select" class="dropdown-select">
+                                    <option value="THB">฿ THB</option>
+                                    <option value="USD">$ USD</option>
+                                    <option value="EUR">€ EUR</option>
+                                    <option value="JPY">¥ JPY</option>
+                                    <option value="GBP">£ GBP</option>
+                                    <option value="CNY">¥ CNY</option>
                                 </select>
                             </div>
 

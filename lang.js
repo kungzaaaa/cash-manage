@@ -17,8 +17,7 @@ const CURRENCIES = {
     EUR: { symbol: '€', nameTh: 'ยูโร (EUR)', nameEn: 'Euro (EUR)' },
     JPY: { symbol: '¥', nameTh: 'เยน (JPY)', nameEn: 'Yen (JPY)' },
     GBP: { symbol: '£', nameTh: 'ปอนด์ (GBP)', nameEn: 'Pound (GBP)' },
-    CNY: { symbol: '¥', nameTh: 'หยวน (CNY)', nameEn: 'Yuan (CNY)' },
-    KRW: { symbol: '₩', nameTh: 'วอน (KRW)', nameEn: 'Won (KRW)' }
+    CNY: { symbol: '¥', nameTh: 'หยวน (CNY)', nameEn: 'Yuan (CNY)' }
 };
 
 function getCurrencySymbol() {

@@ -342,49 +342,82 @@ body {
     margin: 4px 0;
 }
 
-.dropdown-currency-wrapper {
-    padding: 6px 12px 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.dropdown-currency-label {
+.dropdown-item-select {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
-.dropdown-currency-label svg {
-    width: 14px;
-    height: 14px;
-    color: var(--text-muted);
-}
-
-/* Custom Dropdown Overrides inside Profile Dropdown */
-.dropdown-currency-wrapper .custom-select {
+    gap: 10px;
     width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-body);
 }
 
-.dropdown-currency-wrapper .cs-trigger {
-    padding: 8px 10px;
-    font-size: 12px;
-    border-radius: var(--radius-sm);
+/* Currency Custom Select inside Profile Dropdown styling */
+.dropdown-item-select .custom-select {
+    flex: 0 0 auto;
+    width: 95px;
+    margin-left: auto;
+}
+
+.dropdown-item-select .cs-trigger {
+    padding: 4px 8px;
+    border-radius: var(--radius-md); /* highly rounded borders */
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-eng);
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    height: 30px;
+}
+
+.dropdown-item-select .cs-trigger:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-input-focus);
+}
+
+.dropdown-item-select .cs-chevron {
+    width: 10px;
+    height: 10px;
+}
+
+.dropdown-item-select .cs-panel {
+    border-radius: var(--radius-md); /* highly rounded minimalist panel */
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    min-width: 95px;
+    width: auto;
+    left: auto;
+    right: 0;
+    top: calc(100% + 6px);
+}
+
+.dropdown-item-select .cs-option {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-family: var(--font-eng);
+    font-weight: 700;
+    border-radius: calc(var(--radius-md) - 4px);
+    transition: all var(--transition-fast);
+}
+
+.dropdown-item-select .cs-option:hover {
     background: var(--bg-card-hover);
 }
 
-.dropdown-currency-wrapper .cs-panel {
-    border-radius: var(--radius-sm);
-    max-height: 180px;
+.dropdown-item-select .cs-option.active {
+    background: var(--color-primary-bg) !important;
+    color: var(--text-title) !important;
 }
 
-.dropdown-currency-wrapper .cs-option {
-    padding: 7px 8px;
-    font-size: 12px;
-    border-radius: 4px;
+.dropdown-item-select .cs-opt-icon {
+    font-family: var(--font-eng);
+    font-weight: 700;
+    font-size: 11px;
 }
 
 @keyframes dropdownFadeIn {
