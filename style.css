@@ -2629,22 +2629,22 @@ input[type="number"] {
 }
 
 .amount-input-wrapper input {
-    padding-right: 80px !important; /* Make room for the select dropdown on the right */
+    padding-right: 88px !important; /* Make room for the select dropdown on the right */
 }
 
 .amount-currency-select {
     position: absolute;
     right: 8px;
-    width: 65px !important;
-    height: 32px !important;
+    width: 72px !important; /* Accommodate icons and text cleanly */
+    height: 30px !important; /* Sleek inline badge height */
     padding: 0 4px 0 8px !important;
-    border: 1px solid var(--border-light) !important;
-    border-radius: 8px !important;
-    background-color: var(--bg-app) !important;
+    border: 1px solid var(--border-medium) !important;
+    border-radius: var(--radius-md) !important; /* Rounded border matching other select dropdowns (12px) */
+    background-color: var(--bg-surface) !important; /* Matches surface color dynamically (white / dark grey) */
     color: var(--text-title) !important;
-    font-family: var(--font-eng) !important;
+    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
     font-size: 11px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     outline: none !important;
     cursor: pointer !important;
     transition: all var(--transition-fast) !important;
@@ -2654,11 +2654,12 @@ input[type="number"] {
     padding-right: 18px !important;
     appearance: none;
     -webkit-appearance: none;
+    box-shadow: var(--shadow-xs) !important;
 }
 
 .amount-currency-select:hover {
-    border-color: var(--border-medium) !important;
-    background-color: var(--bg-input-focus) !important;
+    border-color: var(--border-focus) !important;
+    background-color: var(--bg-card-hover) !important;
 }
 
 /* Realtime Currency Converter in Profile Modal */
