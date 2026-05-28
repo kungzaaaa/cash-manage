@@ -1346,8 +1346,7 @@ function initCategoryModal() {
     const customInput = customColorDiv.querySelector('input');
     customInput.addEventListener('input', (e) => {
         const hex = e.target.value;
-        customColorDiv.style.background = hex;
-        customColorDiv.querySelector('.custom-palette-icon').style.display = 'none';
+        // Keep the palette icon and conic-gradient visible at all times
         customColorDiv.setAttribute('data-color', hex);
         selectCategoryColor(hex);
     });
