@@ -121,7 +121,7 @@ const TRANSLATIONS = {
         'ledger.filter_cash': 'เงินสด',
         'ledger.filter_bank': 'ธนาคาร',
         'ledger.empty_title': 'ไม่พบรายการธุรกรรม',
-        'ledger.empty_desc': 'ลองเริ่มเพิ่มรายรับหรือรายจ่ายใหม่ หรือกดโหลดข้อมูลจำลองเพื่อดูการแสดงผล',
+        'ledger.empty_desc': 'เพิ่มรายรับหรือรายจ่ายใหม่',
         'ledger.method_cash': 'เงินสด',
         'ledger.method_bank': 'ธนาคาร',
         'ledger.method_cash_title': 'เงินสด',
