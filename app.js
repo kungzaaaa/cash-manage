@@ -1331,25 +1331,50 @@ function initCategoryModal() {
     const colorGrid = elements.colorPickerGrid;
     colorGrid.innerHTML = '';
 
-    // 1. Custom Color Picker (First Item)
+    // 1. Custom Color Picker Trigger (First Item) - No background, paint palette icon
     const customColorDiv = document.createElement('div');
-    customColorDiv.className = 'color-pick-btn';
-    customColorDiv.style.background = 'conic-gradient(from 180deg at 50% 50%, #ff0000 0deg, #ff8a00 60deg, #ffe500 120deg, #14ff00 180deg, #00a8ff 240deg, #8a2be2 300deg, #ff0000 360deg)';
-    customColorDiv.setAttribute('data-color', 'custom');
+    customColorDiv.className = 'color-pick-btn custom-color-picker-trigger';
+    customColorDiv.style.background = 'transparent';
+    customColorDiv.style.border = '2px dashed var(--border-medium)';
+    customColorDiv.style.display = 'flex';
+    customColorDiv.style.alignItems = 'center';
+    customColorDiv.style.justifyContent = 'center';
+    customColorDiv.style.cursor = 'pointer';
+    customColorDiv.setAttribute('data-color', 'custom-picker');
     customColorDiv.innerHTML = `
-        <div class="custom-palette-icon" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.1); border-radius:inherit; pointer-events:none;">
-            <i data-lucide="palette" style="width:20px; height:20px; color:#fff; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));"></i>
-        </div>
-        <input type="color" value="#4ECDC4" title="เลือกสีอื่นๆ" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; padding:0; margin:0; border:none; box-sizing:border-box;">
+        <i data-lucide="palette" style="width:20px; height:20px; color:var(--text-muted); transition: color var(--transition-fast);"></i>
+        <input type="color" value="#4ECDC4" title="${t('category.custom_color_title') || 'เลือกสีอื่นๆ'}" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; padding:0; margin:0; border:none; box-sizing:border-box;">
     `;
     
     const customInput = customColorDiv.querySelector('input');
+    
+    // Preview in real-time as they drag the color picker slider
     customInput.addEventListener('input', (e) => {
         const hex = e.target.value;
-        // Keep the palette icon and conic-gradient visible at all times
-        customColorDiv.setAttribute('data-color', hex);
         selectCategoryColor(hex);
     });
+
+    // When the color is finalized, create a new separate color slot/item in the list!
+    customInput.addEventListener('change', (e) => {
+        const hex = e.target.value;
+        
+        // Check if a slot for this color already exists
+        let existingBtn = colorGrid.querySelector(`.color-pick-btn[data-color="${hex}"]`);
+        if (!existingBtn) {
+            const newBtn = document.createElement('button');
+            newBtn.type = 'button';
+            newBtn.className = 'color-pick-btn custom-color-slot';
+            newBtn.style.background = hex;
+            newBtn.setAttribute('data-color', hex);
+            newBtn.addEventListener('click', () => selectCategoryColor(hex));
+            
+            // Insert it right after the custom color picker trigger (index 1)
+            customColorDiv.insertAdjacentElement('afterend', newBtn);
+        }
+        
+        selectCategoryColor(hex);
+    });
+    
     colorGrid.appendChild(customColorDiv);
 
     // 2. Predefined Colors
