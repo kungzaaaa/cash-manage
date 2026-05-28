@@ -20,7 +20,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <!-- Lucide Icons for clean stroke icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
 
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -758,7 +758,8 @@
                     </div>
 
                     <div class="form-group col-12" style="margin-top: 10px;">
-                        <button type="button" id="btn-profile-converter" class="btn btn-secondary-outline btn-block" style="height: 44px; border-radius: var(--radius-md);">
+                        <button type="button" id="btn-profile-converter" class="btn btn-secondary-outline btn-block"
+                            style="height: 44px; border-radius: var(--radius-md);">
                             <i data-lucide="refresh-cw"></i>
                             <span data-i18n="profile.converter">เครื่องมือแปลงสกุลเงินเรียลไทม์</span>
                         </button>
@@ -806,22 +807,27 @@
                     <i data-lucide="x"></i>
                 </button>
             </div>
-            
+
             <div class="modal-body" style="padding-top: 10px;">
                 <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;" data-i18n="converter.desc">
                     อัตราแลกเปลี่ยนปัจจุบันอ้างอิงข้อมูลสดแบบเรียลไทม์ในตลาดการเงินโลก
                 </p>
-                
+
                 <div class="converter-grid" style="grid-template-columns: 1fr; gap: 14px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label for="conv-amount" data-i18n="converter.amount" style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">จำนวนเงินที่ต้องการคำนวณ</label>
-                        <input type="number" id="conv-amount" value="100" min="0" step="0.01" style="height:44px !important; font-size:16px !important; font-weight:600 !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important;">
+                        <label for="conv-amount" data-i18n="converter.amount"
+                            style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">จำนวนเงินที่ต้องการคำนวณ</label>
+                        <input type="number" id="conv-amount" value="100" min="0" step="0.01"
+                            style="height:44px !important; font-size:16px !important; font-weight:600 !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important;">
                     </div>
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
                         <div class="form-group">
-                            <label for="conv-from" data-i18n="converter.from" style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">จากสกุลเงิน (From)</label>
-                            <select id="conv-from" style="height:44px !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236B7280\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E') !important; background-repeat:no-repeat !important; background-position:right 12px center !important; cursor:pointer;">
+                            <label for="conv-from" data-i18n="converter.from"
+                                style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">จากสกุลเงิน
+                                (From)</label>
+                            <select id="conv-from"
+                                style="height:44px !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236B7280\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E') !important; background-repeat:no-repeat !important; background-position:right 12px center !important; cursor:pointer;">
                                 <option value="THB">฿ THB</option>
                                 <option value="USD">USD</option>
                                 <option value="EUR">EUR</option>
@@ -831,8 +837,11 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="conv-to" data-i18n="converter.to" style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">ไปเป็นสกุลเงิน (To)</label>
-                            <select id="conv-to" style="height:44px !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236B7280\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E') !important; background-repeat:no-repeat !important; background-position:right 12px center !important; cursor:pointer;">
+                            <label for="conv-to" data-i18n="converter.to"
+                                style="font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:6px; display:block;">ไปเป็นสกุลเงิน
+                                (To)</label>
+                            <select id="conv-to"
+                                style="height:44px !important; width:100% !important; background:var(--bg-input) !important; border:1px solid var(--border-light) !important; border-radius:var(--radius-md) !important; padding:10px 14px !important; outline:none !important; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236B7280\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E') !important; background-repeat:no-repeat !important; background-position:right 12px center !important; cursor:pointer;">
                                 <option value="USD">USD</option>
                                 <option value="THB" selected>฿ THB</option>
                                 <option value="EUR">EUR</option>
@@ -843,14 +852,20 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="converter-result-wrapper" style="padding: 20px; border-radius: var(--radius-md); background:var(--bg-app); border:1px solid var(--border-light); text-align:center; margin-bottom: 16px;">
-                    <span id="conv-result-from" style="font-size:12px; color:var(--text-muted); font-family:var(--font-eng); font-weight:500;">100.00 USD =</span>
-                    <span id="conv-result-value" style="font-size:26px; font-weight:800; color:var(--color-income); font-family:var(--font-eng); letter-spacing:-0.5px; display:block; margin-top:4px;">3,650.00 THB</span>
+
+                <div class="converter-result-wrapper"
+                    style="padding: 20px; border-radius: var(--radius-md); background:var(--bg-app); border:1px solid var(--border-light); text-align:center; margin-bottom: 16px;">
+                    <span id="conv-result-from"
+                        style="font-size:12px; color:var(--text-muted); font-family:var(--font-eng); font-weight:500;">100.00
+                        USD =</span>
+                    <span id="conv-result-value"
+                        style="font-size:26px; font-weight:800; color:var(--color-income); font-family:var(--font-eng); letter-spacing:-0.5px; display:block; margin-top:4px;">3,650.00
+                        THB</span>
                 </div>
-                
+
                 <div style="text-align: center; margin-top: 14px;">
-                    <span class="rate-status" id="rate-update-time" style="font-size: 11px; padding: 4px 12px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:20px; color:var(--text-muted); font-family:var(--font-eng); font-weight:600;">อัตราแลกเปลี่ยนปัจจุบัน</span>
+                    <span class="rate-status" id="rate-update-time"
+                        style="font-size: 11px; padding: 4px 12px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:20px; color:var(--text-muted); font-family:var(--font-eng); font-weight:600;">อัตราแลกเปลี่ยนปัจจุบัน</span>
                 </div>
             </div>
         </div>
