@@ -164,6 +164,9 @@ const TRANSLATIONS = {
         'converter.amount': 'จำนวนเงิน',
         'converter.from': 'จากสกุลเงิน',
         'converter.to': 'ไปเป็นสกุลเงิน',
+        'converter.desc': 'อัตราแลกเปลี่ยนปัจจุบันอ้างอิงข้อมูลสดแบบเรียลไทม์ในตลาดการเงินโลก',
+        'dropdown.converter': 'เครื่องมือแปลงสกุลเงิน',
+        'profile.converter': 'เครื่องมือแปลงสกุลเงินเรียลไทม์',
 
         // ========== Data Management ==========
         'data_manage.title': 'จัดการข้อมูล',
@@ -425,6 +428,9 @@ const TRANSLATIONS = {
         'converter.amount': 'Amount',
         'converter.from': 'From Currency',
         'converter.to': 'To Currency',
+        'converter.desc': 'Current exchange rates based on realtime data in the global financial market',
+        'dropdown.converter': 'Currency Converter',
+        'profile.converter': 'Realtime Currency Converter',
 
         // ========== Data Management ==========
         'data_manage.title': 'Manage Data',

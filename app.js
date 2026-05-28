@@ -159,6 +159,10 @@ const elements = {
     // Profile Dropdown
     profileDropdown: document.getElementById('profile-dropdown'),
     btnOpenProfile: document.getElementById('btn-open-profile'),
+    btnOpenConverter: document.getElementById('btn-open-converter'),
+    btnProfileConverter: document.getElementById('btn-profile-converter'),
+    converterModalOverlay: document.getElementById('converter-modal-overlay'),
+    converterModalClose: document.getElementById('converter-modal-close'),
 
     // Category Modal
     categoryModalOverlay: document.getElementById('category-modal-overlay'),
@@ -883,6 +887,22 @@ function setupEventListeners() {
         if (typeof openProfileModal === 'function') openProfileModal();
     });
 
+    // Currency Converter Modal Events
+    if (elements.btnOpenConverter) {
+        elements.btnOpenConverter.addEventListener('click', openConverterModal);
+    }
+    if (elements.btnProfileConverter) {
+        elements.btnProfileConverter.addEventListener('click', openConverterModal);
+    }
+    if (elements.converterModalClose) {
+        elements.converterModalClose.addEventListener('click', closeConverterModal);
+    }
+    if (elements.converterModalOverlay) {
+        elements.converterModalOverlay.addEventListener('click', (e) => {
+            if (e.target === elements.converterModalOverlay) closeConverterModal();
+        });
+    }
+
     // Data Management
     elements.btnManageData.addEventListener('click', openDataManageModal);
     elements.dataManageModalClose.addEventListener('click', closeDataManageModal);
@@ -1165,6 +1185,29 @@ function closeEditModal() {
     elements.editModalOverlay.classList.add('hidden');
     document.body.style.overflow = '';
     elements.editForm.reset();
+}
+
+// -------------------------------------------------------------
+// Currency Converter Modal Actions
+// -------------------------------------------------------------
+function openConverterModal() {
+    closeProfileDropdown();
+    
+    // Auto-close Profile modal if open
+    const profileOverlay = document.getElementById('profile-modal-overlay');
+    if (profileOverlay) {
+        profileOverlay.classList.add('hidden');
+    }
+    
+    elements.converterModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    updateCurrencyConverter();
+    lucide.createIcons();
+}
+
+function closeConverterModal() {
+    elements.converterModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
 }
 
 // -------------------------------------------------------------
