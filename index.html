@@ -643,6 +643,27 @@
                     </div>
                     <i data-lucide="chevron-right" class="action-arrow"></i>
                 </button>
+
+                <!-- Cooldown Countdown Panel (shown after clicking clear-all) -->
+                <div id="clear-cooldown-panel" class="clear-cooldown-panel hidden">
+                    <div class="cooldown-warning">
+                        <i data-lucide="alert-triangle" class="cooldown-icon"></i>
+                        <p data-i18n="data_manage.cooldown_warning">กำลังจะลบข้อมูลทั้งหมด...</p>
+                    </div>
+                    <div class="cooldown-timer-row">
+                        <div class="cooldown-timer-ring">
+                            <svg viewBox="0 0 48 48" class="cooldown-ring-svg">
+                                <circle cx="24" cy="24" r="20" class="cooldown-ring-bg"/>
+                                <circle cx="24" cy="24" r="20" class="cooldown-ring-progress" id="cooldown-ring-progress"/>
+                            </svg>
+                            <span id="cooldown-counter" class="cooldown-counter">3</span>
+                        </div>
+                        <button type="button" id="btn-cancel-clear" class="btn-cancel-clear">
+                            <i data-lucide="x"></i>
+                            <span data-i18n="data_manage.cooldown_cancel">ยกเลิก</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

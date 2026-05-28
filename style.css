@@ -1582,7 +1582,122 @@ body {
 }
 
 /* ============================================================= */
-/* TOAST NOTIFICATION                                             */
+/* CLEAR ALL COOLDOWN PANEL                                       */
+/* ============================================================= */
+.clear-cooldown-panel {
+    margin-top: 10px;
+    border: 1.5px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    background: var(--color-danger-bg);
+    padding: 14px 16px;
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.clear-cooldown-panel.hidden { display: none; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.cooldown-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.cooldown-warning p {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-danger);
+    line-height: 1.3;
+}
+
+.cooldown-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-danger);
+    flex-shrink: 0;
+}
+
+.cooldown-timer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.cooldown-timer-ring {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.cooldown-ring-svg {
+    width: 48px;
+    height: 48px;
+    transform: rotate(-90deg);
+}
+
+.cooldown-ring-bg {
+    fill: none;
+    stroke: var(--color-expense-light);
+    stroke-width: 4;
+}
+
+.cooldown-ring-progress {
+    fill: none;
+    stroke: var(--color-danger);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 125.66; /* 2π × r=20 */
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.cooldown-counter {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-danger);
+    font-family: var(--font-eng);
+}
+
+.btn-cancel-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    font-family: var(--font-thai);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-title);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex: 1;
+}
+
+.btn-cancel-clear:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-focus);
+}
+
+.btn-cancel-clear svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+
 /* ============================================================= */
 .toast {
     position: fixed;

@@ -147,6 +147,16 @@ const TRANSLATIONS = {
         'profile.cancel': 'ยกเลิก',
         'profile.save': 'บันทึกโปรไฟล์',
 
+        // ========== Data Management ==========
+        'data_manage.title': 'จัดการข้อมูล',
+        'data_manage.desc': 'เลือกการดำเนินการกับข้อมูลของคุณ',
+        'data_manage.export_title': 'ส่งออกข้อมูล (CSV)',
+        'data_manage.export_desc': 'ดาวน์โหลดข้อมูลธุรกรรมทั้งหมดเป็นไฟล์ CSV',
+        'data_manage.clear_title': 'ลบข้อมูลทั้งหมด',
+        'data_manage.clear_desc': 'ลบธุรกรรมทั้งหมดอย่างถาวร ไม่สามารถกู้คืนได้',
+        'data_manage.cooldown_warning': 'กำลังจะลบข้อมูลทั้งหมด...',
+        'data_manage.cooldown_cancel': 'ยกเลิก',
+
         // ========== Danger Zone ==========
         'danger.title': 'คำเตือน',
         'danger.description': 'การลบบัญชีผู้ใช้จะเป็นการลบประวัติและข้อมูลธุรกรรมทั้งหมดของคุณอย่างถาวร โดยไม่สามารถกู้คืนข้อมูลกลับมาได้อีก',
@@ -392,6 +402,16 @@ const TRANSLATIONS = {
         'profile.email_label': 'Email Address',
         'profile.cancel': 'Cancel',
         'profile.save': 'Save Profile',
+
+        // ========== Data Management ==========
+        'data_manage.title': 'Manage Data',
+        'data_manage.desc': 'Select an action for your data',
+        'data_manage.export_title': 'Export Data (CSV)',
+        'data_manage.export_desc': 'Download all transactions as a CSV file',
+        'data_manage.clear_title': 'Clear All Data',
+        'data_manage.clear_desc': 'Permanently delete all transactions. Cannot be undone.',
+        'data_manage.cooldown_warning': 'Clearing all data in...',
+        'data_manage.cooldown_cancel': 'Cancel',
 
         // ========== Danger Zone ==========
         'danger.title': 'Warning',

@@ -54,6 +54,7 @@ let state = {
 // Chart.js Instances
 let flowChartInstance = null;
 let categoryChartInstance = null;
+let clearCooldownTimer = null;
 
 // DOM Elements
 const elements = {
@@ -129,6 +130,10 @@ const elements = {
     dataManageModalClose: document.getElementById('data-manage-modal-close'),
     btnManageData: document.getElementById('btn-manage-data'),
     btnExportData: document.getElementById('btn-export-data'),
+    clearCooldownPanel: document.getElementById('clear-cooldown-panel'),
+    btnCancelClear: document.getElementById('btn-cancel-clear'),
+    cooldownCounter: document.getElementById('cooldown-counter'),
+    cooldownRingProgress: document.getElementById('cooldown-ring-progress'),
 
     // Profile Dropdown
     profileDropdown: document.getElementById('profile-dropdown'),
@@ -764,24 +769,71 @@ function setupEventListeners() {
         exportToCSV();
     });
 
-    // Clear all data
-    elements.btnClearAll.addEventListener('click', async () => {
-        if (!txRef) return;
-        if (confirm(t('confirm.clear_all'))) {
-            try {
-                const snapshot = await txRef.get();
-                const batch = db.batch();
-                snapshot.docs.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                await batch.commit();
-                closeDataManageModal();
-                showToast(t('toast.clear_success'), 'danger');
-            } catch (error) {
-                console.error(error);
-                showToast(t('toast.clear_error'), 'danger');
+    // Clear all data — 3-second cooldown with cancel
+    function startClearCooldown() {
+        const DURATION = 3;
+        const CIRCUMFERENCE = 125.66; // 2π × 20
+        let remaining = DURATION;
+
+        // Show panel, disable the main button
+        elements.clearCooldownPanel.classList.remove('hidden');
+        elements.btnClearAll.disabled = true;
+        elements.btnClearAll.style.opacity = '0.45';
+        elements.btnClearAll.style.pointerEvents = 'none';
+
+        // Re-init ring
+        elements.cooldownCounter.textContent = remaining;
+        elements.cooldownRingProgress.style.strokeDashoffset = '0';
+        // Trigger animation on next frame so CSS transition fires
+        requestAnimationFrame(() => {
+            elements.cooldownRingProgress.style.strokeDashoffset = CIRCUMFERENCE.toString();
+        });
+
+        clearCooldownTimer = setInterval(async () => {
+            remaining--;
+            elements.cooldownCounter.textContent = remaining;
+
+            if (remaining <= 0) {
+                clearInterval(clearCooldownTimer);
+                clearCooldownTimer = null;
+                resetClearCooldown();
+
+                if (!txRef) return;
+                try {
+                    const snapshot = await txRef.get();
+                    const batch = db.batch();
+                    snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+                    closeDataManageModal();
+                    showToast(t('toast.clear_success'), 'danger');
+                } catch (error) {
+                    console.error(error);
+                    showToast(t('toast.clear_error'), 'danger');
+                }
             }
+        }, 1000);
+    }
+
+    function resetClearCooldown() {
+        if (clearCooldownTimer) {
+            clearInterval(clearCooldownTimer);
+            clearCooldownTimer = null;
         }
+        elements.clearCooldownPanel.classList.add('hidden');
+        elements.btnClearAll.disabled = false;
+        elements.btnClearAll.style.opacity = '';
+        elements.btnClearAll.style.pointerEvents = '';
+        elements.cooldownCounter.textContent = '3';
+        elements.cooldownRingProgress.style.strokeDashoffset = '0';
+    }
+
+    elements.btnClearAll.addEventListener('click', () => {
+        if (!txRef) return;
+        if (!clearCooldownTimer) startClearCooldown();
+    });
+
+    elements.btnCancelClear.addEventListener('click', () => {
+        resetClearCooldown();
     });
 
     // View Navigation
