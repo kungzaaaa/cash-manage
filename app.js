@@ -161,6 +161,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', () => {
     initFormDateTime();
     initTheme();
+    initCurrency();
     updateCategorySelectOptions();
     setupEventListeners();
     initCustomDropdowns();
@@ -263,6 +264,26 @@ function initTheme() {
     state.currentTheme = savedTheme;
     elements.html.setAttribute('data-theme', savedTheme);
     localStorage.setItem('theme', 'light');
+}
+
+function initCurrency() {
+    const currencySelect = document.getElementById('currency-select');
+    if (currencySelect) {
+        currencySelect.value = currentCurrency;
+        currencySelect.addEventListener('change', () => {
+            currentCurrency = currencySelect.value;
+            localStorage.setItem('app-currency', currentCurrency);
+            
+            // Re-apply translations for form amount label
+            if (typeof applyTranslations === 'function') {
+                applyTranslations();
+            }
+            
+            // Re-render dashboard balance formatting, recent lists, ledger list, and charts
+            renderDashboard();
+            updateCharts();
+        });
+    }
 }
 
 function toggleTheme() {
@@ -373,18 +394,27 @@ function renderDashboard() {
     const overallIncome = totalCashIncome + totalBankIncome;
     const overallExpense = totalCashExpense + totalBankExpense;
 
+    const curSym = getCurrencySymbol();
     // Update Hero Card
     elements.totalBalance.textContent = formatCurrency(overallBalance);
-    elements.totalIncome.textContent = `+฿${formatCurrency(overallIncome)}`;
-    elements.totalExpense.textContent = `-฿${formatCurrency(overallExpense)}`;
+    elements.totalIncome.textContent = `+${curSym}${formatCurrency(overallIncome)}`;
+    elements.totalExpense.textContent = `-${curSym}${formatCurrency(overallExpense)}`;
 
-    elements.cashBalance.textContent = `฿${formatCurrency(currentCashBalance)}`;
-    elements.cashIncome.textContent = `+฿${formatCurrency(totalCashIncome)}`;
-    elements.cashExpense.textContent = `-฿${formatCurrency(totalCashExpense)}`;
+    elements.cashBalance.textContent = `${curSym}${formatCurrency(currentCashBalance)}`;
+    elements.cashIncome.textContent = `+${curSym}${formatCurrency(totalCashIncome)}`;
+    elements.cashExpense.textContent = `-${curSym}${formatCurrency(totalCashExpense)}`;
 
-    elements.bankBalance.textContent = `฿${formatCurrency(currentBankBalance)}`;
-    elements.bankIncome.textContent = `+฿${formatCurrency(totalBankIncome)}`;
-    elements.bankExpense.textContent = `-฿${formatCurrency(totalBankExpense)}`;
+    elements.bankBalance.textContent = `${curSym}${formatCurrency(currentBankBalance)}`;
+    elements.bankIncome.textContent = `+${curSym}${formatCurrency(totalBankIncome)}`;
+    elements.bankExpense.textContent = `-${curSym}${formatCurrency(totalBankExpense)}`;
+
+    // Update static hero currency symbols and input prefixes
+    document.querySelectorAll('.hero-currency').forEach(el => {
+        el.textContent = curSym;
+    });
+    document.querySelectorAll('.input-prefix').forEach(el => {
+        el.textContent = curSym;
+    });
 
     // Color negative balance
     if (overallBalance < 0) {
@@ -529,7 +559,7 @@ function buildTransactionItemHTML(tx) {
         </div>
         <div class="ledger-item-right">
             <div class="item-amount-wrapper">
-                <span class="item-amount ${amountClass}">${sign}฿${formatCurrency(tx.amount)}</span>
+                <span class="item-amount ${amountClass}">${sign}${getCurrencySymbol()}${formatCurrency(tx.amount)}</span>
             </div>
             <div class="item-actions">
                 <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
@@ -612,6 +642,12 @@ function updateCharts() {
                     labels: { color: textBaseColor, font: { family: 'Kanit', size: 12 } }
                 },
                 tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const val = context.raw || 0;
+                            return ` ${context.label}: ${getCurrencySymbol()}${formatCurrency(val)}`;
+                        }
+                    },
                     titleFont: { family: 'Kanit' },
                     bodyFont: { family: 'Kanit' }
                 }
@@ -711,7 +747,7 @@ function updateCharts() {
                             label: function (context) {
                                 const val = context.raw || 0;
                                 const percentage = ((val / totalExpenses) * 100).toFixed(1);
-                                return ` ${context.label}: ฿${formatCurrency(val)} (${percentage}%)`;
+                                return ` ${context.label}: ${getCurrencySymbol()}${formatCurrency(val)} (${percentage}%)`;
                             }
                         },
                         titleFont: { family: 'Kanit' },

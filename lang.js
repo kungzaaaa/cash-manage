@@ -7,9 +7,21 @@
  */
 
 // ---------------------------------------------------------------
-// Current Language State
+// Current Language & Currency State
 // ---------------------------------------------------------------
 let currentLang = localStorage.getItem('app-language') || 'th';
+let currentCurrency = localStorage.getItem('app-currency') || 'THB';
+const CURRENCIES = {
+    THB: { symbol: '฿', nameTh: 'บาท (THB)', nameEn: 'Baht (THB)' },
+    USD: { symbol: '$', nameTh: 'ดอลลาร์ (USD)', nameEn: 'Dollar (USD)' },
+    EUR: { symbol: '€', nameTh: 'ยูโร (EUR)', nameEn: 'Euro (EUR)' },
+    JPY: { symbol: '¥', nameTh: 'เยน (JPY)', nameEn: 'Yen (JPY)' },
+    GBP: { symbol: '£', nameTh: 'ปอนด์ (GBP)', nameEn: 'Pound (GBP)' }
+};
+
+function getCurrencySymbol() {
+    return CURRENCIES[currentCurrency]?.symbol || '฿';
+}
 
 // ---------------------------------------------------------------
 // Translation Dictionary
@@ -72,6 +84,7 @@ const TRANSLATIONS = {
         'dropdown.manage_data': 'จัดการข้อมูล',
         'dropdown.theme': 'โหมดมืด / สว่าง',
         'dropdown.lang': 'ภาษา (Language)',
+        'dropdown.currency': 'สกุลเงิน (Currency)',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'ยอดเงินคงเหลือทั้งหมด',
@@ -91,7 +104,7 @@ const TRANSLATIONS = {
         'form.title': 'บันทึกรายการใหม่',
         'form.income': 'รายรับ (Income)',
         'form.expense': 'รายจ่าย (Expense)',
-        'form.amount': 'จำนวนเงิน (บาท)',
+        'form.amount': 'จำนวนเงิน ({{currency}})',
         'form.method': 'ช่องทางการเงิน',
         'form.method_cash': '💵 เงินสด (Cash)',
         'form.method_bank': '🏦 บัญชีธนาคาร (Bank)',
@@ -328,6 +341,7 @@ const TRANSLATIONS = {
         'dropdown.manage_data': 'Manage Data',
         'dropdown.theme': 'Dark / Light Mode',
         'dropdown.lang': 'Language (ภาษา)',
+        'dropdown.currency': 'Currency (สกุลเงิน)',
 
         // ========== Dashboard Summary ==========
         'dashboard.total_balance': 'Total Balance',
@@ -347,7 +361,7 @@ const TRANSLATIONS = {
         'form.title': 'New Transaction',
         'form.income': 'Income',
         'form.expense': 'Expense',
-        'form.amount': 'Amount (Baht)',
+        'form.amount': 'Amount ({{currency}})',
         'form.method': 'Payment Method',
         'form.method_cash': '💵 Cash',
         'form.method_bank': '🏦 Bank Account',
@@ -560,6 +574,10 @@ const CATEGORY_TRANSLATION_MAP = {
 function t(key, params = {}) {
     const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['th'];
     let text = dict[key] || TRANSLATIONS['th'][key] || key;
+
+    // Auto-replace {{currency}} with current currency code
+    const currencyCode = typeof currentCurrency !== 'undefined' ? currentCurrency : (localStorage.getItem('app-currency') || 'THB');
+    text = text.replace(/{{currency}}/g, currencyCode);
 
     // Simple interpolation: replace {{key}} with value
     Object.keys(params).forEach(param => {

@@ -342,6 +342,39 @@ body {
     margin: 4px 0;
 }
 
+.dropdown-item-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-body);
+}
+
+.dropdown-select {
+    background: var(--bg-input);
+    color: var(--text-title);
+    border: 1px solid var(--border-light);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: var(--font-eng);
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: auto;
+    outline: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.dropdown-select:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-input-focus);
+}
+
 @keyframes dropdownFadeIn {
     from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: translateY(0); }
@@ -1360,6 +1393,18 @@ body {
     font-weight: 600;
     letter-spacing: -0.5px;
     color: var(--text-title);
+}
+
+/* Chrome, Safari, Edge, Opera: Hide number input spin buttons to prevent white blocks in dark/light mode */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox: Hide number input spin buttons */
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 /* Category Row */
