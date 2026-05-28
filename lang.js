@@ -105,7 +105,7 @@ const TRANSLATIONS = {
         'form.title': 'บันทึกรายการใหม่',
         'form.income': 'รายรับ (Income)',
         'form.expense': 'รายจ่าย (Expense)',
-        'form.amount': 'จำนวนเงิน ({{currency}})',
+        'form.amount': 'จำนวนเงิน',
         'form.method': 'ช่องทางการเงิน',
         'form.method_cash': '💵 เงินสด (Cash)',
         'form.method_bank': '🏦 บัญชีธนาคาร (Bank)',
@@ -222,6 +222,10 @@ const TRANSLATIONS = {
         'confirm.load_mock': 'คำเตือน: คุณต้องการโหลดข้อมูลทดลองใช่หรือไม่?\n\nระบบจะเพิ่มข้อมูลตัวอย่างเข้าไปในรายการปัจจุบัน',
         'confirm.clear_all': 'คุณต้องการลบข้อมูลประวัติการทำรายการทั้งหมดใช่หรือไม่? ข้อมูลจะไม่สามารถกู้คืนได้',
         'confirm.delete_tx': 'คุณแน่ใจว่าต้องการลบรายการนี้ใช่ไหม?',
+        'category.delete_confirm': 'คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?\nหากมีรายการที่ใช้หมวดหมู่นี้อยู่ จะถูกเปลี่ยนเป็น "อื่นๆ"',
+
+        // Converter
+        'converter.title': 'แปลงสกุลเงิน (Currency Converter)',
 
         // ========== Delete Errors ==========
         'delete.error.invalid': 'ข้อมูลยืนยันไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
@@ -362,7 +366,7 @@ const TRANSLATIONS = {
         'form.title': 'New Transaction',
         'form.income': 'Income',
         'form.expense': 'Expense',
-        'form.amount': 'Amount ({{currency}})',
+        'form.amount': 'Amount',
         'form.method': 'Payment Method',
         'form.method_cash': '💵 Cash',
         'form.method_bank': '🏦 Bank Account',
@@ -479,6 +483,10 @@ const TRANSLATIONS = {
         'confirm.load_mock': 'Warning: Do you want to load demo data?\n\nSample data will be added to your current transactions.',
         'confirm.clear_all': 'Do you want to delete all transaction history? This cannot be undone.',
         'confirm.delete_tx': 'Are you sure you want to delete this transaction?',
+        'category.delete_confirm': 'Are you sure you want to delete this category?\nAny transactions using this category will be changed to "Others".',
+
+        // Converter
+        'converter.title': 'Currency Converter',
 
         // ========== Delete Errors ==========
         'delete.error.invalid': 'Confirmation data is incorrect. Please check and try again',
