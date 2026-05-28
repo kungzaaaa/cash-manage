@@ -301,46 +301,6 @@
                 </div>
             </section>
 
-            <!-- Currency Converter Card -->
-            <section class="converter-section">
-                <div class="card converter-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i data-lucide="refresh-cw" class="title-icon"></i>
-                            <h2 data-i18n="converter.title">แปลงสกุลเงิน (Currency Converter)</h2>
-                        </div>
-                    </div>
-                    <div class="converter-body">
-                        <div class="converter-input-group">
-                            <input type="number" id="conv-amount" placeholder="0.00" value="1" min="0.01">
-                            <select id="conv-from" class="input-select-addon">
-                                <option value="THB">THB</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="JPY">JPY</option>
-                                <option value="GBP">GBP</option>
-                                <option value="CNY">CNY</option>
-                            </select>
-                        </div>
-                        <button type="button" id="btn-swap-currency" class="btn-icon">
-                            <i data-lucide="arrow-right-left"></i>
-                        </button>
-                        <div class="converter-input-group">
-                            <input type="text" id="conv-result" readonly placeholder="0.00">
-                            <select id="conv-to" class="input-select-addon">
-                                <option value="USD">USD</option>
-                                <option value="THB">THB</option>
-                                <option value="EUR">EUR</option>
-                                <option value="JPY">JPY</option>
-                                <option value="GBP">GBP</option>
-                                <option value="CNY">CNY</option>
-                            </select>
-                        </div>
-                        <div class="converter-rate" id="conv-rate-text"></div>
-                    </div>
-                </div>
-            </section>
-
             <!-- Recent Transactions -->
             <section class="recent-section">
                 <div class="section-header">
@@ -504,18 +464,11 @@
                 <div class="form-grid">
                     <!-- Input Amount -->
                     <div class="form-group col-12">
-                        <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน <span
+                        <label for="tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span
                                 class="required">*</span></label>
-                        <div class="input-with-select amount-input-wrapper">
+                        <div class="input-with-icon amount-input-wrapper">
+                            <span class="input-prefix">฿</span>
                             <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
-                            <select id="tx-currency" class="input-select-addon">
-                                <option value="THB">THB</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="JPY">JPY</option>
-                                <option value="GBP">GBP</option>
-                                <option value="CNY">CNY</option>
-                            </select>
                         </div>
                     </div>
 
@@ -605,18 +558,11 @@
 
                 <div class="form-grid">
                     <div class="form-group col-12">
-                        <label for="edit-tx-amount" data-i18n="form.amount">จำนวนเงิน <span
+                        <label for="edit-tx-amount" data-i18n="form.amount">จำนวนเงิน (บาท) <span
                                 class="required">*</span></label>
-                        <div class="input-with-select amount-input-wrapper">
+                        <div class="input-with-icon amount-input-wrapper">
+                            <span class="input-prefix">฿</span>
                             <input type="number" id="edit-tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
-                            <select id="edit-tx-currency" class="input-select-addon">
-                                <option value="THB">THB</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="JPY">JPY</option>
-                                <option value="GBP">GBP</option>
-                                <option value="CNY">CNY</option>
-                            </select>
                         </div>
                     </div>
 

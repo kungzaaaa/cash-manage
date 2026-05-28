@@ -48,9 +48,7 @@ let state = {
     },
     currentTheme: 'light',
     activeChartTab: 'flow',
-    currentView: 'home', // 'home' or 'detail'
-    exchangeRates: {},
-    baseCurrency: 'THB'
+    currentView: 'home' // 'home' or 'detail'
 };
 
 // Chart.js Instances
@@ -84,7 +82,6 @@ const elements = {
     typeIncomeRadio: document.getElementById('type-income'),
     typeExpenseRadio: document.getElementById('type-expense'),
     txAmount: document.getElementById('tx-amount'),
-    txCurrency: document.getElementById('tx-currency'),
     txMethod: document.getElementById('tx-method'),
     txCategory: document.getElementById('tx-category'),
     txDate: document.getElementById('tx-date'),
@@ -123,7 +120,6 @@ const elements = {
     editTypeIncome: document.getElementById('edit-type-income'),
     editTypeExpense: document.getElementById('edit-type-expense'),
     editTxAmount: document.getElementById('edit-tx-amount'),
-    editTxCurrency: document.getElementById('edit-tx-currency'),
     editTxMethod: document.getElementById('edit-tx-method'),
     editTxCategory: document.getElementById('edit-tx-category'),
     editTxDate: document.getElementById('edit-tx-date'),
@@ -142,14 +138,6 @@ const elements = {
     // Profile Dropdown
     profileDropdown: document.getElementById('profile-dropdown'),
     btnOpenProfile: document.getElementById('btn-open-profile'),
-
-    // Currency Converter
-    convAmount: document.getElementById('conv-amount'),
-    convFrom: document.getElementById('conv-from'),
-    convTo: document.getElementById('conv-to'),
-    convResult: document.getElementById('conv-result'),
-    convRateText: document.getElementById('conv-rate-text'),
-    btnSwapCurrency: document.getElementById('btn-swap-currency'),
 
     // Category Modal
     categoryModalOverlay: document.getElementById('category-modal-overlay'),
@@ -174,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormDateTime();
     initTheme();
     initCurrency();
-    initExchangeRates();
     updateCategorySelectOptions();
     setupEventListeners();
     initCustomDropdowns();
@@ -225,63 +212,6 @@ function initFormDateTime() {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-// -------------------------------------------------------------
-// Exchange Rates Management
-// -------------------------------------------------------------
-async function initExchangeRates() {
-    try {
-        const response = await fetch(`https://open.er-api.com/v6/latest/THB`);
-        const data = await response.json();
-        if (data && data.rates) {
-            state.exchangeRates = data.rates;
-            state.baseCurrency = data.base_code;
-            console.log('Exchange rates loaded for', state.baseCurrency);
-            initCurrencyConverter();
-        }
-    } catch (error) {
-        console.error('Failed to load exchange rates:', error);
-    }
-}
-
-function initCurrencyConverter() {
-    if (!elements.convAmount) return;
-
-    function calculateConversion() {
-        const amount = parseFloat(elements.convAmount.value) || 0;
-        const from = elements.convFrom.value;
-        const to = elements.convTo.value;
-        
-        if (amount <= 0) {
-            elements.convResult.value = '';
-            elements.convRateText.textContent = '';
-            return;
-        }
-
-        const converted = convertCurrency(amount, from, to);
-        elements.convResult.value = formatCurrency(converted);
-        elements.convRateText.textContent = getExchangeRateString(from, to);
-    }
-
-    elements.convAmount.addEventListener('input', calculateConversion);
-    elements.convFrom.addEventListener('change', calculateConversion);
-    elements.convTo.addEventListener('change', calculateConversion);
-
-    elements.btnSwapCurrency.addEventListener('click', () => {
-        const temp = elements.convFrom.value;
-        elements.convFrom.value = elements.convTo.value;
-        elements.convTo.value = temp;
-        
-        // Refresh custom dropdowns if used
-        if (typeof refreshCustomDropdown === 'function') {
-            refreshCustomDropdown(elements.convFrom);
-            refreshCustomDropdown(elements.convTo);
-        }
-        calculateConversion();
-    });
-
-    calculateConversion();
 }
 
 // -------------------------------------------------------------
@@ -451,10 +381,7 @@ function renderDashboard() {
     let totalBankExpense = 0;
 
     state.transactions.forEach(tx => {
-        const originalAmount = parseFloat(tx.amount) || 0;
-        const txCurrency = tx.currency || 'THB';
-        const amount = convertCurrency(originalAmount, txCurrency, currentCurrency);
-        
+        const amount = parseFloat(tx.amount) || 0;
         if (tx.method === 'cash') {
             if (tx.type === 'income') totalCashIncome += amount;
             else totalCashExpense += amount;
@@ -511,30 +438,6 @@ function renderDashboard() {
     if (typeof applyTranslations === 'function') {
         applyTranslations();
     }
-}
-
-function convertCurrency(amount, fromCurrency, toCurrency) {
-    if (!fromCurrency) fromCurrency = 'THB';
-    if (!toCurrency) toCurrency = state.baseCurrency || 'THB';
-    
-    if (fromCurrency === toCurrency) return amount;
-    
-    const rates = state.exchangeRates;
-    if (!rates || Object.keys(rates).length === 0) return amount;
-    
-    const rateFrom = rates[fromCurrency];
-    const rateTo = rates[toCurrency];
-    
-    if (!rateFrom || !rateTo) return amount;
-    
-    return (amount / rateFrom) * rateTo;
-}
-
-function getExchangeRateString(fromCurrency, toCurrency) {
-    const rates = state.exchangeRates;
-    if (!rates || !rates[fromCurrency] || !rates[toCurrency]) return '';
-    const rate = rates[toCurrency] / rates[fromCurrency];
-    return `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
 }
 
 function formatCurrency(number) {
@@ -629,10 +532,6 @@ function buildTransactionItemHTML(tx) {
     const sign = tx.type === 'income' ? '+' : '-';
     const amountClass = tx.type === 'income' ? 'text-income' : 'text-expense';
 
-    const originalAmount = parseFloat(tx.amount) || 0;
-    const txCurrency = tx.currency || 'THB';
-    const convertedAmount = convertCurrency(originalAmount, txCurrency, currentCurrency);
-
     const dateObj = new Date(tx.date);
     const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
         year: 'numeric',
@@ -663,12 +562,7 @@ function buildTransactionItemHTML(tx) {
         </div>
         <div class="ledger-item-right">
             <div class="item-amount-wrapper">
-                <span class="item-amount ${amountClass}">${sign}${getCurrencySymbol()}${formatCurrency(convertedAmount)}</span>
-                ${txCurrency !== currentCurrency ? `
-                <div class="original-amount-tooltip">
-                    <span class="original-amount-text">${formatCurrency(tx.amount)} ${txCurrency}</span>
-                    <span class="exchange-rate-text">(${getExchangeRateString(txCurrency, currentCurrency)})</span>
-                </div>` : ''}
+                <span class="item-amount ${amountClass}">${sign}${getCurrencySymbol()}${formatCurrency(tx.amount)}</span>
             </div>
             <div class="item-actions">
                 <button class="btn-action-sm btn-edit" title="${t('ledger.edit_title')}" data-id="${tx.id}">
@@ -713,10 +607,7 @@ function updateCharts() {
     let totalCash = 0;
     let totalBank = 0;
     state.transactions.forEach(tx => {
-        const originalAmount = parseFloat(tx.amount) || 0;
-        const txCurrency = tx.currency || 'THB';
-        const amount = convertCurrency(originalAmount, txCurrency, currentCurrency);
-        
+        const amount = parseFloat(tx.amount) || 0;
         if (tx.method === 'cash') {
             totalCash += (tx.type === 'income' ? amount : -amount);
         } else {
@@ -777,10 +668,7 @@ function updateCharts() {
     let totalExpenses = 0;
     state.transactions.forEach(tx => {
         if (tx.type === 'expense') {
-            const originalAmount = parseFloat(tx.amount) || 0;
-            const txCurrency = tx.currency || 'THB';
-            const amount = convertCurrency(originalAmount, txCurrency, currentCurrency);
-            
+            const amount = parseFloat(tx.amount) || 0;
             totalExpenses += amount;
             if (expenseData[tx.category]) {
                 expenseData[tx.category].amount += amount;
@@ -1006,7 +894,6 @@ function setupEventListeners() {
 
         const type = elements.typeIncomeRadio.checked ? 'income' : 'expense';
         const amount = parseFloat(elements.txAmount.value);
-        const currency = elements.txCurrency ? elements.txCurrency.value : currentCurrency;
         const method = elements.txMethod.value;
         const category = elements.txCategory.value;
         const date = elements.txDate.value;
@@ -1023,7 +910,7 @@ function setupEventListeners() {
         }
 
         const txId = 'tx-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-        const newTx = { id: txId, type, amount, currency, method, category, date, description };
+        const newTx = { id: txId, type, amount, method, category, date, description };
 
         try {
             await txRef.doc(txId).set(newTx);
@@ -1097,7 +984,6 @@ function setupEventListeners() {
         const id = elements.editTxId.value;
         const type = elements.editTypeIncome.checked ? 'income' : 'expense';
         const amount = parseFloat(elements.editTxAmount.value);
-        const currency = elements.editTxCurrency ? elements.editTxCurrency.value : currentCurrency;
         const method = elements.editTxMethod.value;
         const category = elements.editTxCategory.value;
         const date = elements.editTxDate.value;
@@ -1112,7 +998,7 @@ function setupEventListeners() {
             return;
         }
 
-        const updatedTx = { id, type, amount, currency, method, category, date, description };
+        const updatedTx = { id, type, amount, method, category, date, description };
 
         try {
             await txRef.doc(id).set(updatedTx);
@@ -1171,7 +1057,6 @@ function openEditModal(id) {
     refreshCustomDropdown(elements.editTxCategory);
 
     elements.editTxAmount.value = tx.amount;
-    if (elements.editTxCurrency) elements.editTxCurrency.value = tx.currency || currentCurrency;
     elements.editTxMethod.value = tx.method;
     refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;
