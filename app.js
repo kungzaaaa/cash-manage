@@ -771,7 +771,7 @@ function setupEventListeners() {
 
     // Clear all data — 3-second cooldown with cancel
     function startClearCooldown() {
-        const DURATION = 3;
+        const DURATION = 5;
         const CIRCUMFERENCE = 125.66; // 2π × 20
         let remaining = DURATION;
 
