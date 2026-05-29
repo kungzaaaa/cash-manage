@@ -77,6 +77,10 @@ let flowChartInstance = null;
 let categoryChartInstance = null;
 let clearCooldownTimer = null;
 
+// Global Flatpickr Date Picker Instances
+window.txDatePicker = null;
+window.editDatePicker = null;
+
 // DOM Elements
 const elements = {
     html: document.documentElement,
@@ -185,6 +189,7 @@ const elements = {
 // Core Initialization
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+    initDatePickers();
     initFormDateTime();
     initTheme();
     initCurrency();
@@ -232,14 +237,33 @@ function clearAppForLogout() {
     renderDashboard();
 }
 
+function initDatePickers() {
+    if (typeof flatpickr === 'undefined') return;
+    
+    const config = {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        locale: currentLang === 'th' ? 'th' : 'default',
+        disableMobile: "true" // Force Flatpickr popup on mobile browsers too
+    };
+    
+    window.txDatePicker = flatpickr("#tx-date", config);
+    window.editDatePicker = flatpickr("#edit-tx-date", config);
+}
+
 function initFormDateTime() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    if (window.txDatePicker) {
+        window.txDatePicker.setDate(now);
+    } else {
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
 }
 
 // -------------------------------------------------------------
@@ -327,20 +351,14 @@ async function fetchExchangeRates() {
             console.log('Realtime exchange rates loaded successfully:', data.rates);
             const updateTimeEl = document.getElementById('rate-update-time');
             if (updateTimeEl) {
-                // 💡 ดึงเวลาอัปเดตจริงจากต้นทาง API ตลาดโลก
-                const apiDate = new Date(data.time_last_update_utc);
-
-                // แปลง "วันที่" ให้แสดงผลตามภาษาที่ระบบเลือก (เช่น 29 พ.ค. 2026 หรือ May 29, 2026)
-                const dateStr = apiDate.toLocaleDateString(getDateLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
-
-                // แปลง "เวลา" ให้แสดงผลในรูปแบบ 24 ชั่วโมง (เช่น 07:01)
-                const timeStr = apiDate.toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
-
-                // เลือกคำนำหน้าให้ตรงกับภาษาปัจจุบันในระบบ (i18n)
-                const labelText = currentLang === 'th' ? 'เรทตลาดโลกประจำวันที่' : 'Market rates as of';
-
-                // ผลลัพธ์ที่จะแสดง: "เรตตลาดโลกประจำวันที่ 29 พ.ค. 2026 (07:01)"
-                updateTimeEl.textContent = `${labelText} ${dateStr} (${timeStr})`;
+                const lastUpdate = new Date(data.time_last_update_utc);
+                const day = String(lastUpdate.getDate()).padStart(2, '0');
+                const month = String(lastUpdate.getMonth() + 1).padStart(2, '0');
+                const year = lastUpdate.getFullYear();
+                const timeStr = lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const prefix = currentLang === 'th' ? 'อัปเดตเรียลไทม์' : 'Realtime Update';
+                updateTimeEl.textContent = `${prefix} ${day}/${month}/${year} ${timeStr}`;
             }
             renderDashboard();
             updateCharts();
@@ -1225,6 +1243,9 @@ function openEditModal(id) {
     elements.editTxMethod.value = tx.method;
     refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;
+    if (window.editDatePicker) {
+        window.editDatePicker.setDate(tx.date);
+    }
     elements.editTxDescription.value = tx.description || '';
     const editTxCurrency = document.getElementById('edit-tx-currency');
     if (editTxCurrency) {

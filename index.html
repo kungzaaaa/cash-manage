@@ -25,6 +25,9 @@
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Flatpickr for Modern Minimalist Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -515,7 +518,7 @@
                                 class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="calendar" class="input-icon-left"></i>
-                            <input type="datetime-local" id="tx-date" required>
+                            <input type="text" id="tx-date" required placeholder="เลือกวันเวลา..." data-i18n-placeholder="form.select_date_time" readonly style="cursor: pointer; background: var(--bg-input) !important;">
                         </div>
                     </div>
 
@@ -612,7 +615,7 @@
                                 class="required">*</span></label>
                         <div class="input-with-icon">
                             <i data-lucide="calendar" class="input-icon-left"></i>
-                            <input type="datetime-local" id="edit-tx-date" required>
+                            <input type="text" id="edit-tx-date" required placeholder="เลือกวันเวลา..." data-i18n-placeholder="form.select_date_time" readonly style="cursor: pointer; background: var(--bg-input) !important;">
                         </div>
                     </div>
 
@@ -1022,6 +1025,10 @@
          #   - เชื่อมต่อ Backend API สำหรับ payment processing
          #   - รองรับ webhook สำหรับ payment confirmation
          # ============================================ -->
+
+    <!-- Flatpickr Script & Thai Locale -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
     <!-- i18n Language System -->
     <script src="lang.js"></script>
