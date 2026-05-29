@@ -728,13 +728,14 @@ body {
 
 .hero-account {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     padding: 12px;
     border-radius: var(--radius-md);
     background: var(--bg-app);
     border: 1px solid var(--border-light);
     transition: all var(--transition-fast);
+    flex-wrap: wrap;
 }
 
 .hero-account:hover {
@@ -789,6 +790,318 @@ body {
 
 .flow-sep {
     color: var(--text-faint);
+}
+
+/* Hero Account Detail (wraps flow + savings + net rows) */
+.hero-account-detail {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-light);
+    margin-top: 2px;
+}
+
+.hero-account-savings-row,
+.hero-account-net-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-family: var(--font-eng);
+    font-weight: 500;
+}
+
+.savings-deducted-label,
+.net-balance-label {
+    font-family: var(--font-thai);
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.savings-deducted-value {
+    color: hsl(45, 90%, 42%);
+    font-weight: 600;
+}
+
+.net-balance-value {
+    color: var(--text-title);
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.hero-account-savings-row.hidden,
+.hero-account-net-row.hidden {
+    display: none;
+}
+
+/* ============================================================= */
+/* HERO SAVINGS CARD                                              */
+/* ============================================================= */
+.hero-savings {
+    margin-top: 12px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, hsl(45, 85%, 96%), hsl(40, 70%, 92%));
+    border: 1px solid hsl(45, 60%, 80%);
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .hero-savings {
+    background: linear-gradient(135deg, hsl(45, 30%, 14%), hsl(40, 25%, 18%));
+    border-color: hsl(45, 25%, 28%);
+}
+
+.hero-savings::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, hsla(45, 90%, 55%, 0.12), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-savings-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hero-savings-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: hsla(45, 90%, 50%, 0.15);
+    border: 1px solid hsla(45, 80%, 50%, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.hero-savings-icon svg {
+    width: 18px;
+    height: 18px;
+    color: hsl(45, 90%, 42%);
+}
+
+[data-theme="dark"] .hero-savings-icon svg {
+    color: hsl(45, 90%, 60%);
+}
+
+.hero-savings-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.hero-savings-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+}
+
+.hero-savings-value {
+    font-family: var(--font-eng);
+    font-size: 18px;
+    font-weight: 700;
+    color: hsl(45, 80%, 35%);
+    display: block;
+    letter-spacing: -0.5px;
+}
+
+[data-theme="dark"] .hero-savings-value {
+    color: hsl(45, 90%, 65%);
+}
+
+.btn-savings-manage {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    background: hsl(45, 85%, 45%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-thai);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.btn-savings-manage:hover {
+    background: hsl(45, 85%, 38%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px hsla(45, 80%, 40%, 0.3);
+}
+
+.btn-savings-manage svg {
+    width: 14px;
+    height: 14px;
+}
+
+.hero-savings-breakdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed hsla(45, 60%, 50%, 0.3);
+}
+
+.savings-source-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.savings-source-item svg {
+    width: 12px;
+    height: 12px;
+    color: var(--text-faint);
+}
+
+.savings-source-label {
+    font-family: var(--font-thai);
+    font-size: 10px;
+}
+
+.savings-source-value {
+    font-family: var(--font-eng);
+    font-weight: 600;
+    font-size: 11px;
+    color: hsl(45, 80%, 35%);
+}
+
+[data-theme="dark"] .savings-source-value {
+    color: hsl(45, 90%, 65%);
+}
+
+.btn-savings-history {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: hsla(45, 80%, 50%, 0.12);
+    border: 1px solid hsla(45, 80%, 50%, 0.2);
+    color: hsl(45, 80%, 40%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.btn-savings-history:hover {
+    background: hsla(45, 80%, 50%, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-savings-history svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Savings Summary Card (History View) */
+.savings-summary-card {
+    background: linear-gradient(135deg, hsl(45, 85%, 96%), hsl(40, 70%, 92%));
+    border: 1px solid hsl(45, 60%, 80%);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .savings-summary-card {
+    background: linear-gradient(135deg, hsl(45, 30%, 14%), hsl(40, 25%, 18%));
+    border-color: hsl(45, 25%, 28%);
+}
+
+.savings-summary-total {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.savings-summary-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.savings-summary-value {
+    font-family: var(--font-eng);
+    font-size: 28px;
+    font-weight: 700;
+    color: hsl(45, 80%, 35%);
+    letter-spacing: -1px;
+}
+
+[data-theme="dark"] .savings-summary-value {
+    color: hsl(45, 90%, 65%);
+}
+
+.savings-summary-sources {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding-top: 12px;
+    border-top: 1px dashed hsla(45, 60%, 50%, 0.3);
+}
+
+.savings-summary-source {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.savings-summary-source svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-faint);
+}
+
+.savings-summary-source span:last-child {
+    font-family: var(--font-eng);
+    font-weight: 600;
+    color: hsl(45, 80%, 35%);
+}
+
+[data-theme="dark"] .savings-summary-source span:last-child {
+    color: hsl(45, 90%, 65%);
+}
+
+/* Savings list item badge */
+.savings-type-badge {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+    border: 1px solid;
+}
+
+.savings-type-badge.deposit {
+    background: hsla(45, 90%, 50%, 0.1);
+    border-color: hsla(45, 80%, 50%, 0.25);
+    color: hsl(45, 80%, 35%);
+}
+
+.savings-type-badge.withdraw {
+    background: var(--color-danger-bg);
+    border-color: var(--color-expense-light);
+    color: var(--color-expense);
 }
 
 /* ============================================================= */
@@ -2586,6 +2899,10 @@ input[type="number"] {
     .hero-card { padding: 20px; }
 
     .hero-account-flow { display: none; }
+    .hero-account-detail { display: none; }
+    .hero-savings-breakdown { flex-wrap: wrap; }
+    .btn-savings-manage span { display: none; }
+    .btn-savings-manage { padding: 7px 10px; }
 
     .ledger-item, .recent-item { padding: 12px 14px; }
 }

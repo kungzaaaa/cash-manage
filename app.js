@@ -62,13 +62,14 @@ function convertCurrency(amount, from, to) {
 // App State Management
 let state = {
     transactions: [],
+    savings: [],
     filters: {
         type: 'all',
         search: ''
     },
     currentTheme: 'light',
     activeChartTab: 'flow',
-    currentView: 'home', // 'home' or 'detail'
+    currentView: 'home', // 'home', 'detail', or 'savings'
     exchangeRates: null
 };
 
@@ -178,7 +179,40 @@ const elements = {
     catPreviewIcon: document.getElementById('cat-preview-icon'),
     catPreviewName: document.getElementById('cat-preview-name'),
     btnAddCategory: document.getElementById('btn-add-category'),
-    btnAddCategoryEdit: document.getElementById('btn-add-category-edit')
+    btnAddCategoryEdit: document.getElementById('btn-add-category-edit'),
+
+    // Savings
+    savingsTotal: document.getElementById('savings-total'),
+    savingsFromCash: document.getElementById('savings-from-cash'),
+    savingsFromBank: document.getElementById('savings-from-bank'),
+    cashSavingsDeducted: document.getElementById('cash-savings-deducted'),
+    cashNetBalance: document.getElementById('cash-net-balance'),
+    bankSavingsDeducted: document.getElementById('bank-savings-deducted'),
+    bankNetBalance: document.getElementById('bank-net-balance'),
+    cashSavingsRow: document.getElementById('cash-savings-row'),
+    cashNetRow: document.getElementById('cash-net-row'),
+    bankSavingsRow: document.getElementById('bank-savings-row'),
+    bankNetRow: document.getElementById('bank-net-row'),
+    btnManageSavings: document.getElementById('btn-manage-savings'),
+    btnSavingsHistory: document.getElementById('btn-savings-history'),
+    savingsModalOverlay: document.getElementById('savings-modal-overlay'),
+    savingsModalClose: document.getElementById('savings-modal-close'),
+    savingsForm: document.getElementById('savings-form'),
+    savingsView: document.getElementById('savings-view'),
+    savingsList: document.getElementById('savings-list'),
+    savingsEmptyState: document.getElementById('savings-empty-state'),
+    btnBackFromSavings: document.getElementById('btn-back-from-savings'),
+    btnAddSavingsFromHistory: document.getElementById('btn-add-savings-from-history'),
+    savingsViewTotal: document.getElementById('savings-view-total'),
+    savingsViewCash: document.getElementById('savings-view-cash'),
+    savingsViewBank: document.getElementById('savings-view-bank'),
+    savTypeDeposit: document.getElementById('sav-type-deposit'),
+    savTypeWithdraw: document.getElementById('sav-type-withdraw'),
+    savAmount: document.getElementById('sav-amount'),
+    savSource: document.getElementById('sav-source'),
+    savDate: document.getElementById('sav-date'),
+    savDescription: document.getElementById('sav-description'),
+    btnSubmitSavings: document.getElementById('btn-submit-savings')
 };
 
 // -------------------------------------------------------------
@@ -201,11 +235,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // Firebase Integration (Called by auth.js)
 // -------------------------------------------------------------
 let txRef = null;
+let savingsRef = null;
 let unsubscribeSnapshot = null;
+let unsubscribeSavings = null;
 
 async function initAppForUser(user) {
     state.currentUser = user;
     txRef = db.collection('users').doc(user.uid).collection('transactions');
+    savingsRef = db.collection('users').doc(user.uid).collection('savings');
 
     unsubscribeSnapshot = txRef.onSnapshot((snapshot) => {
         state.transactions = snapshot.docs.map(doc => {
@@ -218,16 +255,32 @@ async function initAppForUser(user) {
         showToast(t('toast.load_error'), 'danger');
     });
 
+    unsubscribeSavings = savingsRef.onSnapshot((snapshot) => {
+        state.savings = snapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+        });
+        state.savings.sort((a, b) => new Date(b.date) - new Date(a.date));
+        renderDashboard();
+    }, (error) => {
+        console.error("Error fetching savings: ", error);
+    });
+
     loadCustomCategories(user);
 }
 
 function clearAppForLogout() {
     state.currentUser = null;
     txRef = null;
+    savingsRef = null;
     state.transactions = [];
+    state.savings = [];
     if (unsubscribeSnapshot) {
         unsubscribeSnapshot();
         unsubscribeSnapshot = null;
+    }
+    if (unsubscribeSavings) {
+        unsubscribeSavings();
+        unsubscribeSavings = null;
     }
     renderDashboard();
 }
@@ -393,6 +446,7 @@ function showHomeView() {
     state.currentView = 'home';
     elements.homeView.classList.remove('hidden');
     elements.detailView.classList.add('hidden');
+    if (elements.savingsView) elements.savingsView.classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -400,6 +454,7 @@ function showDetailView() {
     state.currentView = 'detail';
     elements.homeView.classList.add('hidden');
     elements.detailView.classList.remove('hidden');
+    if (elements.savingsView) elements.savingsView.classList.add('hidden');
     renderLedgerList();
     updateCharts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -481,11 +536,31 @@ function renderDashboard() {
         }
     });
 
+    // Calculate savings totals
+    let savingsFromCash = 0;
+    let savingsFromBank = 0;
+    state.savings.forEach(sav => {
+        const originalAmount = parseFloat(sav.amount) || 0;
+        const amount = convertCurrency(originalAmount, sav.currency || currentCurrency, currentCurrency);
+        if (sav.source === 'cash') {
+            if (sav.type === 'deposit') savingsFromCash += amount;
+            else savingsFromCash -= amount;
+        } else if (sav.source === 'bank') {
+            if (sav.type === 'deposit') savingsFromBank += amount;
+            else savingsFromBank -= amount;
+        }
+    });
+    const totalSavings = savingsFromCash + savingsFromBank;
+
     const currentCashBalance = totalCashIncome - totalCashExpense;
     const currentBankBalance = totalBankIncome - totalBankExpense;
     const overallBalance = currentCashBalance + currentBankBalance;
     const overallIncome = totalCashIncome + totalBankIncome;
     const overallExpense = totalCashExpense + totalBankExpense;
+
+    // Net balances after savings
+    const cashNetBal = currentCashBalance - savingsFromCash;
+    const bankNetBal = currentBankBalance - savingsFromBank;
 
     const curSym = getCurrencySymbol();
     // Update Hero Card
@@ -500,6 +575,39 @@ function renderDashboard() {
     elements.bankBalance.textContent = `${curSym}${formatCurrency(currentBankBalance)}`;
     elements.bankIncome.textContent = `+${curSym}${formatCurrency(totalBankIncome)}`;
     elements.bankExpense.textContent = `-${curSym}${formatCurrency(totalBankExpense)}`;
+
+    // Update Savings displays
+    elements.savingsTotal.textContent = `${curSym}${formatCurrency(totalSavings)}`;
+    elements.savingsFromCash.textContent = `${curSym}${formatCurrency(savingsFromCash)}`;
+    elements.savingsFromBank.textContent = `${curSym}${formatCurrency(savingsFromBank)}`;
+
+    // Update cash/bank savings deducted rows
+    if (totalSavings > 0) {
+        elements.cashSavingsDeducted.textContent = `-${curSym}${formatCurrency(savingsFromCash)}`;
+        elements.cashNetBalance.textContent = `${curSym}${formatCurrency(cashNetBal)}`;
+        elements.bankSavingsDeducted.textContent = `-${curSym}${formatCurrency(savingsFromBank)}`;
+        elements.bankNetBalance.textContent = `${curSym}${formatCurrency(bankNetBal)}`;
+        elements.cashSavingsRow.classList.remove('hidden');
+        elements.cashNetRow.classList.remove('hidden');
+        elements.bankSavingsRow.classList.remove('hidden');
+        elements.bankNetRow.classList.remove('hidden');
+    } else {
+        elements.cashSavingsRow.classList.add('hidden');
+        elements.cashNetRow.classList.add('hidden');
+        elements.bankSavingsRow.classList.add('hidden');
+        elements.bankNetRow.classList.add('hidden');
+    }
+
+    // Update savings view totals
+    if (elements.savingsViewTotal) {
+        elements.savingsViewTotal.textContent = `${curSym}${formatCurrency(totalSavings)}`;
+    }
+    if (elements.savingsViewCash) {
+        elements.savingsViewCash.textContent = `${curSym}${formatCurrency(savingsFromCash)}`;
+    }
+    if (elements.savingsViewBank) {
+        elements.savingsViewBank.textContent = `${curSym}${formatCurrency(savingsFromBank)}`;
+    }
 
     // Update static hero currency symbols and input prefixes
     document.querySelectorAll('.hero-currency').forEach(el => {
@@ -523,6 +631,11 @@ function renderDashboard() {
     if (state.currentView === 'detail') {
         renderLedgerList();
         updateCharts();
+    }
+
+    // If on savings view, update savings list
+    if (state.currentView === 'savings') {
+        renderSavingsHistory();
     }
 
     if (typeof applyTranslations === 'function') {
@@ -1145,6 +1258,41 @@ function setupEventListeners() {
         const isIncome = elements.editTypeIncome.checked;
         openCategoryModal(isIncome ? 'income' : 'expense');
     });
+
+    // Savings Modal & Events
+    if (elements.btnManageSavings) {
+        elements.btnManageSavings.addEventListener('click', openSavingsModal);
+    }
+    if (elements.btnSavingsHistory) {
+        elements.btnSavingsHistory.addEventListener('click', showSavingsView);
+    }
+    if (elements.savingsModalClose) {
+        elements.savingsModalClose.addEventListener('click', closeSavingsModal);
+    }
+    if (elements.savingsModalOverlay) {
+        elements.savingsModalOverlay.addEventListener('click', (e) => {
+            if (e.target === elements.savingsModalOverlay) closeSavingsModal();
+        });
+    }
+    if (elements.btnBackFromSavings) {
+        elements.btnBackFromSavings.addEventListener('click', showHomeView);
+    }
+    if (elements.btnAddSavingsFromHistory) {
+        elements.btnAddSavingsFromHistory.addEventListener('click', openSavingsModal);
+    }
+
+    // Savings type tab changes submit button text
+    if (elements.savTypeDeposit) {
+        elements.savTypeDeposit.addEventListener('change', updateSavingsSubmitBtn);
+    }
+    if (elements.savTypeWithdraw) {
+        elements.savTypeWithdraw.addEventListener('change', updateSavingsSubmitBtn);
+    }
+
+    // Savings Form Submission
+    if (elements.savingsForm) {
+        elements.savingsForm.addEventListener('submit', handleSavingsSubmit);
+    }
 }
 
 // -------------------------------------------------------------
@@ -1719,4 +1867,198 @@ function closeAllDropdowns() {
 function hslToHsla(hsl, alpha) {
     if (!hsl) return '';
     return hsl.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);
+}
+
+// -------------------------------------------------------------
+// Savings System
+// -------------------------------------------------------------
+function initSavingsDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    if (elements.savDate) {
+        elements.savDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+}
+
+function openSavingsModal() {
+    initSavingsDateTime();
+    if (elements.savTypeDeposit) elements.savTypeDeposit.checked = true;
+    updateSavingsSubmitBtn();
+    elements.savingsModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    // Init custom dropdown for source select
+    const savSourceEl = document.getElementById('sav-source');
+    if (savSourceEl && !customDropdownMap.has(savSourceEl)) {
+        initMethodSelectData(savSourceEl);
+        createCustomDropdown(savSourceEl);
+    }
+    lucide.createIcons();
+    setTimeout(() => { if (elements.savAmount) elements.savAmount.focus(); }, 200);
+}
+
+function closeSavingsModal() {
+    elements.savingsModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    if (elements.savingsForm) elements.savingsForm.reset();
+}
+
+function updateSavingsSubmitBtn() {
+    const isDeposit = elements.savTypeDeposit && elements.savTypeDeposit.checked;
+    const btnSpan = elements.btnSubmitSavings ? elements.btnSubmitSavings.querySelector('span') : null;
+    if (btnSpan) {
+        btnSpan.textContent = isDeposit ? t('savings.submit_deposit') : t('savings.submit_withdraw');
+    }
+}
+
+function showSavingsView() {
+    state.currentView = 'savings';
+    elements.homeView.classList.add('hidden');
+    elements.detailView.classList.add('hidden');
+    if (elements.savingsView) elements.savingsView.classList.remove('hidden');
+    renderSavingsHistory();
+    renderDashboard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    lucide.createIcons();
+}
+
+async function handleSavingsSubmit(e) {
+    e.preventDefault();
+    if (!savingsRef) {
+        showToast(t('toast.login_required'), 'danger');
+        return;
+    }
+
+    const type = (elements.savTypeDeposit && elements.savTypeDeposit.checked) ? 'deposit' : 'withdraw';
+    const amount = parseFloat(elements.savAmount.value);
+    const source = elements.savSource.value;
+    const date = elements.savDate.value;
+    const description = elements.savDescription.value.trim();
+
+    if (isNaN(amount) || amount <= 0) {
+        showToast(t('toast.amount_invalid'), 'danger');
+        return;
+    }
+    if (!date) {
+        showToast(t('toast.date_required'), 'danger');
+        return;
+    }
+
+    const savId = 'sav-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    const currency = currentCurrency;
+    const newSav = { id: savId, type, amount, currency, source, date, description };
+
+    try {
+        await savingsRef.doc(savId).set(newSav);
+        if (elements.savAmount) elements.savAmount.value = '';
+        if (elements.savDescription) elements.savDescription.value = '';
+        initSavingsDateTime();
+        closeSavingsModal();
+        showToast(type === 'deposit' ? t('toast.savings_added') : t('toast.savings_withdrawn'), 'success');
+    } catch (error) {
+        console.error(error);
+        showToast(t('toast.savings_error'), 'danger');
+    }
+}
+
+function deleteSavingsEntry(id) {
+    if (confirm(t('confirm.delete_savings'))) {
+        if (!savingsRef) return;
+        savingsRef.doc(id).delete().then(() => {
+            showToast(t('toast.savings_deleted'), 'success');
+        }).catch(error => {
+            console.error(error);
+            showToast(t('toast.savings_delete_error'), 'danger');
+        });
+    }
+}
+
+function renderSavingsHistory() {
+    if (!elements.savingsList) return;
+    elements.savingsList.innerHTML = '';
+
+    const sorted = [...state.savings].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (sorted.length === 0) {
+        if (elements.savingsEmptyState) elements.savingsEmptyState.classList.remove('hidden');
+        return;
+    }
+
+    if (elements.savingsEmptyState) elements.savingsEmptyState.classList.add('hidden');
+
+    sorted.forEach(sav => {
+        const li = document.createElement('li');
+        li.className = 'ledger-item';
+        li.innerHTML = buildSavingsItemHTML(sav);
+
+        // Delete button event
+        const deleteBtn = li.querySelector('.btn-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteSavingsEntry(sav.id);
+            });
+        }
+
+        elements.savingsList.appendChild(li);
+    });
+
+    lucide.createIcons();
+}
+
+function buildSavingsItemHTML(sav) {
+    const isDeposit = sav.type === 'deposit';
+    const iconName = 'piggy-bank';
+    const colorVal = isDeposit ? 'hsl(45, 90%, 42%)' : 'var(--color-expense)';
+    const typeLabel = isDeposit ? t('savings.deposit_label') : t('savings.withdraw_label');
+    const sourceLabel = sav.source === 'cash' ? t('savings.from_cash') : t('savings.from_bank');
+    const sourceIcon = sav.source === 'cash' ? 'banknote' : 'landmark';
+
+    const sign = isDeposit ? '+' : '-';
+    const amountClass = isDeposit ? 'text-savings-deposit' : 'text-expense';
+
+    const dateObj = new Date(sav.date);
+    const formattedDate = dateObj.toLocaleDateString(getDateLocale(), {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const curSym = getCurrencySymbol();
+    const displayAmount = convertCurrency(parseFloat(sav.amount) || 0, sav.currency || currentCurrency, currentCurrency);
+
+    return `
+        <div class="ledger-item-left">
+            <div class="item-icon-wrapper" style="background-color: ${colorVal}10; border: 1px solid ${colorVal}20;">
+                <i data-lucide="${iconName}" style="color: ${colorVal}"></i>
+                <div class="method-indicator bg-${sav.source}" title="${sourceLabel}">
+                    <i data-lucide="${sourceIcon}"></i>
+                </div>
+            </div>
+            <div class="item-title-desc">
+                <div class="item-title-row">
+                    <span class="item-title">${typeLabel}</span>
+                    <span class="savings-type-badge ${sav.type}">${typeLabel}</span>
+                    <span class="method-text-badge">${sourceLabel}</span>
+                </div>
+                ${sav.description ? `<span class="item-desc">${sav.description}</span>` : ''}
+                <span class="item-date">${formattedDate}</span>
+            </div>
+        </div>
+        <div class="ledger-item-right">
+            <div class="item-amount-wrapper" style="text-align: right;">
+                <span class="item-amount" style="color: ${colorVal}; font-weight: 700;">${sign}${curSym}${formatCurrency(displayAmount)}</span>
+            </div>
+            <div class="item-actions">
+                <button class="btn-action-sm btn-delete" title="${t('ledger.delete_title')}" data-id="${sav.id}">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+        </div>
+    `;
 }

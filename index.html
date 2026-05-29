@@ -281,10 +281,20 @@
                                 <span class="hero-account-label" data-i18n="dashboard.cash_balance">เงินสด</span>
                                 <span class="hero-account-value" id="cash-balance">฿0.00</span>
                             </div>
-                            <div class="hero-account-flow">
-                                <span class="text-income" id="cash-income">+฿0.00</span>
-                                <span class="flow-sep">·</span>
-                                <span class="text-expense" id="cash-expense">-฿0.00</span>
+                            <div class="hero-account-detail">
+                                <div class="hero-account-flow">
+                                    <span class="text-income" id="cash-income">+฿0.00</span>
+                                    <span class="flow-sep">·</span>
+                                    <span class="text-expense" id="cash-expense">-฿0.00</span>
+                                </div>
+                                <div class="hero-account-savings-row" id="cash-savings-row">
+                                    <span class="savings-deducted-label" data-i18n="savings.saved_from_cash">เก็บไป</span>
+                                    <span class="savings-deducted-value" id="cash-savings-deducted">-฿0.00</span>
+                                </div>
+                                <div class="hero-account-net-row" id="cash-net-row">
+                                    <span class="net-balance-label" data-i18n="savings.net_balance">คงเหลือสุทธิ</span>
+                                    <span class="net-balance-value" id="cash-net-balance">฿0.00</span>
+                                </div>
                             </div>
                         </div>
                         <div class="hero-account" id="card-bank">
@@ -295,11 +305,54 @@
                                 <span class="hero-account-label" data-i18n="dashboard.bank_balance">ธนาคาร</span>
                                 <span class="hero-account-value" id="bank-balance">฿0.00</span>
                             </div>
-                            <div class="hero-account-flow">
-                                <span class="text-income" id="bank-income">+฿0.00</span>
-                                <span class="flow-sep">·</span>
-                                <span class="text-expense" id="bank-expense">-฿0.00</span>
+                            <div class="hero-account-detail">
+                                <div class="hero-account-flow">
+                                    <span class="text-income" id="bank-income">+฿0.00</span>
+                                    <span class="flow-sep">·</span>
+                                    <span class="text-expense" id="bank-expense">-฿0.00</span>
+                                </div>
+                                <div class="hero-account-savings-row" id="bank-savings-row">
+                                    <span class="savings-deducted-label" data-i18n="savings.saved_from_bank">เก็บไป</span>
+                                    <span class="savings-deducted-value" id="bank-savings-deducted">-฿0.00</span>
+                                </div>
+                                <div class="hero-account-net-row" id="bank-net-row">
+                                    <span class="net-balance-label" data-i18n="savings.net_balance">คงเหลือสุทธิ</span>
+                                    <span class="net-balance-value" id="bank-net-balance">฿0.00</span>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Savings Card -->
+                    <div class="hero-savings" id="hero-savings-card">
+                        <div class="hero-savings-header">
+                            <div class="hero-savings-icon">
+                                <i data-lucide="piggy-bank"></i>
+                            </div>
+                            <div class="hero-savings-info">
+                                <span class="hero-savings-label" data-i18n="savings.title">เงินเก็บสะสม</span>
+                                <span class="hero-savings-value" id="savings-total">฿0.00</span>
+                            </div>
+                            <button type="button" id="btn-manage-savings" class="btn-savings-manage">
+                                <i data-lucide="plus"></i>
+                                <span data-i18n="savings.manage">จัดการเงินเก็บ</span>
+                            </button>
+                        </div>
+                        <div class="hero-savings-breakdown">
+                            <div class="savings-source-item">
+                                <i data-lucide="banknote"></i>
+                                <span class="savings-source-label" data-i18n="savings.from_cash">จากเงินสด</span>
+                                <span class="savings-source-value" id="savings-from-cash">฿0.00</span>
+                            </div>
+                            <span class="flow-sep">·</span>
+                            <div class="savings-source-item">
+                                <i data-lucide="landmark"></i>
+                                <span class="savings-source-label" data-i18n="savings.from_bank">จากธนาคาร</span>
+                                <span class="savings-source-value" id="savings-from-bank">฿0.00</span>
+                            </div>
+                            <button type="button" id="btn-savings-history" class="btn-savings-history" title="ดูประวัติเงินเก็บ">
+                                <i data-lucide="history"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -331,6 +384,62 @@
                     </div>
                 </div>
             </section>
+        </main>
+
+        <!-- ========== SAVINGS HISTORY VIEW ========== -->
+        <main id="savings-view" class="detail-view hidden">
+            <div class="detail-topbar">
+                <button type="button" id="btn-back-from-savings" class="btn-back">
+                    <i data-lucide="arrow-left"></i>
+                    <span data-i18n="savings.back">กลับหน้าหลัก</span>
+                </button>
+                <h2 class="detail-page-title" data-i18n="savings.history_title">ประวัติเงินเก็บ</h2>
+                <div style="width: 120px;"></div>
+            </div>
+
+            <!-- Savings Summary Mini Card -->
+            <div class="savings-summary-card">
+                <div class="savings-summary-total">
+                    <span class="savings-summary-label" data-i18n="savings.total">ยอดเงินเก็บรวม</span>
+                    <span class="savings-summary-value" id="savings-view-total">฿0.00</span>
+                </div>
+                <div class="savings-summary-sources">
+                    <div class="savings-summary-source">
+                        <i data-lucide="banknote"></i>
+                        <span data-i18n="savings.from_cash">จากเงินสด</span>
+                        <span id="savings-view-cash">฿0.00</span>
+                    </div>
+                    <div class="savings-summary-source">
+                        <i data-lucide="landmark"></i>
+                        <span data-i18n="savings.from_bank">จากธนาคาร</span>
+                        <span id="savings-view-bank">฿0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings History List -->
+            <div class="detail-card ledger-card">
+                <div class="ledger-header">
+                    <div class="section-title">
+                        <i data-lucide="piggy-bank"></i>
+                        <h2 data-i18n="savings.history_title">ประวัติเงินเก็บ</h2>
+                    </div>
+                    <button type="button" id="btn-add-savings-from-history" class="btn-add-tx">
+                        <i data-lucide="plus"></i>
+                        <span data-i18n="savings.manage">จัดการเงินเก็บ</span>
+                    </button>
+                </div>
+                <div class="ledger-list-wrapper">
+                    <ul id="savings-list" class="ledger-list"></ul>
+                    <div id="savings-empty-state" class="empty-state hidden">
+                        <div class="empty-icon-wrapper">
+                            <i data-lucide="piggy-bank"></i>
+                        </div>
+                        <h3 data-i18n="savings.empty_title">ยังไม่มีรายการเงินเก็บ</h3>
+                        <p data-i18n="savings.empty_desc">กดปุ่ม "จัดการเงินเก็บ" เพื่อเริ่มเก็บออม</p>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- ========== DETAIL VIEW (Charts + Full Ledger) ========== -->
@@ -1002,6 +1111,80 @@
                         <span data-i18n="category.save">เพิ่มหมวดหมู่</span>
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Savings Modal -->
+    <div id="savings-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="card-title">
+                    <i data-lucide="piggy-bank" class="title-icon" style="color: hsl(45, 90%, 48%);"></i>
+                    <h2 data-i18n="savings.modal_title">จัดการเงินเก็บ</h2>
+                </div>
+                <button id="savings-modal-close" class="btn-icon btn-modal-close" aria-label="ปิด">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="savings-form" autocomplete="off">
+                <!-- Deposit / Withdraw Tabs -->
+                <div class="type-selector-tabs">
+                    <input type="radio" id="sav-type-deposit" name="sav-type" value="deposit" checked>
+                    <label for="sav-type-deposit" class="tab-label label-income">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span data-i18n="savings.deposit">เก็บเงิน (Deposit)</span>
+                    </label>
+                    <input type="radio" id="sav-type-withdraw" name="sav-type" value="withdraw">
+                    <label for="sav-type-withdraw" class="tab-label label-expense">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span data-i18n="savings.withdraw">ถอนเงินเก็บ (Withdraw)</span>
+                    </label>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Amount -->
+                    <div class="form-group col-12">
+                        <label for="sav-amount" data-i18n="savings.amount">จำนวนเงิน <span class="required">*</span></label>
+                        <div class="input-with-icon amount-input-wrapper">
+                            <span class="input-prefix">฿</span>
+                            <input type="number" id="sav-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Source (Cash / Bank) -->
+                    <div class="form-group col-6">
+                        <label for="sav-source" data-i18n="savings.source">แหล่งที่มา <span class="required">*</span></label>
+                        <select id="sav-source" required>
+                            <option value="cash" data-i18n="savings.source_cash">💵 จากเงินสด</option>
+                            <option value="bank" data-i18n="savings.source_bank">🏦 จากธนาคาร</option>
+                        </select>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-group col-6">
+                        <label for="sav-date" data-i18n="savings.date">วันเวลาที่ทำรายการ <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <i data-lucide="calendar" class="input-icon-left"></i>
+                            <input type="datetime-local" id="sav-date" required>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group col-12">
+                        <label for="sav-description" data-i18n="savings.description">บันทึกเพิ่มเติม</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="file-text" class="input-icon-left"></i>
+                            <input type="text" id="sav-description" placeholder="เช่น เก็บเงินเดือน, ฉุกเฉิน..." data-i18n-placeholder="savings.description_placeholder">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-savings">
+                    <i data-lucide="piggy-bank"></i>
+                    <span data-i18n="savings.submit_deposit">เก็บเงิน</span>
+                </button>
             </form>
         </div>
     </div>
