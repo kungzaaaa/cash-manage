@@ -2629,37 +2629,122 @@ input[type="number"] {
 }
 
 .amount-input-wrapper input {
-    padding-right: 96px !important; /* Make room for the select dropdown on the right */
+    padding-right: 88px !important; /* Make room for the select dropdown on the right */
 }
 
-.amount-currency-select {
-    position: absolute;
-    right: 8px;
-    width: 72px !important; /* Accommodate icons and text cleanly */
-    height: 30px !important; /* Sleek inline badge height */
-    padding: 0 4px 0 8px !important;
+.amount-input-wrapper > .custom-select {
+    position: absolute !important;
+    right: 8px !important;
+    width: 80px !important; /* Perfect width for pill trigger */
+    height: 30px !important; /* Symmetrical height */
+    flex: none !important;
+    min-width: 0 !important;
+    z-index: 10 !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-trigger {
+    height: 30px !important;
+    padding: 0 8px 0 10px !important;
+    border-radius: 9999px !important; /* Completely pill-shaped matching design reference! */
     border: 1px solid var(--border-medium) !important;
-    border-radius: var(--radius-md) !important; /* Rounded border matching other select dropdowns (12px) */
-    background-color: var(--bg-surface) !important; /* Matches surface color dynamically (white / dark grey) */
+    background-color: var(--bg-surface) !important;
     color: var(--text-title) !important;
-    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
+    font-family: var(--font-eng), var(--font-thai), sans-serif !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
-    outline: none !important;
-    cursor: pointer !important;
-    transition: all var(--transition-fast) !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 6px center !important;
-    padding-right: 18px !important;
-    appearance: none;
-    -webkit-appearance: none;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    width: 100% !important;
     box-shadow: var(--shadow-xs) !important;
 }
 
-.amount-currency-select:hover {
+.amount-input-wrapper > .custom-select .cs-trigger:hover {
     border-color: var(--border-focus) !important;
     background-color: var(--bg-card-hover) !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-icon {
+    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--text-title) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-label {
+    font-family: var(--font-eng) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+    color: var(--text-title) !important;
+    flex: none !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-chevron {
+    width: 10px !important;
+    height: 10px !important;
+    color: var(--text-faint) !important;
+    margin-left: 2px !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-panel {
+    left: auto !important;
+    right: 0 !important;
+    width: 95px !important; /* Slightly wider options panel for spacing */
+    border-radius: 14px !important; /* Soft round corners for design reference */
+    box-shadow: var(--shadow-lg) !important;
+    padding: 4px !important;
+    border: 1px solid var(--border-light) !important;
+    background-color: var(--bg-surface) !important;
+    top: calc(100% + 6px) !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-option {
+    padding: 8px 10px !important;
+    border-radius: 10px !important; /* Rounded corners for option hover/active state */
+    gap: 8px !important;
+    font-family: var(--font-eng), var(--font-thai), sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-body) !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-option:hover {
+    background-color: var(--bg-card-hover) !important;
+    color: var(--text-title) !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-option.active {
+    background-color: var(--bg-card-hover) !important;
+    color: var(--text-title) !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-opt-icon {
+    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--text-title) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.amount-input-wrapper > .custom-select .cs-opt-label {
+    font-family: var(--font-eng) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-title) !important;
 }
 
 /* Realtime Currency Converter in Profile Modal */
@@ -2803,117 +2888,4 @@ input[type="number"] {
 
 .color-pick-btn.custom-color-picker-trigger.active::after {
     display: none !important;
-}
-
-/* ============================================================= */
-/* INLINE AMOUNT CURRENCY DROPDOWN OVERRIDES                     */
-/* ============================================================= */
-.amount-input-wrapper .custom-select {
-    position: absolute !important;
-    right: 8px !important;
-    width: 82px !important; /* Perfect width for symbol + space + code + arrow */
-    height: 32px !important;
-    z-index: 10 !important;
-    margin: 0 !important;
-}
-
-.amount-input-wrapper .custom-select .cs-trigger {
-    height: 100% !important;
-    width: 100% !important;
-    padding: 0 8px 0 10px !important;
-    border: 1px solid var(--border-medium) !important;
-    border-radius: 20px !important; /* Capsule/pill shape matching the Ref exactly! */
-    background-color: var(--bg-surface) !important; /* Dynamic dark/light surface color */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 4px !important;
-    box-shadow: var(--shadow-xs) !important;
-    transition: all var(--transition-fast) !important;
-}
-
-.amount-input-wrapper .custom-select .cs-trigger:hover {
-    border-color: var(--border-focus) !important;
-    background-color: var(--bg-card-hover) !important;
-}
-
-.amount-input-wrapper .custom-select.open .cs-trigger {
-    border-color: var(--border-focus) !important;
-    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1) !important;
-}
-
-.amount-input-wrapper .custom-select .cs-icon {
-    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: var(--text-title) !important;
-    display: flex !important;
-    align-items: center;
-    margin-right: 1px !important;
-}
-
-.amount-input-wrapper .custom-select .cs-label {
-    font-family: var(--font-eng), sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    color: var(--text-title) !important;
-    flex: 1 !important;
-    text-align: left !important;
-    letter-spacing: 0.2px !important;
-}
-
-.amount-input-wrapper .custom-select .cs-chevron {
-    width: 10px !important;
-    height: 10px !important;
-    color: var(--text-muted) !important;
-    margin-left: 2px !important;
-    transition: transform var(--transition-fast) !important;
-}
-
-/* Panel Options styling */
-.amount-input-wrapper .custom-select .cs-panel {
-    min-width: 96px !important;
-    width: 96px !important;
-    right: 0 !important;
-    left: auto !important;
-    border-radius: 14px !important; /* Soft round corners matching Ref */
-    padding: 5px !important;
-    box-shadow: var(--shadow-lg) !important;
-    border: 1px solid var(--border-light) !important;
-}
-
-.amount-input-wrapper .custom-select .cs-option {
-    padding: 8px 10px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 8px !important;
-    border-radius: 9px !important;
-    transition: background 0.12s ease !important;
-}
-
-.amount-input-wrapper .custom-select .cs-option:hover,
-.amount-input-wrapper .custom-select .cs-option.active {
-    background-color: var(--bg-card-hover) !important;
-}
-
-.amount-input-wrapper .custom-select .cs-opt-icon {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: var(--text-title) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: auto !important;
-    height: auto !important;
-}
-
-.amount-input-wrapper .custom-select .cs-opt-label {
-    font-family: var(--font-eng), sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    color: var(--text-title) !important;
-    flex: 1 !important;
-    text-align: right !important;
-    letter-spacing: 0.2px !important;
 }

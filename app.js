@@ -1189,6 +1189,7 @@ function openEditModal(id) {
     const editTxCurrency = document.getElementById('edit-tx-currency');
     if (editTxCurrency) {
         editTxCurrency.value = tx.currency || 'THB';
+        refreshCustomDropdown(editTxCurrency);
     }
 
     elements.editModalOverlay.classList.remove('hidden');
