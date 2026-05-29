@@ -115,7 +115,6 @@ const TRANSLATIONS = {
         'form.description_placeholder': 'รายละเอียด หรือคำอธิบายเพิ่มเติม...',
         'form.submit': 'บันทึกรายการ',
         'form.add_category': 'เพิ่มหมวดหมู่ใหม่',
-        'form.select_date_time': 'เลือกวันเวลา...',
 
         // ========== Charts ==========
         'chart.title': 'วิเคราะห์สัดส่วนและการเงิน',
@@ -382,7 +381,6 @@ const TRANSLATIONS = {
         'form.description_placeholder': 'Additional details or notes...',
         'form.submit': 'Save Transaction',
         'form.add_category': 'Add new category',
-        'form.select_date_time': 'Select Date & Time...',
 
         // ========== Charts ==========
         'chart.title': 'Financial Analysis',
@@ -712,14 +710,6 @@ function setLanguage(lang) {
         const editTxMethod = document.getElementById('edit-tx-method');
         if (txMethod) refreshCustomDropdown(txMethod);
         if (editTxMethod) refreshCustomDropdown(editTxMethod);
-    }
-
-    // Update Flatpickr locales dynamically
-    if (window.txDatePicker) {
-        window.txDatePicker.set('locale', lang === 'th' ? 'th' : 'default');
-    }
-    if (window.editDatePicker) {
-        window.editDatePicker.set('locale', lang === 'th' ? 'th' : 'default');
     }
 }
 

@@ -77,10 +77,6 @@ let flowChartInstance = null;
 let categoryChartInstance = null;
 let clearCooldownTimer = null;
 
-// Global Flatpickr Date Picker Instances
-window.txDatePicker = null;
-window.editDatePicker = null;
-
 // DOM Elements
 const elements = {
     html: document.documentElement,
@@ -189,7 +185,6 @@ const elements = {
 // Core Initialization
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    initDatePickers();
     initFormDateTime();
     initTheme();
     initCurrency();
@@ -237,51 +232,14 @@ function clearAppForLogout() {
     renderDashboard();
 }
 
-function initDatePickers() {
-    if (typeof flatpickr === 'undefined') return;
-    
-    const config = {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        locale: currentLang === 'th' ? 'th' : 'default',
-        disableMobile: "true", // Force Flatpickr popup on mobile browsers too
-        onReady: function(selectedDates, dateStr, instance) {
-            // Convert Flatpickr month select to our premium custom dropdown!
-            const monthSelect = instance.monthElements[0];
-            if (monthSelect) {
-                createCustomDropdown(monthSelect);
-                const dropdownData = customDropdownMap.get(monthSelect);
-                if (dropdownData) {
-                    dropdownData.wrapper.classList.add('flatpickr-month-custom-select');
-                }
-            }
-        },
-        onMonthChange: function(selectedDates, dateStr, instance) {
-            // Synchronize the custom dropdown when navigating via arrows
-            const monthSelect = instance.monthElements[0];
-            if (monthSelect) {
-                refreshCustomDropdown(monthSelect);
-            }
-        }
-    };
-    
-    window.txDatePicker = flatpickr("#tx-date", config);
-    window.editDatePicker = flatpickr("#edit-tx-date", config);
-}
-
 function initFormDateTime() {
     const now = new Date();
-    if (window.txDatePicker) {
-        window.txDatePicker.setDate(now);
-    } else {
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    elements.txDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 // -------------------------------------------------------------
@@ -1261,9 +1219,6 @@ function openEditModal(id) {
     elements.editTxMethod.value = tx.method;
     refreshCustomDropdown(elements.editTxMethod);
     elements.editTxDate.value = tx.date;
-    if (window.editDatePicker) {
-        window.editDatePicker.setDate(tx.date);
-    }
     elements.editTxDescription.value = tx.description || '';
     const editTxCurrency = document.getElementById('edit-tx-currency');
     if (editTxCurrency) {
