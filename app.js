@@ -501,13 +501,22 @@ function renderDashboard() {
     elements.bankIncome.textContent = `+${curSym}${formatCurrency(totalBankIncome)}`;
     elements.bankExpense.textContent = `-${curSym}${formatCurrency(totalBankExpense)}`;
 
-    // Update static hero currency symbols and input prefixes
+    // Update static hero currency symbols
     document.querySelectorAll('.hero-currency').forEach(el => {
         el.textContent = curSym;
     });
-    document.querySelectorAll('.input-prefix').forEach(el => {
-        el.textContent = curSym;
-    });
+
+    // Update individual transaction input prefixes based on their selected currency
+    const txPrefix = document.querySelector('#tx-amount')?.parentElement.querySelector('.input-prefix');
+    if (txPrefix) {
+        const cur = document.getElementById('tx-currency')?.value || 'THB';
+        txPrefix.textContent = CURRENCIES[cur]?.symbol || '฿';
+    }
+    const editPrefix = document.querySelector('#edit-tx-amount')?.parentElement.querySelector('.input-prefix');
+    if (editPrefix) {
+        const cur = document.getElementById('edit-tx-currency')?.value || 'THB';
+        editPrefix.textContent = CURRENCIES[cur]?.symbol || '฿';
+    }
 
     // Color negative balance
     if (overallBalance < 0) {
@@ -1145,6 +1154,25 @@ function setupEventListeners() {
         const isIncome = elements.editTypeIncome.checked;
         openCategoryModal(isIncome ? 'income' : 'expense');
     });
+
+    // Update input currency prefixes dynamically when changing currencies
+    const txCurEl = document.getElementById('tx-currency');
+    if (txCurEl) {
+        txCurEl.addEventListener('change', (e) => {
+            const cur = e.target.value;
+            const prefix = txCurEl.parentElement.querySelector('.input-prefix');
+            if (prefix) prefix.textContent = CURRENCIES[cur]?.symbol || '฿';
+        });
+    }
+
+    const editTxCurEl = document.getElementById('edit-tx-currency');
+    if (editTxCurEl) {
+        editTxCurEl.addEventListener('change', (e) => {
+            const cur = e.target.value;
+            const prefix = editTxCurEl.parentElement.querySelector('.input-prefix');
+            if (prefix) prefix.textContent = CURRENCIES[cur]?.symbol || '฿';
+        });
+    }
 }
 
 // -------------------------------------------------------------
@@ -1190,6 +1218,7 @@ function openEditModal(id) {
     if (editTxCurrency) {
         editTxCurrency.value = tx.currency || 'THB';
         refreshCustomDropdown(editTxCurrency);
+        editTxCurrency.dispatchEvent(new Event('change'));
     }
 
     elements.editModalOverlay.classList.remove('hidden');
