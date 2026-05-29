@@ -247,25 +247,19 @@ function initDatePickers() {
         locale: currentLang === 'th' ? 'th' : 'default',
         disableMobile: "true", // Force Flatpickr popup on mobile browsers too
         onReady: function(selectedDates, dateStr, instance) {
-            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            // Convert Flatpickr month select to our premium custom dropdown!
+            const monthSelect = instance.monthElements[0];
             if (monthSelect) {
                 createCustomDropdown(monthSelect);
-            }
-        },
-        onOpen: function(selectedDates, dateStr, instance) {
-            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
-            if (monthSelect) {
-                refreshCustomDropdown(monthSelect);
+                const dropdownData = customDropdownMap.get(monthSelect);
+                if (dropdownData) {
+                    dropdownData.wrapper.classList.add('flatpickr-month-custom-select');
+                }
             }
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
-            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
-            if (monthSelect) {
-                refreshCustomDropdown(monthSelect);
-            }
-        },
-        onYearChange: function(selectedDates, dateStr, instance) {
-            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            // Synchronize the custom dropdown when navigating via arrows
+            const monthSelect = instance.monthElements[0];
             if (monthSelect) {
                 refreshCustomDropdown(monthSelect);
             }
