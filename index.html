@@ -450,32 +450,19 @@
             </div>
 
             <form id="transaction-form" autocomplete="off">
-                <div class="form-header-row">
-                    <!-- Form Tabs for Income / Expense Selection -->
-                    <div class="type-selector-tabs" style="margin-bottom: 0; flex: 1;">
-                        <input type="radio" id="type-income" name="tx-type" value="income" checked>
-                        <label for="type-income" class="tab-label label-income">
-                            <i data-lucide="arrow-down-left"></i>
-                            <span data-i18n="form.income">รายรับ (Income)</span>
-                        </label>
+                <!-- Form Tabs for Income / Expense Selection -->
+                <div class="type-selector-tabs">
+                    <input type="radio" id="type-income" name="tx-type" value="income" checked>
+                    <label for="type-income" class="tab-label label-income">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span data-i18n="form.income">รายรับ (Income)</span>
+                    </label>
 
-                        <input type="radio" id="type-expense" name="tx-type" value="expense">
-                        <label for="type-expense" class="tab-label label-expense">
-                            <i data-lucide="arrow-up-right"></i>
-                            <span data-i18n="form.expense">รายจ่าย (Expense)</span>
-                        </label>
-                    </div>
-
-                    <div class="tx-currency-wrapper">
-                        <select id="tx-currency">
-                            <option value="THB">฿ THB</option>
-                            <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
-                            <option value="JPY">¥ JPY</option>
-                            <option value="GBP">£ GBP</option>
-                            <option value="CNY">¥ CNY</option>
-                        </select>
-                    </div>
+                    <input type="radio" id="type-expense" name="tx-type" value="expense">
+                    <label for="type-expense" class="tab-label label-expense">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span data-i18n="form.expense">รายจ่าย (Expense)</span>
+                    </label>
                 </div>
 
                 <div class="form-grid">
@@ -486,6 +473,14 @@
                         <div class="input-with-icon amount-input-wrapper">
                             <span class="input-prefix">฿</span>
                             <input type="number" id="tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                            <select id="tx-currency" class="amount-currency-select">
+                                <option value="THB">฿ THB</option>
+                                <option value="USD">$ USD</option>
+                                <option value="EUR">€ EUR</option>
+                                <option value="JPY">¥ JPY</option>
+                                <option value="GBP">£ GBP</option>
+                                <option value="CNY">¥ CNY</option>
+                            </select>
                         </div>
                     </div>
 
@@ -559,31 +554,18 @@
             <form id="edit-transaction-form" autocomplete="off">
                 <input type="hidden" id="edit-tx-id">
 
-                <div class="form-header-row">
-                    <!-- Type selector tabs -->
-                    <div class="type-selector-tabs" style="margin-bottom: 0; flex: 1;">
-                        <input type="radio" id="edit-type-income" name="edit-tx-type" value="income">
-                        <label for="edit-type-income" class="tab-label label-income">
-                            <i data-lucide="arrow-down-left"></i>
-                            <span data-i18n="form.income">รายรับ (Income)</span>
-                        </label>
-                        <input type="radio" id="edit-type-expense" name="edit-tx-type" value="expense">
-                        <label for="edit-type-expense" class="tab-label label-expense">
-                            <i data-lucide="arrow-up-right"></i>
-                            <span data-i18n="form.expense">รายจ่าย (Expense)</span>
-                        </label>
-                    </div>
-
-                    <div class="tx-currency-wrapper">
-                        <select id="edit-tx-currency">
-                            <option value="THB">฿ THB</option>
-                            <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
-                            <option value="JPY">¥ JPY</option>
-                            <option value="GBP">£ GBP</option>
-                            <option value="CNY">¥ CNY</option>
-                        </select>
-                    </div>
+                <!-- Type selector tabs -->
+                <div class="type-selector-tabs">
+                    <input type="radio" id="edit-type-income" name="edit-tx-type" value="income">
+                    <label for="edit-type-income" class="tab-label label-income">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span data-i18n="form.income">รายรับ (Income)</span>
+                    </label>
+                    <input type="radio" id="edit-type-expense" name="edit-tx-type" value="expense">
+                    <label for="edit-type-expense" class="tab-label label-expense">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span data-i18n="form.expense">รายจ่าย (Expense)</span>
+                    </label>
                 </div>
 
                 <div class="form-grid">
@@ -593,6 +575,14 @@
                         <div class="input-with-icon amount-input-wrapper">
                             <span class="input-prefix">฿</span>
                             <input type="number" id="edit-tx-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                            <select id="edit-tx-currency" class="amount-currency-select">
+                                <option value="THB">฿ THB</option>
+                                <option value="USD">$ USD</option>
+                                <option value="EUR">€ EUR</option>
+                                <option value="JPY">¥ JPY</option>
+                                <option value="GBP">£ GBP</option>
+                                <option value="CNY">¥ CNY</option>
+                            </select>
                         </div>
                     </div>
 

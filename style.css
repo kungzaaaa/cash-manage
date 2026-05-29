@@ -1303,40 +1303,6 @@ body {
 /* ============================================================= */
 /* FORMS                                                          */
 /* ============================================================= */
-.form-header-row {
-    display: flex;
-    align-items: stretch;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.tx-currency-wrapper {
-    flex-shrink: 0;
-    width: 120px;
-}
-
-.tx-currency-wrapper .custom-select {
-    height: 100%;
-}
-
-.tx-currency-wrapper .cs-trigger {
-    border-radius: 24px !important;
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-light) !important;
-    padding: 0 16px !important;
-    height: 100%;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-}
-
-.tx-currency-wrapper .cs-trigger:hover {
-    background: var(--bg-card-hover) !important;
-    border-color: var(--border-medium) !important;
-}
-
-.tx-currency-wrapper .cs-panel {
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-}
 .type-selector-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2663,7 +2629,7 @@ input[type="number"] {
 }
 
 .amount-input-wrapper input {
-    padding-right: 88px !important; /* Make room for the select dropdown on the right */
+    padding-right: 96px !important; /* Make room for the select dropdown on the right */
 }
 
 .amount-currency-select {
@@ -2837,4 +2803,117 @@ input[type="number"] {
 
 .color-pick-btn.custom-color-picker-trigger.active::after {
     display: none !important;
+}
+
+/* ============================================================= */
+/* INLINE AMOUNT CURRENCY DROPDOWN OVERRIDES                     */
+/* ============================================================= */
+.amount-input-wrapper .custom-select {
+    position: absolute !important;
+    right: 8px !important;
+    width: 82px !important; /* Perfect width for symbol + space + code + arrow */
+    height: 32px !important;
+    z-index: 10 !important;
+    margin: 0 !important;
+}
+
+.amount-input-wrapper .custom-select .cs-trigger {
+    height: 100% !important;
+    width: 100% !important;
+    padding: 0 8px 0 10px !important;
+    border: 1px solid var(--border-medium) !important;
+    border-radius: 20px !important; /* Capsule/pill shape matching the Ref exactly! */
+    background-color: var(--bg-surface) !important; /* Dynamic dark/light surface color */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    box-shadow: var(--shadow-xs) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.amount-input-wrapper .custom-select .cs-trigger:hover {
+    border-color: var(--border-focus) !important;
+    background-color: var(--bg-card-hover) !important;
+}
+
+.amount-input-wrapper .custom-select.open .cs-trigger {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1) !important;
+}
+
+.amount-input-wrapper .custom-select .cs-icon {
+    font-family: var(--font-thai), var(--font-eng), sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--text-title) !important;
+    display: flex !important;
+    align-items: center;
+    margin-right: 1px !important;
+}
+
+.amount-input-wrapper .custom-select .cs-label {
+    font-family: var(--font-eng), sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-title) !important;
+    flex: 1 !important;
+    text-align: left !important;
+    letter-spacing: 0.2px !important;
+}
+
+.amount-input-wrapper .custom-select .cs-chevron {
+    width: 10px !important;
+    height: 10px !important;
+    color: var(--text-muted) !important;
+    margin-left: 2px !important;
+    transition: transform var(--transition-fast) !important;
+}
+
+/* Panel Options styling */
+.amount-input-wrapper .custom-select .cs-panel {
+    min-width: 96px !important;
+    width: 96px !important;
+    right: 0 !important;
+    left: auto !important;
+    border-radius: 14px !important; /* Soft round corners matching Ref */
+    padding: 5px !important;
+    box-shadow: var(--shadow-lg) !important;
+    border: 1px solid var(--border-light) !important;
+}
+
+.amount-input-wrapper .custom-select .cs-option {
+    padding: 8px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    border-radius: 9px !important;
+    transition: background 0.12s ease !important;
+}
+
+.amount-input-wrapper .custom-select .cs-option:hover,
+.amount-input-wrapper .custom-select .cs-option.active {
+    background-color: var(--bg-card-hover) !important;
+}
+
+.amount-input-wrapper .custom-select .cs-opt-icon {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--text-title) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.amount-input-wrapper .custom-select .cs-opt-label {
+    font-family: var(--font-eng), sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-title) !important;
+    flex: 1 !important;
+    text-align: right !important;
+    letter-spacing: 0.2px !important;
 }
