@@ -245,7 +245,31 @@ function initDatePickers() {
         dateFormat: "Y-m-d H:i",
         time_24hr: true,
         locale: currentLang === 'th' ? 'th' : 'default',
-        disableMobile: "true" // Force Flatpickr popup on mobile browsers too
+        disableMobile: "true", // Force Flatpickr popup on mobile browsers too
+        onReady: function(selectedDates, dateStr, instance) {
+            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            if (monthSelect) {
+                createCustomDropdown(monthSelect);
+            }
+        },
+        onOpen: function(selectedDates, dateStr, instance) {
+            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            if (monthSelect) {
+                refreshCustomDropdown(monthSelect);
+            }
+        },
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            if (monthSelect) {
+                refreshCustomDropdown(monthSelect);
+            }
+        },
+        onYearChange: function(selectedDates, dateStr, instance) {
+            const monthSelect = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+            if (monthSelect) {
+                refreshCustomDropdown(monthSelect);
+            }
+        }
     };
     
     window.txDatePicker = flatpickr("#tx-date", config);
