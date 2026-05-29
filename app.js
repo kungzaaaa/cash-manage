@@ -337,7 +337,7 @@ async function fetchExchangeRates() {
                 const timeStr = apiDate.toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
 
                 // เลือกคำนำหน้าให้ตรงกับภาษาปัจจุบันในระบบ (i18n)
-                const labelText = currentLang === 'th' ? 'เรตตลาดโลกประจำวันที่' : 'Market rates as of';
+                const labelText = currentLang === 'th' ? 'เรทตลาดโลกประจำวันที่' : 'Market rates as of';
 
                 // ผลลัพธ์ที่จะแสดง: "เรตตลาดโลกประจำวันที่ 29 พ.ค. 2026 (07:01)"
                 updateTimeEl.textContent = `${labelText} ${dateStr} (${timeStr})`;
