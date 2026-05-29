@@ -304,12 +304,12 @@ function initCurrency() {
         currencySelect.addEventListener('change', () => {
             currentCurrency = currencySelect.value;
             localStorage.setItem('app-currency', currentCurrency);
-            
+
             // Re-apply translations for form amount label
             if (typeof applyTranslations === 'function') {
                 applyTranslations();
             }
-            
+
             // Re-render dashboard balance formatting, recent lists, ledger list, and charts
             renderDashboard();
             updateCharts();
@@ -327,8 +327,20 @@ async function fetchExchangeRates() {
             console.log('Realtime exchange rates loaded successfully:', data.rates);
             const updateTimeEl = document.getElementById('rate-update-time');
             if (updateTimeEl) {
-                const dateStr = new Date(data.time_last_update_utc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                updateTimeEl.textContent = `อัปเดตเรียลไทม์ ${dateStr}`;
+                // 💡 ดึงเวลาอัปเดตจริงจากต้นทาง API ตลาดโลก
+                const apiDate = new Date(data.time_last_update_utc);
+
+                // แปลง "วันที่" ให้แสดงผลตามภาษาที่ระบบเลือก (เช่น 29 พ.ค. 2026 หรือ May 29, 2026)
+                const dateStr = apiDate.toLocaleDateString(getDateLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
+
+                // แปลง "เวลา" ให้แสดงผลในรูปแบบ 24 ชั่วโมง (เช่น 07:01)
+                const timeStr = apiDate.toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
+
+                // เลือกคำนำหน้าให้ตรงกับภาษาปัจจุบันในระบบ (i18n)
+                const labelText = currentLang === 'th' ? 'เรตตลาดโลกประจำวันที่' : 'Market rates as of';
+
+                // ผลลัพธ์ที่จะแสดง: "เรตตลาดโลกประจำวันที่ 29 พ.ค. 2026 (07:01)"
+                updateTimeEl.textContent = `${labelText} ${dateStr} (${timeStr})`;
             }
             renderDashboard();
             updateCharts();
@@ -350,9 +362,9 @@ function updateCurrencyConverter() {
     const amount = parseFloat(convAmount.value) || 0;
     const from = convFrom.value;
     const to = convTo.value;
-    
+
     const result = convertCurrency(amount, from, to);
-    
+
     const rates = state.exchangeRates || fallbackExchangeRates;
     const rateFrom = rates[from] || 1;
     const rateTo = rates[to] || 1;
@@ -1237,13 +1249,13 @@ function closeEditModal() {
 // -------------------------------------------------------------
 function openConverterModal() {
     closeProfileDropdown();
-    
+
     // Auto-close Profile modal if open
     const profileOverlay = document.getElementById('profile-modal-overlay');
     if (profileOverlay) {
         profileOverlay.classList.add('hidden');
     }
-    
+
     elements.converterModalOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     updateCurrencyConverter();
@@ -1375,9 +1387,9 @@ function initCategoryModal() {
         <i data-lucide="palette" style="width:20px; height:20px; color:var(--text-muted); transition: color var(--transition-fast);"></i>
         <input type="color" value="#4ECDC4" title="${t('category.custom_color_title') || 'เลือกสีอื่นๆ'}" style="position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; padding:0; margin:0; border:none; box-sizing:border-box;">
     `;
-    
+
     const customInput = customColorDiv.querySelector('input');
-    
+
     // Preview in real-time as they drag the color picker slider
     customInput.addEventListener('input', (e) => {
         const hex = e.target.value;
@@ -1387,7 +1399,7 @@ function initCategoryModal() {
     // When the color is finalized, create a new separate color slot/item in the list!
     customInput.addEventListener('change', (e) => {
         const hex = e.target.value;
-        
+
         // Check if a slot for this color already exists
         let existingBtn = colorGrid.querySelector(`.color-pick-btn[data-color="${hex}"]`);
         if (!existingBtn) {
@@ -1397,14 +1409,14 @@ function initCategoryModal() {
             newBtn.style.background = hex;
             newBtn.setAttribute('data-color', hex);
             newBtn.addEventListener('click', () => selectCategoryColor(hex));
-            
+
             // Insert it right after the custom color picker trigger (index 1)
             customColorDiv.insertAdjacentElement('afterend', newBtn);
         }
-        
+
         selectCategoryColor(hex);
     });
-    
+
     colorGrid.appendChild(customColorDiv);
 
     // 2. Predefined Colors
