@@ -1570,7 +1570,7 @@ function initCustomDropdowns() {
     createCustomDropdown(elements.editTxCategory);
 
     // Initialize currency custom select dropdowns
-    const currencySelects = ['currency-select', 'conv-from', 'conv-to'];
+    const currencySelects = ['currency-select', 'conv-from', 'conv-to', 'tx-currency', 'edit-tx-currency'];
     currencySelects.forEach(id => {
         const el = document.getElementById(id);
         if (el) createCustomDropdown(el);
