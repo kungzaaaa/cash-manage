@@ -73,6 +73,8 @@ const TRANSLATIONS = {
         'auth.error.too_many': 'มีการเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่',
         'auth.error.cancelled_popup': 'กรุณาลองกดเข้าสู่ระบบอีกครั้ง',
         'auth.error.generic': 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+        'auth.email_sent': 'สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลของคุณเพื่อยืนยันตัวตนก่อนเข้าใช้งาน',
+        'auth.error.email_not_verified': 'กรุณายืนยันอีเมลของคุณก่อนเข้าใช้งาน',
 
         // ========== Header ==========
         'header.subtitle': 'ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี',
@@ -339,6 +341,8 @@ const TRANSLATIONS = {
         'auth.error.too_many': 'Too many login attempts. Please wait a moment',
         'auth.error.cancelled_popup': 'Please try logging in again',
         'auth.error.generic': 'An error occurred. Please try again',
+        'auth.email_sent': 'Registration successful! Please check your email to verify your account before logging in.',
+        'auth.error.email_not_verified': 'Please verify your email before logging in.',
 
         // ========== Header ==========
         'header.subtitle': 'Track income, expenses & account balances',

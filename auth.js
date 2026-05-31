@@ -74,6 +74,19 @@ const authElements = {
 // ---------------------------------------------------------------
 auth.onAuthStateChanged(async (user) => {
     if (user) {
+        // Check if user verified their email (exclude Google sign-in which is verified by default)
+        const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+        if (!user.emailVerified && !isGoogleUser) {
+            showAuthError(t('auth.error.email_not_verified'));
+            if (typeof showToast === 'function') {
+                showToast(t('auth.error.email_not_verified'), 'warning');
+            }
+            showAuthScreen();
+            await auth.signOut();
+            authElements.loadingOverlay.classList.add('hidden');
+            return;
+        }
+
         // User is signed in
 
         // 1. Load user profile from Firestore to fetch custom photo URL (Base64) or display name
@@ -208,19 +221,28 @@ async function registerWithEmail(email, password, displayName) {
     try {
         const cred = await auth.createUserWithEmailAndPassword(email, password);
         // Set display name
-        if (cred.user && displayName) {
-            await cred.user.updateProfile({ displayName });
+        if (cred.user) {
+            if (displayName) {
+                await cred.user.updateProfile({ displayName });
+            }
+
+            // Send verification email
+            await cred.user.sendEmailVerification();
 
             // Update user profile doc in Firestore with displayName immediately
             await db.collection('users').doc(cred.user.uid).set({
-                displayName: displayName,
+                displayName: displayName || '',
                 email: cred.user.email || '',
                 photoURL: cred.user.photoURL || '',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
 
-            // Force app UI to show display name immediately
-            showApp(cred.user, '', displayName);
+            if (typeof showToast === 'function') {
+                showToast(t('auth.email_sent'), 'success');
+            }
+
+            // Immediately sign out to prevent automatic login until email is verified
+            await auth.signOut();
         }
     } catch (error) {
         console.error('Register error:', error);
