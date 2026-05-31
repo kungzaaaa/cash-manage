@@ -84,9 +84,9 @@ auth.onAuthStateChanged(async (user) => {
     if (user) {
         // User is signed in
 
-        // Check if email verification is required (only for email/password users)
-        const isPasswordProvider = user.providerData.some(p => p.providerId === 'password');
-        if (isPasswordProvider && !user.emailVerified) {
+        // Check if email verification is required
+        // Google accounts automatically have emailVerified = true
+        if (!user.emailVerified) {
             // Email not verified yet — show verification screen
             showVerificationScreen(user);
             authElements.loadingOverlay.classList.add('hidden');
