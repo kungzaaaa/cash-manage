@@ -38,6 +38,14 @@ const authElements = {
     // Error display
     authError: document.getElementById('auth-error'),
 
+    // Email Verification Screen
+    verificationScreen: document.getElementById('verification-screen'),
+    verificationEmail: document.getElementById('verification-email'),
+    btnResendVerification: document.getElementById('btn-resend-verification'),
+    btnCheckVerification: document.getElementById('btn-check-verification'),
+    btnVerificationLogout: document.getElementById('btn-verification-logout'),
+    resendCooldownText: document.getElementById('resend-cooldown-text'),
+
     // User profile in header
     userProfileSection: document.getElementById('user-profile-section'),
     userAvatar: document.getElementById('user-avatar'),
@@ -76,6 +84,18 @@ auth.onAuthStateChanged(async (user) => {
     if (user) {
         // User is signed in
 
+        // Check if email verification is required (only for email/password users)
+        const isPasswordProvider = user.providerData.some(p => p.providerId === 'password');
+        if (isPasswordProvider && !user.emailVerified) {
+            // Email not verified yet — show verification screen
+            showVerificationScreen(user);
+            authElements.loadingOverlay.classList.add('hidden');
+            return;
+        }
+
+        // Email is verified (or user is Google/OAuth) — proceed to main app
+        hideVerificationScreen();
+
         // 1. Load user profile from Firestore to fetch custom photo URL (Base64) or display name
         let firestorePhotoURL = '';
         let firestoreDisplayName = '';
@@ -102,6 +122,7 @@ auth.onAuthStateChanged(async (user) => {
         }
     } else {
         // User is signed out
+        hideVerificationScreen();
         showAuthScreen();
 
         // Clear app state (defined in app.js)
@@ -141,7 +162,132 @@ function showAuthScreen() {
     authElements.authScreen.classList.remove('hidden');
     authElements.appContainer.classList.add('hidden');
     authElements.userProfileSection.classList.add('hidden');
+    hideVerificationScreen();
     hideAuthError();
+}
+
+// ---------------------------------------------------------------
+// Email Verification Screen helpers
+// ---------------------------------------------------------------
+let resendCooldownTimer = null;
+
+function showVerificationScreen(user) {
+    authElements.authScreen.classList.add('hidden');
+    authElements.appContainer.classList.add('hidden');
+    authElements.verificationScreen.classList.remove('hidden');
+
+    // Display user's email in the badge
+    const emailSpan = authElements.verificationEmail.querySelector('span');
+    if (emailSpan) emailSpan.textContent = user.email || '';
+
+    // Apply translations
+    if (typeof applyTranslations === 'function') applyTranslations();
+
+    // Refresh Lucide icons
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function hideVerificationScreen() {
+    authElements.verificationScreen.classList.add('hidden');
+}
+
+async function resendVerificationEmail() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await user.sendEmailVerification();
+        if (typeof showToast === 'function') showToast(t('toast.verify_sent'), 'success');
+
+        // Start cooldown (60 seconds)
+        startResendCooldown(60);
+    } catch (error) {
+        console.error('Error sending verification email:', error);
+        if (error.code === 'auth/too-many-requests') {
+            if (typeof showToast === 'function') showToast(t('auth.error.too_many'), 'danger');
+            startResendCooldown(60);
+        } else {
+            if (typeof showToast === 'function') showToast(t('toast.verify_error'), 'danger');
+        }
+    }
+}
+
+function startResendCooldown(seconds) {
+    // Disable resend button
+    authElements.btnResendVerification.disabled = true;
+    authElements.btnResendVerification.style.opacity = '0.5';
+    authElements.btnResendVerification.style.pointerEvents = 'none';
+
+    // Show cooldown text
+    authElements.resendCooldownText.classList.remove('hidden');
+    let remaining = seconds;
+    authElements.resendCooldownText.textContent = t('verify.resend_cooldown', { seconds: remaining });
+
+    // Clear any existing timer
+    if (resendCooldownTimer) clearInterval(resendCooldownTimer);
+
+    resendCooldownTimer = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            authElements.resendCooldownText.textContent = t('verify.resend_cooldown', { seconds: remaining });
+        } else {
+            clearInterval(resendCooldownTimer);
+            resendCooldownTimer = null;
+            authElements.btnResendVerification.disabled = false;
+            authElements.btnResendVerification.style.opacity = '';
+            authElements.btnResendVerification.style.pointerEvents = '';
+            authElements.resendCooldownText.classList.add('hidden');
+        }
+    }, 1000);
+}
+
+async function checkEmailVerification() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Show loading
+    authElements.loadingOverlay.classList.remove('hidden');
+
+    try {
+        // Reload user data from Firebase to get latest emailVerified status
+        await user.reload();
+
+        if (user.emailVerified) {
+            // Verified! Hide verification screen and proceed
+            hideVerificationScreen();
+
+            // Load Firestore profile data
+            let firestorePhotoURL = '';
+            let firestoreDisplayName = '';
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    firestorePhotoURL = data.photoURL || '';
+                    firestoreDisplayName = data.displayName || '';
+                }
+            } catch (err) {
+                console.error('Error fetching user profile:', err);
+            }
+
+            showApp(user, firestorePhotoURL, firestoreDisplayName);
+            await saveUserProfile(user);
+
+            if (typeof initAppForUser === 'function') {
+                await initAppForUser(user);
+            }
+
+            if (typeof showToast === 'function') showToast(t('toast.verify_sent').replace(t('toast.verify_sent'), '✅'), 'success');
+        } else {
+            // Not verified yet
+            if (typeof showToast === 'function') showToast(t('toast.verify_not_yet'), 'danger');
+        }
+    } catch (error) {
+        console.error('Error checking verification:', error);
+        if (typeof showToast === 'function') showToast(t('toast.verify_error'), 'danger');
+    } finally {
+        authElements.loadingOverlay.classList.add('hidden');
+    }
 }
 
 // ---------------------------------------------------------------
@@ -218,9 +364,15 @@ async function registerWithEmail(email, password, displayName) {
                 photoURL: cred.user.photoURL || '',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
+        }
 
-            // Force app UI to show display name immediately
-            showApp(cred.user, '', displayName);
+        // Send email verification
+        if (cred.user) {
+            await cred.user.sendEmailVerification();
+            // Show verification screen (onAuthStateChanged will also trigger this)
+            showVerificationScreen(cred.user);
+            // Start cooldown immediately after first send
+            startResendCooldown(60);
         }
     } catch (error) {
         console.error('Register error:', error);
@@ -653,6 +805,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Logout button
     authElements.btnLogout.addEventListener('click', logout);
+
+    // -------------------------------------------------------------
+    // Email Verification Screen Events
+    // -------------------------------------------------------------
+    authElements.btnResendVerification.addEventListener('click', resendVerificationEmail);
+    authElements.btnCheckVerification.addEventListener('click', checkEmailVerification);
+    authElements.btnVerificationLogout.addEventListener('click', logout);
+
+    // Language toggle on verification screen
+    const verifyLangToggle = document.getElementById('verify-lang-toggle');
+    if (verifyLangToggle) {
+        verifyLangToggle.addEventListener('click', () => {
+            if (typeof toggleLanguage === 'function') toggleLanguage();
+            // Update flag text
+            const flag = document.getElementById('verify-lang-flag');
+            if (flag) flag.textContent = t('lang.switch');
+        });
+    }
 
     // -------------------------------------------------------------
     // Profile & Account Settings Events

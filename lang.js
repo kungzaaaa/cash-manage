@@ -74,6 +74,18 @@ const TRANSLATIONS = {
         'auth.error.cancelled_popup': 'กรุณาลองกดเข้าสู่ระบบอีกครั้ง',
         'auth.error.generic': 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
 
+        // ========== Email Verification ==========
+        'verify.title': 'กรุณายืนยันอีเมลของคุณ',
+        'verify.desc': 'เราได้ส่งลิงก์ยืนยันไปยังอีเมลของคุณแล้ว กรุณาเปิดกล่องจดหมายและคลิกลิงก์เพื่อยืนยันตัวตน',
+        'verify.check_spam': 'หากไม่พบอีเมล กรุณาตรวจสอบในโฟลเดอร์ Spam หรือ Junk Mail',
+        'verify.resend': 'ส่งอีเมลยืนยันอีกครั้ง',
+        'verify.check': 'ฉันยืนยันแล้ว ตรวจสอบสถานะ',
+        'verify.logout': 'ออกจากระบบ',
+        'verify.resend_cooldown': 'ส่งอีเมลอีกครั้งได้ในอีก {{seconds}} วินาที',
+        'toast.verify_sent': 'ส่งอีเมลยืนยันเรียบร้อยแล้ว กรุณาตรวจสอบกล่องจดหมายของคุณ',
+        'toast.verify_not_yet': 'อีเมลยังไม่ได้รับการยืนยัน กรุณาคลิกลิงก์ในอีเมลก่อน',
+        'toast.verify_error': 'ไม่สามารถส่งอีเมลยืนยันได้ กรุณาลองใหม่อีกครั้ง',
+
         // ========== Header ==========
         'header.subtitle': 'ระบบบันทึกรายรับ-รายจ่ายและเงินคงเหลือแยกบัญชี',
         'header.profile_label': 'จัดการโปรไฟล์',
@@ -339,6 +351,18 @@ const TRANSLATIONS = {
         'auth.error.too_many': 'Too many login attempts. Please wait a moment',
         'auth.error.cancelled_popup': 'Please try logging in again',
         'auth.error.generic': 'An error occurred. Please try again',
+
+        // ========== Email Verification ==========
+        'verify.title': 'Please Verify Your Email',
+        'verify.desc': 'We\'ve sent a verification link to your email. Please open your inbox and click the link to verify your identity.',
+        'verify.check_spam': 'If you can\'t find the email, please check your Spam or Junk Mail folder.',
+        'verify.resend': 'Resend Verification Email',
+        'verify.check': 'I\'ve Verified, Check Status',
+        'verify.logout': 'Logout',
+        'verify.resend_cooldown': 'Resend available in {{seconds}}s',
+        'toast.verify_sent': 'Verification email sent! Please check your inbox.',
+        'toast.verify_not_yet': 'Email not yet verified. Please click the link in the email first.',
+        'toast.verify_error': 'Failed to send verification email. Please try again.',
 
         // ========== Header ==========
         'header.subtitle': 'Track income, expenses & account balances',

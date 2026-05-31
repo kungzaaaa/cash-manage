@@ -144,6 +144,54 @@
     </div>
 
     <!-- ============================================================= -->
+    <!-- EMAIL VERIFICATION SCREEN                                     -->
+    <!-- ============================================================= -->
+    <div id="verification-screen" class="verification-screen hidden">
+        <div class="verification-card">
+            <!-- Language Toggle on Verification Screen -->
+            <button id="verify-lang-toggle" class="btn-icon auth-lang-btn" aria-label="Switch Language" title="EN / ไทย">
+                <span id="verify-lang-flag">EN</span>
+            </button>
+
+            <div class="verification-icon-wrapper">
+                <div class="verification-icon-circle">
+                    <i data-lucide="mail-check" class="verification-icon"></i>
+                </div>
+                <div class="verification-icon-ring"></div>
+            </div>
+
+            <h2 class="verification-title" data-i18n="verify.title">กรุณายืนยันอีเมลของคุณ</h2>
+            <p class="verification-desc" data-i18n="verify.desc">เราได้ส่งลิงก์ยืนยันไปยังอีเมลของคุณแล้ว กรุณาเปิดกล่องจดหมายและคลิกลิงก์เพื่อยืนยันตัวตน</p>
+
+            <div class="verification-email-badge" id="verification-email">
+                <i data-lucide="at-sign"></i>
+                <span>user@example.com</span>
+            </div>
+
+            <p class="verification-spam-note" data-i18n="verify.check_spam">หากไม่พบอีเมล กรุณาตรวจสอบในโฟลเดอร์ Spam หรือ Junk Mail</p>
+
+            <div class="verification-actions">
+                <button type="button" id="btn-check-verification" class="btn btn-primary btn-block btn-lg">
+                    <i data-lucide="shield-check"></i>
+                    <span data-i18n="verify.check">ฉันยืนยันแล้ว ตรวจสอบสถานะ</span>
+                </button>
+
+                <button type="button" id="btn-resend-verification" class="btn btn-secondary-outline btn-block btn-lg">
+                    <i data-lucide="send"></i>
+                    <span data-i18n="verify.resend">ส่งอีเมลยืนยันอีกครั้ง</span>
+                </button>
+
+                <p id="resend-cooldown-text" class="resend-cooldown-text hidden"></p>
+
+                <button type="button" id="btn-verification-logout" class="btn-text-link">
+                    <i data-lucide="log-out"></i>
+                    <span data-i18n="verify.logout">ออกจากระบบ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
     <!-- MAIN APP CONTAINER                                            -->
     <!-- ============================================================= -->
     <div class="app-container hidden" id="app-container">
