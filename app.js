@@ -161,7 +161,6 @@ const elements = {
     profileDropdown: document.getElementById('profile-dropdown'),
     btnOpenProfile: document.getElementById('btn-open-profile'),
     btnOpenConverter: document.getElementById('btn-open-converter'),
-    btnProfileConverter: document.getElementById('btn-profile-converter'),
     converterModalOverlay: document.getElementById('converter-modal-overlay'),
     converterModalClose: document.getElementById('converter-modal-close'),
 
@@ -906,9 +905,6 @@ function setupEventListeners() {
     // Currency Converter Modal Events
     if (elements.btnOpenConverter) {
         elements.btnOpenConverter.addEventListener('click', openConverterModal);
-    }
-    if (elements.btnProfileConverter) {
-        elements.btnProfileConverter.addEventListener('click', openConverterModal);
     }
     if (elements.converterModalClose) {
         elements.converterModalClose.addEventListener('click', closeConverterModal);
