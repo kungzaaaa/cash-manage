@@ -210,6 +210,17 @@ async function registerWithEmail(email, password, displayName) {
         // Set display name
         if (cred.user && displayName) {
             await cred.user.updateProfile({ displayName });
+
+            // Update user profile doc in Firestore with displayName immediately
+            await db.collection('users').doc(cred.user.uid).set({
+                displayName: displayName,
+                email: cred.user.email || '',
+                photoURL: cred.user.photoURL || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            // Force app UI to show display name immediately
+            showApp(cred.user, '', displayName);
         }
     } catch (error) {
         console.error('Register error:', error);
